@@ -21,3 +21,5 @@ class LexiconRu:
     text_sent_fullname: str = ('Отправьте ваши Имя и Фамилию.\n'
                                'Пример:\n<code>Питон '
                                'Джаваскриптович</code>')
+    text_gender: str = 'Имя и Фамилия записаны✅\nВыберите ваш пол:'
+    text_select_course: str = 'Ваш пол записан✅\nВыберите пройденный курс:'
