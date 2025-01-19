@@ -17,7 +17,7 @@ from middlewares.outer import ThrottlingMiddleware
 logger_main = logging.getLogger(__name__)
 
 async def main():
-    with open('logs/logging_setting/log_config.yaml', 'rt') as file:
+    with open('logs/logging_setting/log_config.yml', 'rt') as file:
         log_config = yaml.safe_load(file.read())
     dictConfig(log_config)
     logger_main.info('Loading logging settings success')

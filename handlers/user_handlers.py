@@ -3,6 +3,7 @@ import logging
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 
+from lexicon.lexicon_ru import LexiconRu
 
 user_router = Router()
 logger_user_hand = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ logger_user_hand = logging.getLogger(__name__)
 
 @user_router.message(F.text == '/start')
 async def cmd_start(msg: Message):
-    await msg.answer('Анкета')
+    await msg.answer(LexiconRu.text_survey)
 
 
 @user_router.callback_query(F.data == 'back')
