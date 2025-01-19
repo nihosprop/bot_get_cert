@@ -9,7 +9,7 @@ logger_kb_utils = logging.getLogger(__name__)
 
 
 def create_inline_kb(
-        width: int, *args, cancel_butt=True, webapp=False,
+        width: int = 1, *args, cancel_butt=True, webapp=False,
         reverse_size_text=False, **kwargs) -> InlineKeyboardMarkup:
     """Generates inline keyboards on the fly"""
     kb_builder = InlineKeyboardBuilder()
