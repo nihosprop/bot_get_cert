@@ -1,8 +1,7 @@
 import logging
 
-from keyboards import BUTT_COURSES
 from keyboards.kb_utils import create_inline_kb
-from keyboards.buttons import ADMIN_PANEL_BUTT, BUTT_SEX
+from keyboards.buttons import ADMIN_PANEL_BUTT, BUTT_SEX, BUTT_COURSES
 
 logger_keyboards = logging.getLogger(__name__)
 
