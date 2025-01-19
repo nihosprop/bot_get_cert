@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
@@ -14,3 +15,11 @@ class IsAdmin(BaseFilter):
                              f':{superadmin=}\n{user_id == superadmin=}')
         logger_filters.debug('Exit')
         return user_id == superadmin
+
+class IsFullName(BaseFilter):
+    async def __call__(self, msg: Message) -> bool:
+        pattern = r'^[А-Я][а-я]+ [А-Я][а-я]+$'
+        if re.match(pattern, msg.text):
+            return True
+        else:
+            return False
