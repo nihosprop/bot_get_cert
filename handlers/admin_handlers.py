@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from filters.filters import IsAdmin
-from keyboards.keyboards import kb_admin, kb_back
+from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from states.states import FSMAdminPanel
 

@@ -3,7 +3,7 @@ import logging
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from keyboards.buttons import CANCEL_BUTT
+from keyboards.buttons import BUTT_CANCEL, BUTT_BACK
 
 logger_kb_utils = logging.getLogger(__name__)
 
@@ -26,11 +26,11 @@ def create_inline_kb(
         for button in args:
             if len(button) > 16:
                 big_text.append(InlineKeyboardButton(
-                        text=CANCEL_BUTT[button] if CANCEL_BUTT.get(
+                        text=BUTT_CANCEL[button] if BUTT_CANCEL.get(
                                 button) else button, callback_data=button))
             else:
                 small_text.append(InlineKeyboardButton(
-                        text=CANCEL_BUTT[button] if CANCEL_BUTT.get(
+                        text=BUTT_CANCEL[button] if BUTT_CANCEL.get(
                                 button) else button, callback_data=button))
 
     if kwargs:
@@ -49,8 +49,11 @@ def create_inline_kb(
         kb_builder.row(*big_text, width=1)
 
     if cancel_butt:
-        kb_builder.row(InlineKeyboardButton(text=CANCEL_BUTT['cancel'],
+        kb_builder.row(InlineKeyboardButton(text=BUTT_CANCEL['cancel'],
                                             callback_data='/cancel'))
+    if back:
+        kb_builder.row(InlineKeyboardButton(text=BUTT_BACK['back'],
+                                            callback_data='back'))
     if webapp:
         kb_builder.row(
             InlineKeyboardButton(text="TestHTML", url='http://194.15.46.138/#'))

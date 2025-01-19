@@ -18,7 +18,7 @@ class IsAdmin(BaseFilter):
 
 class IsFullName(BaseFilter):
     async def __call__(self, msg: Message) -> bool:
-        pattern = r'^[А-Я][а-я]+ [А-Я][а-я]+$'
+        pattern = r'^[А-ЯA-Z][а-яa-z]+ [А-ЯA-Z][а-яa-z]+$'
         if re.match(pattern, msg.text):
             return True
         else:
