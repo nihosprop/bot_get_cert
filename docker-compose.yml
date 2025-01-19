@@ -1,0 +1,22 @@
+services:
+  main:
+    image: niwibonihs/bot_get_cert:latest
+    container_name:
+    restart: "unless-stopped"
+    env_file: .env
+    depends_on:
+      - "redis_fsm"
+    networks:
+      - my-network
+
+  redis_fsm:
+    image: "redis:7"
+    container_name: RedisFSM
+    restart: "unless-stopped"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+    networks:
+      - my-network
+
+networks:
+  my-network:
