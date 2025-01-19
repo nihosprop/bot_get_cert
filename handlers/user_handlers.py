@@ -53,6 +53,11 @@ async def msg_full_name(msg: Message, state: FSMContext):
     await state.set_state(FSMQuiz.fill_gender)
 
 
+@user_router.message(StateFilter(FSMQuiz.fill_gender))
+async def msg_other_fill_gender(msg: Message):
+    await msg.delete()
+
+
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_gender))
 async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
     await clbk.message.edit_text(LexiconRu.text_sent_fullname,
@@ -85,8 +90,3 @@ async def cmd_reset(msg: Message, state: FSMContext):
     await msg.delete()
     await state.set_state(state=None)
     await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
-
-
-@user_router.message()
-async def msg_other(msg: Message):
-    await msg.delete()
