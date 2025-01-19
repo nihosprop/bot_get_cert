@@ -16,3 +16,4 @@ class KeyBoards:
 
 kb_admin = create_inline_kb(2, **ADMIN_PANEL_BUTT, cancel_butt=False)
 kb_back = create_inline_kb(width=1, back='Назад', cancel_butt=False)
+kb_quiz = create_inline_kb(start_quiz='Начать', cancel_butt=False)
