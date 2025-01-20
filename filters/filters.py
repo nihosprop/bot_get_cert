@@ -40,3 +40,24 @@ class IsCorrectData(BaseFilter):
         except ValueError as err:
             logger_filters.warning(f'Некорректная дата: {err}')
             return False
+
+
+class IsCorrectEmail(BaseFilter):
+    async def __call__(self, msg: Message):
+        """
+        Проверяет валидность email по регулярному выражению.
+        Покрывает большинство повседневных случаев, но не проверяет
+        существование домена.
+        """
+        email = msg.text.strip()
+        pattern = r'''
+                ^
+                [a-zA-Z0-9_.+-]+    # Локальная часть (до @)
+                @
+                [a-zA-Z0-9-]+       # Домен
+                (\.[a-zA-Z0-9-]+)*  # Поддомены
+                \.[a-zA-Z]{2,}      # Верхнеуровневый домен (минимум 2 буквы)
+                $
+            '''
+        return (False, {'email': email})[bool(re.fullmatch(pattern, email,
+                                                     re.VERBOSE))]
