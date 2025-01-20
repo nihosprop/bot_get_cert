@@ -23,3 +23,20 @@ class IsFullName(BaseFilter):
             return True
         else:
             return False
+
+
+class IsCorrectData(BaseFilter):
+    async def __call__(self, msg: Message) -> bool | dict[str, str]:
+        if not msg.text:
+            return False
+
+        date_str = msg.text
+        try:
+            date_obj = datetime.strptime(date_str, "%d.%m.%Y")
+            if date_obj.date() > datetime.now().date():
+                raise ValueError
+            return {'date': date_str}
+
+        except ValueError as err:
+            logger_filters.warning(f'Некорректная дата: {err}')
+            return False
