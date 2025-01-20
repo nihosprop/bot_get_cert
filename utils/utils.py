@@ -165,23 +165,6 @@ class MessageProcessor:
         await asyncio.sleep(delay)
         await value.delete()
 
-    # async def _send_message(self, user_id, text: str) -> None:
-    #     try:
-    #         await self._type_update.bot.send_message(chat_id=user_id, text=text)
-    #     except Exception as err:
-    #         logger_utils.error(f'Error sending message to user {user_id}: '
-    #                            f'{err}', exc_info=True)
-    #
-    # async def broadcast(self, text: str) -> None:
-    #     """
-    #
-    #     :param text: str
-    #     :return: None
-    #     """
-    #     for user_id in await get_users():
-    #         await self._send_message(user_id, text)
-    #         await asyncio.sleep(0.3)
-
 
 class ImmutableDict(Mapping):
     def __init__(self, data=None):
@@ -205,7 +188,7 @@ class ImmutableDict(Mapping):
     def __call__(self, key):
         return self._data[key]
 
-def get_immutable_dict(*args):
+async def get_immutable_dict(*args):
     temp_dict = {}
     for dct in args:
         temp_dict.update(dct)

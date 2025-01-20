@@ -26,7 +26,7 @@ async def main():
     bot = Bot(token=config.tg_bot.token,
               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-    redis = Redis(host=config.redis_host, port=6379, db=0)
+    redis = Redis(host=config.redis_host, port=6379, db=0, decode_responses=True)
 
     try:
         await redis.ping()

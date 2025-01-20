@@ -1,5 +1,6 @@
 import logging
 import re
+from datetime import datetime
 
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
@@ -16,6 +17,7 @@ class IsAdmin(BaseFilter):
         logger_filters.debug('Exit')
         return user_id == superadmin
 
+
 class IsFullName(BaseFilter):
     async def __call__(self, msg: Message) -> bool:
         pattern = r'^[А-ЯA-Z][а-яa-z]+ [А-ЯA-Z][а-яa-z]+$'
@@ -27,18 +29,24 @@ class IsFullName(BaseFilter):
 
 class IsCorrectData(BaseFilter):
     async def __call__(self, msg: Message) -> bool | dict[str, str]:
+        logger_filters.debug(f'Entry {__class__.__name__}')
+
         if not msg.text:
+            logger_filters.debug(f'Exit False {__class__.__name__}')
             return False
 
         date_str = msg.text
+        logger_filters.debug(f'{date_str=}')
         try:
             date_obj = datetime.strptime(date_str, "%d.%m.%Y")
             if date_obj.date() > datetime.now().date():
                 raise ValueError
+            logger_filters.debug(f'Exit Done {__class__.__name__}')
             return {'date': date_str}
 
         except ValueError as err:
             logger_filters.warning(f'Некорректная дата: {err}')
+            logger_filters.debug(f'Exit False {__class__.__name__}')
             return False
 
 
