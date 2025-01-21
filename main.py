@@ -26,7 +26,7 @@ async def main():
     bot = Bot(token=config.tg_bot.token,
               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-    redis = Redis(host=config.redis_host, port=6379, db=0, decode_responses=True)
+    redis = Redis(host=config.redis_host, port=6379, db=0)
 
     try:
         await redis.ping()
@@ -39,7 +39,7 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     # throttling storage
-    storage_throttling = RedisStorage.from_url(f'redis://localhost:6379/1')
+    storage_throttling = RedisStorage.from_url(f'redis://{config.redis_host}:6379/1')
 
     try:
         logger_main.info('Loading from a db.json success')
