@@ -1,5 +1,4 @@
 import logging
-from email.charset import add_alias
 
 from aiogram import F, Router
 from aiogram.filters import StateFilter
