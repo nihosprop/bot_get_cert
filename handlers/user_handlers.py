@@ -69,9 +69,11 @@ async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_email))
 async def clbk_back_fill_email(clbk: CallbackQuery, state: FSMContext):
     logger_user_hand.debug('Entry')
+    msg_processor = MessageProcessor(clbk, state)
+    # await msg_processor.deletes_messages(msgs_for_del=True)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_date_of_revocation)
     await clbk.answer()
     logger_user_hand.debug('Exit')
@@ -79,10 +81,16 @@ async def clbk_back_fill_email(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.end))
 async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
-    await clbk.message.edit_text(LexiconRu.text_data_done,
+    logger_user_hand.debug('Entry')
+    msg_processor = MessageProcessor(clbk, state)
+    await msg_processor.deletes_messages(msgs_for_del=True)
+    value = await clbk.message.edit_text(LexiconRu.text_data_done,
                                  reply_markup=kb_back_cancel)
+    await msg_processor.save_msg_id(value, msgs_for_del=True,
+                                    msgs_for_reset=True)
     await state.set_state(FSMQuiz.fill_email)
     await clbk.answer()
+    logger_user_hand.debug('Exit')
 
 
 @user_router.message(StateFilter(default_state), F.content_type.in_(
@@ -95,11 +103,6 @@ async def msg_other(msg: Message):
 async def clbk_back(clbk: CallbackQuery, state: FSMContext):
     logger_user_hand.debug(f'Entry {clbk_back.__name__=}')
     msg_processor = MessageProcessor(clbk, state)
-
-    # try:
-    #     await msg_processor.deletes_messages(msgs_for_reset=True)
-    # except Exception as err:
-    #     logger_user_hand.error(f"Ошибка при удалении сообщений: {err=}")
 
     try:
         await state.clear()

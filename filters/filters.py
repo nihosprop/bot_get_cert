@@ -54,7 +54,7 @@ class IsCorrectData(BaseFilter):
                                          message_id=msg.message_id)
             return False
 
-        start_kurse = datetime.strptime('01.09.2023', "%d.%m.%Y")
+        start_kurse = datetime.strptime('01.03.2024', "%d.%m.%Y")
         date_str = msg.text
         logger_filters.debug(f'{date_str=}')
 
