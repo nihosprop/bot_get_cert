@@ -25,6 +25,7 @@ class IsFullName(BaseFilter):
     async def __call__(self, msg: Message) -> bool:
         logger_filters.debug(f'Entry {__class__.__name__}')
         pattern = r'^[А-ЯA-Z][а-яa-z]+ [А-ЯA-Z][а-яa-z]+$'
+
         if msg.content_type != ContentType.TEXT:
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)

@@ -57,8 +57,11 @@ async def clbk_back_fill_course(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_gender))
 async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
-    await clbk.message.edit_text(LexiconRu.text_sent_fullname,
+    msg_processor = MessageProcessor(clbk, state)
+    await msg_processor.deletes_messages(msgs_for_del=True)
+    value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                  reply_markup=kb_butt_cancel)
+    await msg_processor.save_msg_id(value, msgs_for_reset=True, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_full_name)
     await clbk.answer()
 
@@ -90,16 +93,24 @@ async def msg_other(msg: Message):
 
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
 async def clbk_back(clbk: CallbackQuery, state: FSMContext):
+    logger_user_hand.debug(f'Entry {clbk_back.__name__=}')
     msg_processor = MessageProcessor(clbk, state)
+
+    # try:
+    #     await msg_processor.deletes_messages(msgs_for_reset=True)
+    # except Exception as err:
+    #     logger_user_hand.error(f"Ошибка при удалении сообщений: {err=}")
+
     try:
-        await msg_processor.deletes_messages(msgs_for_reset=True, msgs_for_del=True)
+        await state.clear()
     except Exception as err:
-        logger_user_hand.error(f"Ошибка при удалении сообщений: {err=}")
-    await state.clear()
+        logger_user_hand.error(f'{err=}')
+
     value = await clbk.message.edit_text(LexiconRu.text_survey,
                                  reply_markup=kb_butt_quiz)
     await msg_processor.save_msg_id(value, msgs_for_reset=True, msgs_for_del=True)
     await clbk.answer()
+    logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
 
 
 @user_router.callback_query(F.data == 'start_quiz', StateFilter(default_state))
@@ -150,7 +161,7 @@ async def clbk_select_empty_course(clbk: CallbackQuery):
         F.content_type.in_({"text", "sticker", "photo", "video", "document"}))
 async def delete_unexpected_messages(msg: Message, state: FSMContext):
     """
-    Удаляет сообщения пользователя, если он отправляет текст/медиа вместо
+    Удаляет сообщения пользователя, если он отправляет текст/медиа, вместо
     нажатия на кнопку.
     """
     logger_user_hand.debug(f"Перехвачено сообщение типа: {msg.content_type}")
@@ -163,12 +174,12 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
 async def msg_full_name(msg: Message, state: FSMContext):
+    await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
     await state.update_data(full_name=msg.text)
     logger_user_hand.debug(f'{await state.get_data()=}')
     await msg_processor.deletes_messages(msgs_for_del=True)
-    await msg.delete()
     value = await msg.answer(LexiconRu.text_gender,
                              reply_markup=kb_select_gender)
     await msg_processor.save_msg_id(value, msgs_for_reset=True)
@@ -179,6 +190,7 @@ async def msg_full_name(msg: Message, state: FSMContext):
 @user_router.message(StateFilter(FSMQuiz.fill_date_of_revocation),
                      IsCorrectData())
 async def msg_sent_date(msg: Message, state: FSMContext, date: str):
+    await msg.delete()
     logger_user_hand.debug('Entry')
     msg_processor = MessageProcessor(msg, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
@@ -205,11 +217,11 @@ async def msg_sent_email(msg: Message, state: FSMContext):
     msg_processor = MessageProcessor(msg, state)
     await state.update_data(email=msg.text)
     await msg_processor.deletes_messages(msgs_for_del=True)
-    text = (f'Имя: {await state.get_value('full_name')}\n'
-            f'Пол: {BUTT_GENDER[await state.get_value('gender')]}\n'
-            f'Курс: {BUTT_COURSES[await state.get_value('course')]}\n'
-            f'Дата отзыва: {await state.get_value('date')}\n'
-            f'Email: {await state.get_value('email')}')
+    text = (f'{'Имя:':<7}{await state.get_value('full_name')}\n'
+            f'{'Пол:':<7}{BUTT_GENDER[await state.get_value('gender')]}\n'
+            f'{'Курс:':<7}{BUTT_COURSES[await state.get_value('course')]}\n'
+            f'{'Email:':<7}{await state.get_value('email')}\n'
+            f'Дата отзыва: {await state.get_value('date')}')
     await state.set_state(FSMQuiz.end)
     await msg.delete()
     value = await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
