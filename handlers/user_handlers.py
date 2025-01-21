@@ -1,4 +1,5 @@
 import logging
+from email.charset import add_alias
 
 from aiogram import F, Router
 from aiogram.filters import StateFilter
@@ -21,6 +22,16 @@ from utils.utils import MessageProcessor
 
 user_router = Router()
 logger_user_hand = logging.getLogger(__name__)
+
+
+@user_router.message(F.text == '/start')
+async def cmd_start(msg: Message, state: FSMContext):
+    msg_processor = MessageProcessor(msg, state)
+    await msg_processor.deletes_messages(msgs_for_del=True, msgs_for_reset=True)
+    await state.clear()
+    value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
+    await msg_processor.save_msg_id(value, msgs_for_del=True,
+                                    msgs_for_reset=True)
 
 
 @user_router.callback_query(F.data == 'back',
@@ -72,36 +83,23 @@ async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-@user_router.message(F.text == '/reset')
-async def cmd_reset(msg: Message, state: FSMContext):
-    await msg.delete()
-    await state.set_state(state=None)
-    await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
-
-
 @user_router.message(StateFilter(default_state), F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message):
     await msg.delete()
 
 
-@user_router.message(F.text == '/start', StateFilter(default_state))
-async def cmd_start(msg: Message):
-    await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
-
-
-@user_router.message(F.text == '/start', ~StateFilter(default_state))
-async def cmd_start(msg: Message, state: FSMContext):
-    await state.clear()
-    await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
-    await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
-
-
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
 async def clbk_back(clbk: CallbackQuery, state: FSMContext):
-    await clbk.message.edit_text(LexiconRu.text_survey,
-                                 reply_markup=kb_butt_quiz)
+    msg_processor = MessageProcessor(clbk, state)
+    try:
+        await msg_processor.deletes_messages(msgs_for_reset=True, msgs_for_del=True)
+    except Exception as err:
+        logger_user_hand.error(f"Ошибка при удалении сообщений: {err=}")
     await state.clear()
+    value = await clbk.message.edit_text(LexiconRu.text_survey,
+                                 reply_markup=kb_butt_quiz)
+    await msg_processor.save_msg_id(value, msgs_for_reset=True, msgs_for_del=True)
     await clbk.answer()
 
 
@@ -118,10 +116,12 @@ async def clbk_start_quiz(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data.in_(BUTT_GENDER),
                             StateFilter(FSMQuiz.fill_gender))
 async def clbk_sex(clbk: CallbackQuery, state: FSMContext):
-    await MessageProcessor(clbk, state).deletes_messages(msgs_for_del=True)
+    msg_processor = MessageProcessor(clbk, state)
+    await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(gender=clbk.data)
-    await clbk.message.edit_text(LexiconRu.text_select_course,
-                                 reply_markup=kb_courses)
+    value = await clbk.message.edit_text(LexiconRu.text_select_course,
+                                         reply_markup=kb_courses)
+    await msg_processor.save_msg_id(value, msgs_for_reset=True)
     await state.set_state(FSMQuiz.fill_course)
     await clbk.answer()
 
@@ -133,22 +133,22 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext):
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
+    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True,
+                                                    msgs_for_reset=True)
     await state.set_state(FSMQuiz.fill_date_of_revocation)
     await clbk.answer()
 
 
 @user_router.callback_query(F.data.in_(
         [name for name in BUTT_COURSES if name.endswith(('3', '4', '5', '6'))]),
-                            StateFilter(FSMQuiz.fill_course))
+        StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
 
 
-@user_router.message(StateFilter(FSMQuiz.fill_gender,
-                                 FSMQuiz.fill_course, FSMQuiz.end),
-                     F.content_type.in_(
-                             {"text", "sticker", "photo", "video", "document"}))
+@user_router.message(
+        StateFilter(FSMQuiz.fill_gender, FSMQuiz.fill_course, FSMQuiz.end),
+        F.content_type.in_({"text", "sticker", "photo", "video", "document"}))
 async def delete_unexpected_messages(msg: Message, state: FSMContext):
     """
     Удаляет сообщения пользователя, если он отправляет текст/медиа вместо
@@ -164,18 +164,21 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
 async def msg_full_name(msg: Message, state: FSMContext):
+    msg_processor = MessageProcessor(msg, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
-
     await state.update_data(full_name=msg.text)
     logger_user_hand.debug(f'{await state.get_data()=}')
-    await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
+    await msg_processor.deletes_messages(msgs_for_del=True)
     await msg.delete()
-    await msg.answer(LexiconRu.text_gender, reply_markup=kb_select_gender)
+    value = await msg.answer(LexiconRu.text_gender,
+                             reply_markup=kb_select_gender)
+    await msg_processor.save_msg_id(value, msgs_for_reset=True)
+
     await state.set_state(FSMQuiz.fill_gender)
 
 
 @user_router.message(StateFilter(FSMQuiz.fill_date_of_revocation),
-        IsCorrectData())
+                     IsCorrectData())
 async def msg_sent_date(msg: Message, state: FSMContext, date: str):
     logger_user_hand.debug('Entry')
     msg_processor = MessageProcessor(msg, state)
@@ -183,7 +186,8 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
     await state.update_data(date=date)
     value = await msg.answer(LexiconRu.text_data_done,
                              reply_markup=kb_back_cancel)
-    await msg_processor.save_msg_id(value, msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True,
+                                    msgs_for_reset=True)
     await state.set_state(FSMQuiz.fill_email)
     logger_user_hand.debug('Exit')
 
@@ -199,8 +203,9 @@ async def clbk_done(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.message(StateFilter(FSMQuiz.fill_email), IsCorrectEmail())
 async def msg_sent_email(msg: Message, state: FSMContext):
+    msg_processor = MessageProcessor(msg, state)
     await state.update_data(email=msg.text)
-    await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
+    await msg_processor.deletes_messages(msgs_for_del=True)
     text = (f'Имя: {await state.get_value('full_name')}\n'
             f'Пол: {BUTT_GENDER[await state.get_value('gender')]}\n'
             f'Курс: {BUTT_COURSES[await state.get_value('course')]}\n'
@@ -208,5 +213,6 @@ async def msg_sent_email(msg: Message, state: FSMContext):
             f'Email: {await state.get_value('email')}')
     await state.set_state(FSMQuiz.end)
     await msg.delete()
-    await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
-                     f'<code>{text}</code>', reply_markup=kb_end_quiz)
+    value = await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
+                             f'<code>{text}</code>', reply_markup=kb_end_quiz)
+    await msg_processor.save_msg_id(value, msgs_for_reset=True)

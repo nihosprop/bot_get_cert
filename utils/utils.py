@@ -7,7 +7,6 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-
 logger_utils = logging.getLogger(__name__)
 
 
@@ -23,7 +22,8 @@ class MessageProcessor:
     _state: FSMContext
 
     async def deletes_messages(
-            self, msgs_for_del=False, msgs_remove_kb=False) -> None:
+            self, msgs_for_del=False, msgs_remove_kb=False,
+            msgs_for_reset=False) -> None:
         """
         Deleting messages from chat based on passed parameters.
         This method removes various types of messages from a chat.
@@ -31,6 +31,7 @@ class MessageProcessor:
         are set to True.
         If no parameters are specified, the method does not perform any
         actions.
+        :param msgs_for_reset: bool
         :param msgs_for_del: bool
         :param msgs_remove_kb: bool
         :return: None
@@ -43,8 +44,9 @@ class MessageProcessor:
             chat_id = self._type_update.message.chat.id
 
         kwargs: dict = {
-                "msgs_for_del": msgs_for_del,
-                "msgs_remove_kb": msgs_remove_kb}
+                'msgs_for_del': msgs_for_del,
+                'msgs_remove_kb': msgs_remove_kb,
+                'msgs_for_reset': msgs_for_reset}
 
         keys = [key for key, val in kwargs.items() if val]
         logger_utils.debug(f'{keys=}')
@@ -68,7 +70,7 @@ class MessageProcessor:
 
     async def save_msg_id(
             self, value: Message | CallbackQuery, msgs_for_del=False,
-            msgs_remove_kb=False) -> None:
+            msgs_remove_kb=False, msgs_for_reset=False) -> None:
         """
         The writes_msg_id_to_storage method is intended for writing an identifier
         messages in the store depending on the values of the passed flags.
@@ -77,6 +79,7 @@ class MessageProcessor:
         in the corresponding list in the object's state.
         After the recording process is completed, a success message is logged.
         completion of the operation.
+        :param msgs_for_reset:
         :param value: Message | CallbackQuery
         :param msgs_for_del: bool
         :param msgs_remove_kb: bool
@@ -86,7 +89,8 @@ class MessageProcessor:
 
         flags: dict = {
                 'msgs_for_del': msgs_for_del,
-                'msgs_remove_kb': msgs_remove_kb}
+                'msgs_remove_kb': msgs_remove_kb,
+                'msgs_for_reset': msgs_for_reset}
 
         for key, val in flags.items():
             logger_utils.debug('Start writing data to storage…')
@@ -135,7 +139,7 @@ class MessageProcessor:
     async def change_message(self, key='msg_id_for_change') -> None:
         pass
 
-    async def delete_message(self, key='msg_id_for_change') -> None:
+    async def delete_message(self, key='msg_id_for_del') -> None:
         """
         Deletes a message using the specified key. The method retrieves data from
         states and uses them to delete a message with the specified key.
@@ -187,6 +191,7 @@ class ImmutableDict(Mapping):
 
     def __call__(self, key):
         return self._data[key]
+
 
 async def get_immutable_dict(*args):
     temp_dict = {}
