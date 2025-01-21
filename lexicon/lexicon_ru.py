@@ -8,6 +8,7 @@ logger_lexicon = logging.getLogger(__name__)
 class LexiconCommandsRu:
     start: str = 'Запуск'
     admin: str = 'Админ панель'
+    reset: str = 'Сброс'
 
 
 @dataclass
