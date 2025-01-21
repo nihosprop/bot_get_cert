@@ -15,4 +15,3 @@ class FSMQuiz(StatesGroup):
     fill_date_of_revocation = State()
     fill_email = State()
     end = State()
-    
