@@ -1,13 +1,137 @@
 import asyncio
 import logging
+import os
 from dataclasses import dataclass
 from collections.abc import Mapping
+import io
 
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+from keyboards import BUTT_COURSES
+
 logger_utils = logging.getLogger(__name__)
+
+
+async def get_certificate(
+        state: FSMContext, w_text=False):
+    logger_utils.debug(f'Entry')
+    try:
+        user_name = await state.get_value('full_name')
+        number_str: str = await state.get_value('number')
+        if not number_str:
+            number_str = '000001'
+            await state.update_data(number=number_str)
+        number = str(int(number_str)+1).zfill(6)
+        logger_utils.debug(f'{number=}')
+
+        course = BUTT_COURSES[await state.get_value('course')]
+        logger_utils.debug(f'{course=}')
+        gender = await state.get_value('gender')
+        logger_utils.debug(f'{gender=}')
+
+        base_dir = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', 'static'))
+
+        template_name = None
+
+        if gender == 'female':
+            match course:
+                case 'Лучший по Python.Часть 1':
+                    template_name = '1 часть жен.pdf'
+                case 'Лучший по Python.Часть 2':
+                    template_name = '2 часть жен.pdf'
+        elif gender == 'male':
+            match course:
+                case 'Лучший по Python.Часть 1':
+                    template_name = '1 часть муж.pdf'
+                case 'Лучший по Python.Часть 2':
+                    template_name = '2 часть муж.pdf'
+
+        font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
+        template_file = os.path.join(base_dir, template_name)
+        output_file = os.path.join(base_dir, 'mod_cert.pdf')
+
+        if not os.path.exists(font_path):
+            raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
+
+        # Регистрация внешнего шрифта
+        pdfmetrics.registerFont(TTFont('BitterReg', font_path))
+
+        light_gray = Color(230 / 255, 230 / 255, 230 / 255)
+        watermark_text = 'TEST VERSION'
+        # Открываем исходный PDF
+        reader = PdfReader(template_file)
+
+        # Создаем объект для записи нового PDF
+        writer = PdfWriter()
+
+        for page_num in range(len(reader.pages)):
+            # Читаем страницу
+            page = reader.pages[page_num]
+            # Создаем временный буфер для добавления текста
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+            font_size = 16
+
+            if len(user_name) in (24, 25):
+                font_size = 15
+            elif len(user_name) in (26, 27):
+                font_size = 14
+            elif len(user_name) in (28, 29, 30):
+                font_size = 13
+
+            # Определяем ширину текста
+            text_width = can.stringWidth(user_name, 'BitterReg', font_size)
+            # Добавляем текст
+            can.setFont('BitterReg', font_size)
+            page_width = letter[0]  # Ширина страницы
+            x_position = (page_width - text_width) / 2 + 155
+            # Добавляем текст по центру
+            can.drawString(x_position, 306, user_name)
+
+            can.setFont('BitterReg', 21)
+            can.setFillColor(light_gray)
+            can.drawString(440, 373, number)
+
+            if w_text:
+                # Устанавливаем прозрачный цвет и шрифт
+                can.setFillColor(Color(0.3, 0, 0, alpha=0.7))
+                can.setFont('Helvetica', 50)
+                # Поворачиваем текст (опционально) на 45 градусов
+                can.rotate(45)
+                # Добавляем водяной знак
+                can.drawString(110, 60, watermark_text)  # Позиция текста
+
+            # Закрываем холст и сохраняем его содержимое в пакет
+            can.showPage()
+            can.save()
+
+            # Перемещаемся в начало буфера
+            packet.seek(0)
+
+            # Преобразуем буфер в PDF-объект
+            new_pdf = PdfReader(packet)
+
+            # Вставляем новую страницу поверх старой
+            page.merge_page(new_pdf.pages[0])
+
+            # Добавляем измененную страницу в выходной PDF
+            writer.add_page(page)
+
+        with open(output_file, 'wb') as fh:
+            writer.write(fh)
+    except Exception as err:
+        logger_utils.error(f'{err=}', exc_info=True)
+    else:
+        return output_file
 
 
 @dataclass
