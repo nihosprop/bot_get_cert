@@ -13,6 +13,15 @@ from lexicon.lexicon_ru import LexiconRu
 logger_middl_outer = logging.getLogger(__name__)
 
 
+class RedisMiddleware(BaseMiddleware):
+    def __init__(self, redis_client):
+        self.redis_client = redis_client
+
+    async def __call__(self, handler, event, data):
+        data['redis_client'] = self.redis_client
+        return await handler(event, data)
+
+
 class ThrottlingMiddleware(BaseMiddleware):
     """A middleware for limiting the frequency of requests from a single user.
     Uses Redis to store information about request frequency. If the frequency
