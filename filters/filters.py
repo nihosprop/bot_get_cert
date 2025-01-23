@@ -11,6 +11,21 @@ from utils import MessageProcessor
 logger_filters = logging.getLogger(__name__)
 
 
+class IsValidProfileLink(BaseFilter):
+    """
+    Проверяет, является ли валидной ссылкой на профиль,
+    где цифры в URL это ID пользователя.
+    """
+    async def __call__(self, msg: Message) -> bool | dict[str, str]:
+        link = msg.text
+        pattern = r'^https?://[^/]+/users/(\d+)/profile$'
+        match = re.match(pattern, link)
+        if bool(match):
+            stepik_user_id = link.split('/')[-2]
+            return {'stepik_user_id': stepik_user_id}
+        return False
+
+
 class IsAdmin(BaseFilter):
     async def __call__(self, msg: Message, superadmin) -> bool:
         logger_filters.debug('Entry')
