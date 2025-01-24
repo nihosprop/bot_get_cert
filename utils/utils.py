@@ -275,7 +275,8 @@ class StepikService:
 
             # Логируем успешную отправку
             logger_utils.info(
-                f"Сертификат {output_file} успешно отправлен пользователю {clbk.from_user.first_name}:{clbk.from_user.id}")
+                f"Сертификат {output_file.split('\\')[-1]} успешно отправлен "
+                f"пользователю {clbk.from_user.first_name}:{clbk.from_user.id}")
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",
