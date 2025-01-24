@@ -2,10 +2,10 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from collections.abc import Mapping
 import io
 
 from PyPDF2 import PdfReader, PdfWriter
+from aiogram.client.session import aiohttp
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -14,28 +14,106 @@ from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from redis.asyncio import Redis
 
 from keyboards import BUTT_COURSES
 
 logger_utils = logging.getLogger(__name__)
 
 
-async def get_certificate(
+async def get_stepik_access_token(
+        client_id, client_secret, redis_client: Redis) -> str:
+    """
+    Получает токен доступа для Stepik API.
+    :param redis_client: 
+    :param client_id: Идентификатор клиента.
+    :param client_secret: Секретный ключ клиента.
+    :return: Токен доступа
+    :raises: RuntimeError, если не удалось получить токен.
+    """
+    cached_token = await redis_client.get('stepik_token')
+    url = 'https://stepik.org/oauth2/token/'
+
+    if cached_token:
+        logger_utils.debug("Используется кэшированный токен из Redis.")
+        return cached_token.decode('utf-8')
+
+    data = {
+            'grant_type': 'client_credentials',
+            'client_id': f'{client_id}',
+            'client_secret': f'{client_secret}'}
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=data) as resp:
+                if resp.status != 200:
+                    error_message = await resp.text()
+                    logger_utils.error(f"Ошибка при запросе токена: "
+                                       f"{error_message}", exc_info=True)
+                    raise RuntimeError(
+                        f"Не удалось получить токен: {error_message}")
+                response = await resp.json()
+                access_token = response.get('access_token')
+                if not access_token:
+                    raise RuntimeError("Токен не найден в ответе API.")
+                # Сохраняем токен в Redis с TTL
+                await redis_client.set('stepik_token', access_token, ex=3600)
+                logger_utils.debug("Токен успешно получен и сохранён в Redis.")
+                return access_token
+
+    except aiohttp.ClientError as err:
+        logger_utils.error(f"Ошибка сети при запросе токена: {err}",
+                           exc_info=True)
+        raise RuntimeError(f"Ошибка сети: {err}")
+
+    except Exception as err:
+        logger_utils.error(f"Неожиданная ошибка при запросе токена: {err}",
+                           exc_info=True)
+        raise RuntimeError(f"Неожиданная ошибка: {err}")
+
+
+async def check_certificate(stepik_user_id, course_id, access_token):
+    page_number = 1
+    while True:
+        try:
+            api_url = (f'https://stepik.org/api/certificates?user='
+                       f'{stepik_user_id}&page={page_number}')
+            async with aiohttp.ClientSession() as session:
+                async with session.get(api_url, headers={
+                        'Authorization': 'Bearer ' + access_token}) as response:
+                    if response.status == 429:
+                        logger_utils.warning(
+                                'Превышен лимит запросов. Ожидание…')
+                        await asyncio.sleep(10)
+                    response.raise_for_status()
+                    data = await response.json()
+
+                    # Проверяем сертификаты на текущей странице
+                    for certificate in data['certificates']:
+                        # logger_utils.debug(f'{certificate}')
+                        if certificate['course'] == int(course_id):
+                            return True  # Сертификат за курс найден
+
+                    # Если есть следующая страница, переходим к ней
+                    if data['meta']['has_next']:
+                        page_number += 1
+                        await asyncio.sleep(1)  # Задержка между запросами
+                    else:
+                        break  # Больше страниц нет
+        except Exception as err:
+            logger_utils.error(f"Ошибка при запросе сертификатов: {err}",
+                               exc_info=True)
+            raise
+    return False  # Сертификат за курс не найден
+
+
+async def generate_certificate(
         state: FSMContext, w_text=False):
     logger_utils.debug(f'Entry')
     try:
         user_name = await state.get_value('full_name')
-        number_str: str = await state.get_value('number')
-        if not number_str:
-            number_str = '000001'
-            await state.update_data(number=number_str)
-        number = str(int(number_str)+1).zfill(6)
-        logger_utils.debug(f'{number=}')
-
+        number = await state.get_value('number')
         course = BUTT_COURSES[await state.get_value('course')]
-        logger_utils.debug(f'{course=}')
         gender = await state.get_value('gender')
-        logger_utils.debug(f'{gender=}')
 
         base_dir = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), '..', 'static'))
@@ -57,7 +135,7 @@ async def get_certificate(
 
         font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
         template_file = os.path.join(base_dir, template_name)
-        output_file = os.path.join(base_dir, 'mod_cert.pdf')
+        output_file = os.path.join(base_dir, f'BestInPython_№{number}.pdf')
 
         if not os.path.exists(font_path):
             raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
@@ -94,13 +172,14 @@ async def get_certificate(
             can.setFont('BitterReg', font_size)
             page_width = letter[0]  # Ширина страницы
             x_position = (page_width - text_width) / 2 + 155
-            # Добавляем текст по центру
+            # Добавляем текст ФИО по центру
             can.drawString(x_position, 306, user_name)
-
+            # Добавляем текст № сертификата
             can.setFont('BitterReg', 21)
             can.setFillColor(light_gray)
             can.drawString(440, 373, number)
 
+            # Добавить водяной знак
             if w_text:
                 # Устанавливаем прозрачный цвет и шрифт
                 can.setFillColor(Color(0.3, 0, 0, alpha=0.7))
@@ -265,10 +344,10 @@ class MessageProcessor:
 
     async def delete_message(self, key='msg_id_for_del') -> None:
         """
-        Deletes a message using the specified key. The method retrieves data from
-        states and uses them to delete a message with the specified key.
-        Args: key (str): The key by which the message will be found for
-        removal. Default 'msg_id_for_change'. Return: None.
+        Удаляет сообщение, используя указанный ключ. Метод извлекает данные из
+        состояния и использует их для удаления сообщения с указанным ключом.
+        Args: key (str): Ключ, по которому будет найдено сообщение
+        удаление. По умолчанию «msg_id_for_change». Возвращает: None.
         :param key: str
         :return: None
         """
@@ -285,40 +364,10 @@ class MessageProcessor:
          Deletes a message after a specified time interval.
          Arguments: message (types.Message): The message to be deleted.
                     delay (int): Time in seconds before the message is deleted.
-                    Returns: None
+                    returns: None
         :param value: Message
         :param delay: int
         :return: None
         """
         await asyncio.sleep(delay)
         await value.delete()
-
-
-class ImmutableDict(Mapping):
-    def __init__(self, data=None):
-        if data is None:
-            self._data = {}
-        else:
-            self._data = dict(data)
-
-    def __getitem__(self, key):
-        return self._data[key]
-
-    def __iter__(self):
-        return iter(self._data)
-
-    def __len__(self):
-        return len(self._data)
-
-    def __repr__(self):
-        return f'ImmutableDict({self._data})'
-
-    def __call__(self, key):
-        return self._data[key]
-
-
-async def get_immutable_dict(*args):
-    temp_dict = {}
-    for dct in args:
-        temp_dict.update(dct)
-    return ImmutableDict(temp_dict)
