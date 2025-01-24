@@ -210,7 +210,8 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(date=date)
     value = await msg.answer(LexiconRu.text_data_done,
-                             reply_markup=kb_back_cancel)
+                             reply_markup=kb_back_cancel,
+                             disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True,
                                     msgs_for_reset=True)
     await state.set_state(FSMQuiz.fill_link_cert)
