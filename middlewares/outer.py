@@ -14,8 +14,11 @@ logger_middl_outer = logging.getLogger(__name__)
 
 
 class RedisMiddleware(BaseMiddleware):
-    def __init__(self, redis_client):
-        self.redis_client = redis_client
+    """
+    Передает Redis клиент в контекст, для доступа в хэндлерах
+    """
+    def __init__(self, redis):
+        self.redis_client = redis
 
     async def __call__(self, handler, event, data):
         data['redis_client'] = self.redis_client
