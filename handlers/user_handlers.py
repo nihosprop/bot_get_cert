@@ -75,7 +75,6 @@ async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
 async def clbk_back_fill_link_cert(clbk: CallbackQuery, state: FSMContext):
     logger_user_hand.debug('Entry')
     msg_processor = MessageProcessor(clbk, state)
-    # await msg_processor.deletes_messages(msgs_for_del=True)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -226,11 +225,11 @@ async def clbk_done(
     msg_processor = MessageProcessor(clbk, state)
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                   redis_client)
-    await clbk.answer('Данные проверяются…')
+
     value1 = await clbk.message.edit_text('Ваши данные проверяются✅\n'
                                           'Ожидайте выдачи сертификата🏆\n',
                                           reply_markup=kb_butt_quiz)
-
+    await clbk.answer('Данные проверяются…')
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
     logger_user_hand.debug(f'{course_id=}')
