@@ -13,7 +13,7 @@ BUTT_DONE: dict[str, str] = {'done': 'Подтвердить✅'}
 
 BUTT_START: dict[str, str] = {'get_cert': 'Получить сертификат', 'get_promo':
     'Получить промокод со скидкой'}
-BUTT_GENDER: dict[str, str] = {'male': 'Мужской♂', 'female': 'Женский♀'}
+BUTT_GENDER: dict[str, str] = {'male': 'Мужской ♂', 'female': 'Женский ♀'}
 BUTT_COURSES: dict[str, str] = {
         'id_1_214271': 'Лучший по Python.Часть 1',
         'id_2_221885': 'Лучший по Python.Часть 2',
