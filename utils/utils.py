@@ -459,7 +459,7 @@ class MessageProcessor:
             for remaining in range(delay, 0, -1):
                 # Обновляем текст сообщения с оставшимся временем
                 await value.edit_text(
-                    f"{original_text}\n\nУдалиться через: {remaining} сек...")
+                    f"{original_text}\n\nУдалится через: {remaining} сек...")
                 await asyncio.sleep(1)
         except Exception as e:
             logger_utils.error(f"Ошибка при обновлении сообщения: {e}",
