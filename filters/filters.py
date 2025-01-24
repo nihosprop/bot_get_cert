@@ -6,8 +6,6 @@ from aiogram.enums import ContentType
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from utils import MessageProcessor
-
 logger_filters = logging.getLogger(__name__)
 
 
@@ -15,13 +13,15 @@ class IsValidProfileLink(BaseFilter):
     """
     Проверяет, является ли валидной ссылкой на профиль,
     где цифры в URL это ID пользователя.
+    Поддерживает два формата ссылок:
+    1. https://stepik.org/users/USER_ID/profile
+    2. https://stepik.org/users/USER_ID
     """
     async def __call__(self, msg: Message) -> bool | dict[str, str]:
         link = msg.text
-        pattern = r'^https?://[^/]+/users/(\d+)/profile$'
-        match = re.match(pattern, link)
-        if bool(match):
-            stepik_user_id = link.split('/')[-2]
+        match = re.match(r'^https?://[^/]+/users/(\d+)(?:/profile)?$', link)
+        if match:
+            stepik_user_id: str = match.group(1)
             return {'stepik_user_id': stepik_user_id}
         return False
 
