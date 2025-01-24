@@ -226,7 +226,7 @@ async def clbk_done(
     msg_processor = MessageProcessor(clbk, state)
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                   redis_client)
-    await clbk.answer("Данные проверяются…")
+    await clbk.answer('Данные проверяются…')
     value1 = await clbk.message.edit_text('Ваши данные проверяются✅\n'
                                           'Ожидайте выдачи сертификата🏆\n',
                                           reply_markup=kb_butt_quiz)
@@ -253,8 +253,10 @@ async def clbk_done(
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
-            await clbk.message.answer('Произошла ошибка. Попробуйте позже.\n'
+            value = await clbk.message.answer('Произошла ошибка. Попробуйте '
+                                           'позже.\n'
                                       'Или обратитесь к администратору.')
+            await msg_processor.save_msg_id(value, msgs_for_del=True)
             return
 
         try:
@@ -263,7 +265,7 @@ async def clbk_done(
                                   f':{clbk.from_user.id}')
 
             # отправка сертификата
-            await stepik_service.send_certificate(clbk, path)
+            await stepik_service.send_certificate(clbk, path, state)
             value = await clbk.message.answer(LexiconRu.text_survey,
                                               reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_reset=True,

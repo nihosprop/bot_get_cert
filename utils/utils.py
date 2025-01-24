@@ -255,17 +255,19 @@ class StepikService:
             raise
 
     @staticmethod
-    async def send_certificate(clbk: CallbackQuery, output_file: str) -> None:
+    async def send_certificate(clbk: CallbackQuery, output_file: str, state: FSMContext) \
+            -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
+        :param state:
         :param clbk: CallbackQuery от пользователя.
         :param output_file: Путь к файлу сертификата.
         """
+        msg_processor = MessageProcessor(clbk, state)
         try:
             # Проверяем, существует ли файл
             if not os.path.exists(output_file):
                 logger_utils.error(f"Файл {output_file} не найден.")
-                await clbk.message.answer("Произошла ошибка: файл не найден.")
                 return
 
             # Отправка файла пользователю
@@ -281,8 +283,9 @@ class StepikService:
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",
                                exc_info=True)
-            await clbk.message.answer(
-                "Произошла ошибка при отправке сертификата.")
+            value = await clbk.message.answer('Что-то пошло не так, сообщите'
+                                      ' администратору.')
+            await msg_processor.save_msg_id(value, msgs_for_del=True)
         finally:
             # Удаляем файл после отправки
             try:
