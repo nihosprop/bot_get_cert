@@ -44,13 +44,19 @@ class IsAdmin(BaseFilter):
 
 
 class IsFullName(BaseFilter):
-    async def __call__(self, msg: Message) -> bool:
+    async def __call__(self, msg: Message, state: FSMContext) -> bool:
         logger_filters.debug(f'Entry {__class__.__name__}')
+        msg_processor = MessageProcessor(msg, state)
         pattern = r'^[А-ЯA-Z][а-яa-z]+ [А-ЯA-Z][а-яa-z]+$'
 
         if msg.content_type != ContentType.TEXT:
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
+            value = await msg.answer(f'{msg.from_user.first_name}, '
+                                     f'введите пожалуйста Имя и Фамилию текстом '
+                                     f';)')
+            await msg_processor.deletes_msg_a_delay(value, delay=6,
+                                                    indication=True)
 
         if re.match(pattern, msg.text):
             logger_filters.debug(f'Exit True {__class__.__name__}')
@@ -59,6 +65,12 @@ class IsFullName(BaseFilter):
             logger_filters.debug(f'Exit False {__class__.__name__}')
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
+            value = await msg.answer(f'{msg.from_user.first_name}, '
+                                     f'Вы ввели Имя и Фамилию в некорректном '
+                                     f'формате.\n'
+                                     f'Посмотрите на пример выше ;)')
+            await msg_processor.deletes_msg_a_delay(value,
+                                                    delay=7, indication=True)
             return False
 
 
