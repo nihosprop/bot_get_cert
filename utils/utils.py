@@ -446,7 +446,7 @@ class MessageProcessor:
         :param delay: int
         :return: None
         """
-        if indication:
+        if not indication:
             await asyncio.sleep(delay)
             await value.delete()
             return
