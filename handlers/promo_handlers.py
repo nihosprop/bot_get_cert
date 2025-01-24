@@ -18,9 +18,6 @@ from keyboards import (BUTT_COURSES,
                        kb_select_gender)
 from lexicon.lexicon_ru import LexiconRu
 from keyboards.keyboards import kb_butt_quiz
-from utils import (check_certificate,
-                   generate_certificate,
-                   get_stepik_access_token)
 from utils.utils import MessageProcessor
 
 promo_router = Router()
@@ -30,5 +27,4 @@ logger_promo = logging.getLogger(__name__)
 
 @promo_router.callback_query(F.data == 'get_promo')
 async def temp(clbk: CallbackQuery):
-    await clbk.message.answer('Вы запросили сертификат')
-
+    await clbk.answer('В разработке', show_alert=True)
