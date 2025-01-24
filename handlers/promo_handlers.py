@@ -27,4 +27,4 @@ logger_promo = logging.getLogger(__name__)
 
 @promo_router.callback_query(F.data == 'get_promo')
 async def temp(clbk: CallbackQuery):
-    await clbk.answer('В разработке', show_alert=True)
+    await clbk.answer('Раздел в разработке', show_alert=True)
