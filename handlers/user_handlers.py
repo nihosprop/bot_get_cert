@@ -179,7 +179,7 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
     msg_processor = MessageProcessor(msg, state)
     reminder = await msg.answer(
             "Пожалуйста, используйте кнопки для взаимодействия с ботом.")
-    await msg_processor.deletes_msg_a_delay(reminder, delay=3)
+    await msg_processor.deletes_msg_a_delay(reminder, delay=5)
 
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
@@ -274,12 +274,11 @@ async def clbk_done(
     else:
         value = await clbk.message.answer('У вас пока нет сертификата этого'
                                           ' курса')
-        await msg_processor.save_msg_id(value, msgs_for_del=True)
+        await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz)
         await msg_processor.save_msg_id(value, msgs_for_reset=True,
                                         msgs_for_del=True)
-
         await state.clear()
         await clbk.answer()
     logger_user_hand.debug(f'Exit')

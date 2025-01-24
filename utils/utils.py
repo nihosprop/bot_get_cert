@@ -3,7 +3,6 @@ import logging
 import os
 from dataclasses import dataclass
 import io
-from concurrent.futures import ThreadPoolExecutor
 
 from PyPDF2 import PdfReader, PdfWriter
 from aiogram.client.session import aiohttp
@@ -418,9 +417,6 @@ class MessageProcessor:
 
         logger_utils.debug('Exit')
 
-    async def change_message(self, key='msg_id_for_change') -> None:
-        pass
-
     async def delete_message(self, key='msg_id_for_del') -> None:
         """
         Удаляет сообщение, используя указанный ключ. Метод извлекает данные из
@@ -438,15 +434,34 @@ class MessageProcessor:
         logger_utils.debug('Exit')
 
     @staticmethod
-    async def deletes_msg_a_delay(value: Message, delay: int) -> None:
+    async def deletes_msg_a_delay(value: Message,
+                                  delay: int, indication=False) -> None:
         """
          Deletes a message after a specified time interval.
          Arguments: value (types.Message): The message to delete.
                     delay (int): Time in seconds before the message is deleted.
                     returns: None
+        :param indication: Bool
         :param value: Message
         :param delay: int
         :return: None
         """
-        await asyncio.sleep(delay)
-        await value.delete()
+        if indication:
+            await asyncio.sleep(delay)
+            await value.delete()
+            return
+
+        # Сохраняем оригинальный текст сообщения
+        original_text = value.text
+        try:
+            # Обратный отсчет от delay до 1
+            for remaining in range(delay, 0, -1):
+                # Обновляем текст сообщения с оставшимся временем
+                await value.edit_text(
+                    f"{original_text}\n\nУдалиться через: {remaining} сек...")
+                await asyncio.sleep(1)
+        except Exception as e:
+            logger_utils.error(f"Ошибка при обновлении сообщения: {e}",
+                               exc_info=True)
+        finally:
+            await value.delete()
