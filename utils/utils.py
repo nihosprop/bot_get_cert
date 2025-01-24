@@ -133,8 +133,9 @@ class StepikService:
             course = BUTT_COURSES[state_data.get('course')]
             gender = state_data.get('gender')
 
-            base_dir = os.path.abspath(
+            local_path = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), '..', 'static'))
+            base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
 
             template_name = None
 
