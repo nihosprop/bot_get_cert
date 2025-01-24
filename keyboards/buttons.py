@@ -8,7 +8,7 @@ ADMIN_PANEL_BUTT: dict[str, str] = {
         'exit': 'Выход'}
 
 BUTT_CANCEL: dict[str, str] = {'cancel': '❌ОТМЕНА'}
-BUTT_BACK: dict[str, str] = {'back': '🔙Назад'}
+BUTT_BACK: dict[str, str] = {'back': '🔙 Назад'}
 BUTT_DONE: dict[str, str] = {'done': 'Подтвердить✅'}
 
 BUTT_START: dict[str, str] = {'get_cert': 'Получить сертификат', 'get_promo':
