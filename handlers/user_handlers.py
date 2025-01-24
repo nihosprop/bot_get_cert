@@ -179,7 +179,7 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
     msg_processor = MessageProcessor(msg, state)
     reminder = await msg.answer(
             "Пожалуйста, используйте кнопки для взаимодействия с ботом.")
-    await msg_processor.deletes_msg_a_delay(reminder, delay=5)
+    await msg_processor.deletes_msg_a_delay(reminder, delay=5, indication=True)
 
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
