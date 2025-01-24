@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 import io
 
+from concurrent.futures import ThreadPoolExecutor
 from PyPDF2 import PdfReader, PdfWriter
 from aiogram.client.session import aiohttp
 from reportlab.pdfbase.ttfonts import TTFont
@@ -20,6 +21,8 @@ from keyboards import BUTT_COURSES
 
 logger_utils = logging.getLogger(__name__)
 
+# Создаем пул потоков для выполнения синхронных операций
+executor = ThreadPoolExecutor(max_workers=4)
 
 async def get_stepik_access_token(
         client_id, client_secret, redis_client: Redis) -> str:
@@ -106,14 +109,17 @@ async def check_certificate(stepik_user_id, course_id, access_token):
     return False  # Сертификат за курс не найден
 
 
-async def generate_certificate(
-        state: FSMContext, w_text=False):
+def sync_generate_certificate(
+        state_data, w_text=False):
+    """
+    Синхронная функция для генерации сертификата.
+    """
     logger_utils.debug(f'Entry')
     try:
-        user_name = await state.get_value('full_name')
-        number = await state.get_value('number')
-        course = BUTT_COURSES[await state.get_value('course')]
-        gender = await state.get_value('gender')
+        user_name = state_data.get('full_name')
+        number = state_data.get('number')
+        course = BUTT_COURSES[state_data['course']]
+        gender = state_data.get('gender')
 
         base_dir = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), '..', 'static'))
@@ -211,6 +217,22 @@ async def generate_certificate(
         logger_utils.error(f'{err=}', exc_info=True)
     else:
         return output_file
+
+
+async def generate_certificate(state: FSMContext, w_text=False):
+    """
+    Асинхронная обёртка для генерации сертификата.
+    """
+    logger_utils.debug('Entry')
+    try:
+        # Получаем данные из состояния
+        state_data = await state.get_data()
+        # Выполняем синхронную операцию в отдельном потоке
+        output_file = await asyncio.to_thread(sync_generate_certificate, state_data, w_text)
+        return output_file
+    except Exception as err:
+        logger_utils.error(f'{err=}', exc_info=True)
+        raise
 
 
 @dataclass
