@@ -11,6 +11,8 @@ BUTT_CANCEL: dict[str, str] = {'cancel': '❌ОТМЕНА'}
 BUTT_BACK: dict[str, str] = {'back': '🔙Назад'}
 BUTT_DONE: dict[str, str] = {'done': 'Подтвердить✅'}
 
+BUTT_START: dict[str, str] = {'get_cert': 'Получить сертификат', 'get_promo':
+    'Получить промокод со скидкой'}
 BUTT_GENDER: dict[str, str] = {'male': 'Мужской♂', 'female': 'Женский♀'}
 BUTT_COURSES: dict[str, str] = {
         'course_1': 'Лучший по Python.Часть 1',
