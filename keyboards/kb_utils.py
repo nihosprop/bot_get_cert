@@ -16,12 +16,6 @@ def create_inline_kb(
     big_text: list[InlineKeyboardButton] = []
     small_text: list[InlineKeyboardButton] = []
 
-    # if immutable_buttons:
-    #     buttons = [InlineKeyboardButton(text=text, callback_data=butt)
-    #             for butt, text in kwargs.items()]
-    #     kb_builder.row(*buttons, width=width)
-    #     return kb_builder.as_markup()
-
     if args:
         for button in args:
             if len(button) > 16:

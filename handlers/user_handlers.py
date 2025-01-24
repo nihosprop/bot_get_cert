@@ -1,9 +1,10 @@
 import logging
+
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
-from aiogram.types import CallbackQuery, FSInputFile, Message
+from aiogram.types import CallbackQuery, Message
 from redis import Redis
 
 from config_data.config import Stepik
@@ -18,9 +19,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import (check_certificate,
-                   generate_certificate,
-                   get_stepik_access_token)
+from utils import StepikService
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -125,10 +124,11 @@ async def clbk_back(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
 async def clbk_get_cert(clbk: CallbackQuery, state: FSMContext):
+    msg_processor = MessageProcessor(clbk, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                          reply_markup=kb_butt_cancel)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_full_name)
     await clbk.answer()
 
@@ -146,9 +146,8 @@ async def clbk_sex(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-@user_router.callback_query(
-        F.data.in_([name for name in BUTT_COURSES if name.startswith(('id_1',
-        'id_2'))]),
+@user_router.callback_query(F.data.in_(
+        [name for name in BUTT_COURSES if name.startswith(('id_1', 'id_2'))]),
         StateFilter(FSMQuiz.fill_course))
 async def clbk_select_course(clbk: CallbackQuery, state: FSMContext):
     await state.update_data(course=clbk.data)
@@ -160,9 +159,8 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-@user_router.callback_query(F.data.in_(
-        [name for name in BUTT_COURSES if name.startswith(('id_3', 'id_4',
-        'id_5', 'id_6'))]),
+@user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
+        name.startswith(('id_3', 'id_4', 'id_5', 'id_6'))]),
         StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
@@ -221,19 +219,19 @@ async def clbk_done(
         stepik: Stepik):
     logger_user_hand.debug(f'Entry')
     msg_processor = MessageProcessor(clbk, state)
+    stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
+                                  redis_client)
     await clbk.answer("Данные проверяются…")
     value1 = await clbk.message.edit_text('Ваши данные проверяются✅\n'
-                                 'Ожидайте выдачи сертификата🏆\n',
-                                 reply_markup=kb_butt_quiz)
+                                          'Ожидайте выдачи сертификата🏆\n',
+                                          reply_markup=kb_butt_quiz)
 
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
     logger_user_hand.debug(f'{course_id=}')
-    access_token = await get_stepik_access_token(stepik.client_id,
-                                                 stepik.client_cecret,
-                                                 redis_client=redis_client)
-    certificates = await check_certificate(stepik_user_id, course_id,
-                                           access_token)
+    access_token = await stepik_service.get_stepik_access_token()
+    certificates = await stepik_service.check_certificate(stepik_user_id,
+                                                          course_id, access_token)
     if certificates:
         try:
             number = await redis_client.incr('cert_number')
@@ -246,8 +244,7 @@ async def clbk_done(
 
         try:
             # генерация сертификата
-            path = await generate_certificate(state, w_text=True)
-            pdf_file = FSInputFile(path)
+            path = await stepik_service.generate_certificate(state, w_text=True)
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
@@ -261,16 +258,11 @@ async def clbk_done(
                                   f':{clbk.from_user.id}')
 
             # отправка сертификата
-            await clbk.message.answer_document(pdf_file, caption='Ваш сертификат '
-                                                                 'готов📧\n'
-                                                                 'Желаем удачи в '
-                                                                 'дальнейшем '
-                                                                 'обучении!🤝')
-
+            await stepik_service.send_certificate(clbk, path)
             value = await clbk.message.answer(LexiconRu.text_survey,
-                                             reply_markup=kb_butt_quiz)
+                                              reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                        msgs_for_del=True)
+                                            msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
             logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
 
@@ -280,7 +272,14 @@ async def clbk_done(
             await state.clear()
             await clbk.answer()
     else:
-        await clbk.message.answer('У вас пока нет сертификата этого курса')
+        value = await clbk.message.answer('У вас пока нет сертификата этого'
+                                          ' курса')
+        await msg_processor.save_msg_id(value, msgs_for_del=True)
+        value = await clbk.message.answer(LexiconRu.text_survey,
+                                          reply_markup=kb_butt_quiz)
+        await msg_processor.save_msg_id(value, msgs_for_reset=True,
+                                        msgs_for_del=True)
+
         await state.clear()
         await clbk.answer()
     logger_user_hand.debug(f'Exit')
@@ -304,5 +303,3 @@ async def msg_sent_stepik_link(
     value = await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
                              f'<code>{text}</code>', reply_markup=kb_end_quiz)
     await msg_processor.save_msg_id(value, msgs_for_reset=True)
-
-
