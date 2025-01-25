@@ -23,6 +23,24 @@ logger_utils = logging.getLogger(__name__)
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
 
+def get_username(_type_update: Message | CallbackQuery):
+    """
+       Возвращает имя пользователя.
+       Если first_name отсутствует, использует username.
+       Если username также отсутствует, возвращает "Аноним".
+
+       :param _type_update: Объект Message или CallbackQuery.
+       :return: Имя пользователя.
+       """
+    user_name = _type_update.from_user.first_name
+
+    if not user_name:
+        if username := _type_update.from_user.username:
+            return f'@{username}'
+        else:
+            return "Аноним"
+    return user_name
+
 @dataclass
 class StepikService:
     client_id: str
