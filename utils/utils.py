@@ -430,7 +430,7 @@ class StepikService:
             data.update(course_id=await self.redis_client.hget(str(
                     type_update.from_user.id), 'course_id'))
             output_file = await asyncio.to_thread(self.sync_exists_certificate,
-            data, type_update, w_text)
+            data, w_text)
 
             logger_utils.debug(f'Exit')
             return output_file
