@@ -23,7 +23,7 @@ logger_utils = logging.getLogger(__name__)
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
 
-def get_username(_type_update: Message | CallbackQuery):
+async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
        Возвращает имя пользователя.
        Если first_name отсутствует, использует username.
@@ -38,7 +38,7 @@ def get_username(_type_update: Message | CallbackQuery):
         if username := _type_update.from_user.username:
             return f'@{username}'
         else:
-            return "Аноним"
+            return str(_type_update.from_user.id)
     return user_name
 
 @dataclass
@@ -95,9 +95,35 @@ class StepikService:
                                exc_info=True)
             raise RuntimeError(f"Неожиданная ошибка: {err}")
 
+    async def check_cert_in_user(self, tg_user_id: str, course_id: str) \
+            -> bool | str:
+        """
+        Проверяет, есть ли номер сертификата у пользователя.
+        :param course_id:
+        :param tg_user_id: ID пользователя.
+        :return: True и номер сертификата, если найден, иначе False.
+        """
+        certificate = await self.redis_client.hget(f'{tg_user_id}',
+                                                   f'{course_id}')
+        return certificate if certificate else False
+
+    async def save_certificate_number(self, user_id: str, course_id: str):
+        """
+        Сохраняет номер сертификата в Redis.
+        :param course_id: ID курса.
+        :param user_id: tg_ID пользователя.
+        """
+
+        try:
+            await self.redis_client.hset(f'{user_id}', course_id)
+            logger_utils.info(f'Данные сохранены: {user_id}')
+        except Exception as err:
+            logger_utils.error(f'Ошибка при сохранении данных в Redis: {err}',
+                               exc_info=True)
+
     @staticmethod
-    async def check_certificate(stepik_user_id: str, course_id: str,
-            access_token: str) -> bool:
+    async def check_cert_in_stepik(stepik_user_id: str, course_id: str,
+                                   access_token: str) -> bool:
         """
         Проверяет наличие сертификата у пользователя на Stepik.
         :param stepik_user_id: ID пользователя на Stepik.
@@ -137,20 +163,46 @@ class StepikService:
         return False  # Сертификат за курс не найден
 
     @staticmethod
-    def sync_generate_certificate(state_data: dict[str, str], w_text: bool = False):
+    def sync_generate_certificate(data: dict[str, str],
+                                  w_text: bool = False) -> tuple[str, str] | None:
         """
         Синхронная функция для генерации сертификата.
-        :param state_data: Данные для генерации сертификата.
+        :param data: Данные для генерации сертификата.
         :param w_text: Флаг для добавления водяного знака.
         :return: Путь к сгенерированному файлу сертификата.
         """
-        logger_utils.debug(f'Entry')
-        try:
-            user_name = state_data.get('full_name')
-            number = state_data.get('number')
-            course = BUTT_COURSES[state_data.get('course')]
-            gender = state_data.get('gender')
+        logger_utils.debug('Entry')
 
+        try:
+            # 1. Извлечение данных из state_data
+            user_name = data.get('full_name')
+            number = data.get('end_number')
+            course = BUTT_COURSES[data.get('course')]
+            logger_utils.debug(f'{course=}')
+            gender = data.get('gender')
+
+            # Проверка значений gender и course
+            if gender not in ('female', 'male'):
+                logger_utils.error(f"Неизвестное значение gender: {gender}")
+                raise ValueError(f"Неизвестное значение gender: {gender}")
+
+            if course not in ('Лучший по Python.Часть 1', 'Лучший по Python.Часть 2'):
+                logger_utils.error(f"Неизвестное значение course: {course}")
+                raise ValueError(f"Неизвестное значение course: {course}")
+
+        except KeyError as err:
+            logger_utils.error(
+                f"Ошибка при извлечении данных из state_data: {err}",
+                exc_info=True)
+            return None
+        except Exception as err:
+            logger_utils.error(
+                f"Неизвестная ошибка при извлечении данных из state_data: {err}",
+                exc_info=True)
+            return None
+
+        # 2. Определение путей к файлам
+        try:
             local_path = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), '..', 'static'))
             base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
@@ -170,6 +222,14 @@ class StepikService:
                     case 'Лучший по Python.Часть 2':
                         template_name = '2 часть муж.pdf'
 
+            # Проверка, что template_name не равен None
+            if template_name is None:
+                logger_utils.error(
+                    f"Не удалось определить шаблон для gender={gender}, course={course}")
+                raise ValueError("Имя шаблона не может быть None")
+
+            logger_utils.debug(f"Выбран шаблон: {template_name}")
+
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
             output_file = os.path.join(base_dir, f'BestInPython_{number}.pdf')
@@ -177,21 +237,33 @@ class StepikService:
             if not os.path.exists(font_path):
                 raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
 
-            # Регистрация внешнего шрифта
-            pdfmetrics.registerFont(TTFont('BitterReg', font_path))
+        except FileNotFoundError as err:
+            logger_utils.error(f"Ошибка при определении путей: {err}",
+                               exc_info=True)
+            return None
+        except Exception as err:
+            logger_utils.error(
+                f"Неизвестная ошибка при определении путей: {err}",
+                exc_info=True)
+            return None
 
+        # 3. Регистрация шрифта
+        try:
+            pdfmetrics.registerFont(TTFont('BitterReg', font_path))
+        except Exception as err:
+            logger_utils.error(f"Ошибка при регистрации шрифта: {err}",
+                               exc_info=True)
+            return None
+
+        # 4. Работа с PDF
+        try:
             light_gray = Color(230 / 255, 230 / 255, 230 / 255)
             watermark_text = 'TEST VERSION'
-            # Открываем исходный PDF
             reader = PdfReader(template_file)
-
-            # Создаем объект для записи нового PDF
             writer = PdfWriter()
 
             for page_num in range(len(reader.pages)):
-                # Читаем страницу
                 page = reader.pages[page_num]
-                # Создаем временный буфер для добавления текста
                 packet = io.BytesIO()
                 can = canvas.Canvas(packet, pagesize=letter)
                 font_size = 16
@@ -203,77 +275,186 @@ class StepikService:
                 elif len(user_name) in (28, 29, 30):
                     font_size = 13
 
-                # Определяем ширину текста
                 text_width = can.stringWidth(user_name, 'BitterReg', font_size)
-                # Добавляем текст
                 can.setFont('BitterReg', font_size)
-                page_width = letter[0]  # Ширина страницы
+                page_width = letter[0]
                 x_position = (page_width - text_width) / 2 + 155
-                # Добавляем текст ФИО по центру
                 can.drawString(x_position, 306, user_name)
-                # Добавляем текст № сертификата
                 can.setFont('BitterReg', 21)
                 can.setFillColor(light_gray)
                 can.drawString(440, 373, number)
 
-                # Добавить водяной знак
                 if w_text:
-                    # Устанавливаем прозрачный цвет и шрифт
                     can.setFillColor(Color(0.3, 0, 0, alpha=0.7))
                     can.setFont('Helvetica', 50)
-                    # Поворачиваем текст (опционально) на 45 градусов
                     can.rotate(45)
-                    # Добавляем водяной знак
-                    can.drawString(110, 60, watermark_text)  # Позиция текста
+                    can.drawString(110, 60, watermark_text)
 
-                # Закрываем холст и сохраняем его содержимое в пакет
                 can.showPage()
                 can.save()
-
-                # Перемещаемся в начало буфера
                 packet.seek(0)
-
-                # Преобразуем буфер в PDF-объект
                 new_pdf = PdfReader(packet)
-
-                # Вставляем новую страницу поверх старой
                 page.merge_page(new_pdf.pages[0])
+                writer.add_page(page)
 
-                # Добавляем измененную страницу в выходной PDF
+            with open(output_file, 'wb') as fh:
+                writer.write(fh)
+
+        except Exception as err:
+            logger_utils.error(f"Ошибка при работе с PDF: {err}", exc_info=True)
+            return None
+
+        # 5. Возврат результата
+        return output_file, template_name
+
+    @staticmethod
+    def sync_exists_certificate(data: dict[str, str], w_text: bool = False):
+        logger_utils.debug(f'Entry')
+        logger_utils.debug(f'{data=}')
+
+        try:
+            local_path = os.path.abspath(
+                    os.path.join(os.path.dirname(__file__), '..', 'static'))
+            base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
+
+            template_name = data.get('template_name')
+            logger_utils.debug(f'{template_name=}')
+            user_name = data.get('name_on_cert')
+
+            # Извлечение course_id
+            course_id = data.get('course_id')
+            if course_id == 'None':
+                logger_utils.error(f"course равен 'None'")
+                raise ValueError("course не может быть 'None'")
+
+            cert_number = data.get(course_id)
+
+            font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
+            template_file = os.path.join(base_dir, template_name)
+            output_file = os.path.join(base_dir, f'BestInPython_{cert_number}.pdf')
+
+            if not os.path.exists(font_path):
+                raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
+        except FileNotFoundError as err:
+            logger_utils.error(f"Ошибка при определении путей: {err}",
+                               exc_info=True)
+            return None
+        except Exception as err:
+            logger_utils.error(
+                    f"Неизвестная ошибка при определении путей: {err}",
+                    exc_info=True)
+            return None
+
+        # 3. Регистрация шрифта
+        try:
+            pdfmetrics.registerFont(TTFont('BitterReg', font_path))
+        except Exception as err:
+            logger_utils.error(f"Ошибка при регистрации шрифта: {err}",
+                               exc_info=True)
+            return None
+
+        # 4. Работа с PDF
+        try:
+            light_gray = Color(230 / 255, 230 / 255, 230 / 255)
+            watermark_text = 'TEST VERSION'
+            reader = PdfReader(template_file)
+            writer = PdfWriter()
+
+            for page_num in range(len(reader.pages)):
+                page = reader.pages[page_num]
+                packet = io.BytesIO()
+                can = canvas.Canvas(packet, pagesize=letter)
+                font_size = 16
+
+                if len(user_name) in (24, 25):
+                    font_size = 15
+                elif len(user_name) in (26, 27):
+                    font_size = 14
+                elif len(user_name) in (28, 29, 30):
+                    font_size = 13
+
+                text_width = can.stringWidth(user_name, 'BitterReg', font_size)
+                can.setFont('BitterReg', font_size)
+                page_width = letter[0]
+                x_position = (page_width - text_width) / 2 + 155
+                can.drawString(x_position, 306, user_name)
+                can.setFont('BitterReg', 21)
+                can.setFillColor(light_gray)
+                can.drawString(440, 373, cert_number)
+
+                if w_text:
+                    can.setFillColor(Color(0.3, 0, 0, alpha=0.7))
+                    can.setFont('Helvetica', 50)
+                    can.rotate(45)
+                    can.drawString(110, 60, watermark_text)
+
+                can.showPage()
+                can.save()
+                packet.seek(0)
+                new_pdf = PdfReader(packet)
+                page.merge_page(new_pdf.pages[0])
                 writer.add_page(page)
 
             with open(output_file, 'wb') as fh:
                 writer.write(fh)
         except Exception as err:
-            logger_utils.error(f'{err=}', exc_info=True)
+            logger_utils.error(f"Ошибка при работе с PDF: {err}", exc_info=True)
             return None
-        else:
-            return output_file
+        # 5. Возврат результата
+        return output_file
 
     async def generate_certificate(
-            self, state: FSMContext, w_text: bool = False):
+            self, data: FSMContext | Redis, type_update, w_text: bool = False,
+            exist_cert=False):
         """
         Асинхронная обёртка для генерации сертификата.
-        :param state: Контекст состояния FSM.
+        :param type_update:
+        :param exist_cert: Флаг существования сертификата.
+        :param data:
         :param w_text: Флаг для добавления водяного знака.
         :return: Путь к сгенерированному файлу сертификата.
         """
-        logger_utils.debug('Entry')
-        try:
-            # Получаем данные из состояния
-            state_data = await state.get_data()
-            # Выполняем синхронную операцию в отдельном потоке
-            output_file = await asyncio.to_thread(self.sync_generate_certificate,
-                                                  state_data, w_text)
-            # output_file = await asyncio.get_event_loop().run_in_executor(
-            #         executor, self.sync_generate_certificate, state_data, w_text)
+        logger_utils.debug(f'Entry')
+        if exist_cert:
+            data: dict[str, str] = await self.redis_client.hgetall(
+                    str(type_update.from_user.id))
+            logger_utils.debug(f'Сертификат есть')
+            template_name = await self.redis_client.hget(str(
+                    type_update.from_user.id), 'template_name')
+
+            if template_name is None:
+                logger_utils.error("template_name не найден в Redis")
+                raise ValueError("template_name не может быть None")
+
+            data.update(template_name=template_name)
+            data.update(course_id=await self.redis_client.hget(str(
+                    type_update.from_user.id), 'course_id'))
+            output_file = await asyncio.to_thread(self.sync_exists_certificate,
+            data, type_update, w_text)
+
+            logger_utils.debug(f'Exit')
             return output_file
+
+        try:
+            state_data = await data.get_data()
+            # Выполняем синхронную операцию в отдельном потоке
+            output_file, template_name = await asyncio.to_thread(self.sync_generate_certificate,
+                                                  state_data, w_text)
+            # запись template_name в базу
+            await self.redis_client.hset(str(type_update.from_user.id),
+                                         'template_name', template_name)
+
+            logger_utils.debug(f'Exit')
+            return output_file
+
         except Exception as err:
             logger_utils.error(f'{err=}', exc_info=True)
+            logger_utils.debug(f'Exit')
             raise
 
     @staticmethod
-    async def send_certificate(clbk: CallbackQuery, output_file: str, state: FSMContext) \
+    async def send_certificate(clbk: CallbackQuery, output_file: str,
+                               state: FSMContext) \
             -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
@@ -291,12 +472,14 @@ class StepikService:
             # Отправка файла пользователю
             pdf_file = FSInputFile(output_file)
             await clbk.message.answer_document(pdf_file,
-                                               caption='Ваш сертификат готов! 🎉\nЖелаем удачи в дальнейшем обучении!🤝')
+                                               caption='Ваш сертификат готов! 🎉\n'
+                                               'Желаем удачи в дальнейшем'
+                                                       ' обучении!🤝')
 
             # Логируем успешную отправку
             logger_utils.info(
-                f"Сертификат {output_file.split('\\')[-1]} успешно отправлен "
-                f"пользователю {clbk.from_user.first_name}:{clbk.from_user.id}")
+                f"Сертификат {output_file.split('\\')[-1]} успешно отправлен"
+                f" {clbk.from_user.first_name}:{clbk.from_user.id}")
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",

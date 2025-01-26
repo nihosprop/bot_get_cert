@@ -18,10 +18,10 @@ class RedisMiddleware(BaseMiddleware):
     Передает Redis клиент в контекст, для доступа в хэндлерах
     """
     def __init__(self, redis):
-        self.redis_client = redis
+        self.redis_data = redis
 
     async def __call__(self, handler, event, data):
-        data['redis_client'] = self.redis_client
+        data['redis_data'] = self.redis_data
         return await handler(event, data)
 
 
