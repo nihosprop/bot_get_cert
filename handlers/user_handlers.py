@@ -257,6 +257,7 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_reset=True,
                                         msgs_for_del=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=5)
+        await state.clear()
         logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
         return
 
