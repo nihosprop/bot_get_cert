@@ -17,7 +17,7 @@ BUTT_GENDER: dict[str, str] = {'male': 'Мужской ♂', 'female': 'Женс
 BUTT_COURSES: dict[str, str] = {
         'id_1_214271': 'Лучший по Python.Часть 1',
         'id_2_221885': 'Лучший по Python.Часть 2',
-        'id_3': '🔜Лучший по Python.Часть 3',
-        'id_4': '🔜Лучший по Python.Часть 4',
-        'id_5': '🔜Лучший по Python.Часть 5',
-        'id_6': '🔜Лучший по Python.ООП'}
+        'id_3': '🔜 Лучший по Python.Часть 3',
+        'id_4': '🔜 Лучший по Python.Часть 4',
+        'id_5': '🔜 Лучший по Python.Часть 5',
+        'id_6': '🔜 Лучший по Python.ООП'}
