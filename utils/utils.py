@@ -318,16 +318,8 @@ class StepikService:
             base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
 
             template_name = data.get('template_name')
-            logger_utils.debug(f'{template_name=}')
-            user_name = data.get('name_on_cert')
-
-            # Извлечение course_id
-            course_id = data.get('course_id')
-            if course_id == 'None':
-                logger_utils.error(f"course равен 'None'")
-                raise ValueError("course не может быть 'None'")
-
-            cert_number = data.get(course_id)
+            user_name = data.get('full_name')
+            cert_number = data.get('cert_number')
 
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
@@ -404,45 +396,60 @@ class StepikService:
         return output_file
 
     async def generate_certificate(
-            self, data: FSMContext | Redis, type_update, w_text: bool = False,
+            self, state_data: FSMContext, type_update, w_text: bool = False,
             exist_cert=False):
         """
         Асинхронная обёртка для генерации сертификата.
-        :param type_update:
+        :param type_update: Тип апдэйта.
         :param exist_cert: Флаг существования сертификата.
-        :param data:
+        :param state_data: Данные для генерации сертификата.
         :param w_text: Флаг для добавления водяного знака.
         :return: Путь к сгенерированному файлу сертификата.
         """
         logger_utils.debug(f'Entry')
+
+        data = await state_data.get_data()
+        user_tg_id = str(type_update.from_user.id)
+        course_id = data.get('course').split('_')[-1]
+
         if exist_cert:
-            data: dict[str, str] = await self.redis_client.hgetall(
-                    str(type_update.from_user.id))
-            logger_utils.debug(f'Сертификат есть')
-            template_name = await self.redis_client.hget(str(
-                    type_update.from_user.id), 'template_name')
+            logger_utils.debug(f'Сертификат есть !!!')
+            try:
+                user_data = await self.redis_client.hget(user_tg_id, course_id)
+                logger_utils.debug(f'{user_data=}')
 
-            if template_name is None:
-                logger_utils.error("template_name не найден в Redis")
-                raise ValueError("template_name не может быть None")
+                cert_number, full_name, template = user_data.split(':')
+                logger_utils.debug(f'{cert_number}-{full_name}-{template}')
+                data.update({'template_name': template,
+                             'cert_number': cert_number, 'full_name': full_name})
 
-            data.update(template_name=template_name)
-            data.update(course_id=await self.redis_client.hget(str(
-                    type_update.from_user.id), 'course_id'))
-            output_file = await asyncio.to_thread(self.sync_exists_certificate,
-            data, w_text)
-
+            except Exception as err:
+                logger_utils.error(f'Не удалось получить данные пользователя '
+                                   f'из Redis хранилища', exc_info=True)
+                raise
+            output_file = await asyncio.to_thread(
+                self.sync_exists_certificate, data, w_text)
             logger_utils.debug(f'Exit')
             return output_file
 
         try:
-            state_data = await data.get_data()
             # Выполняем синхронную операцию в отдельном потоке
             output_file, template_name = await asyncio.to_thread(self.sync_generate_certificate,
-                                                  state_data, w_text)
-            # запись template_name в базу
-            await self.redis_client.hset(str(type_update.from_user.id),
-                                         'template_name', template_name)
+                                                                 data, w_text)
+            # Сохраняем данные в Redis
+            cert_number = await state_data.get_value('end_number')
+            full_name = await state_data.get_value('full_name')
+            logger_utils.debug(f'{user_tg_id=}\n'
+                               f'{course_id=}\n'
+                               f'{cert_number=}\n'
+                               f'{full_name=}\n'
+                               f'{user_tg_id}={cert_number}:{full_name}:{template_name}')
+
+            await self.redis_client.hset(name=user_tg_id,
+                                         key=course_id,
+                                         value=f'{cert_number}:'
+                                               f'{full_name}:'
+                                               f'{template_name}')
 
             logger_utils.debug(f'Exit')
             return output_file

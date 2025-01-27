@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, get_username
+from utils import StepikService
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -247,18 +247,14 @@ async def clbk_done(
                                           reply_markup=kb_butt_quiz)
     await clbk.answer('Идет проверка…')
 
-    tg_user_name = await get_username(clbk)
     tg_user_id = str(clbk.from_user.id)
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
-    logger_user_hand.debug(f'{course_id=}:{tg_user_name=}')
 
     cert = await stepik_service.check_cert_in_user(tg_user_id, course_id)
     logger_user_hand.debug(f'{cert=}')
 
     if cert:
-        logger_user_hand.debug(
-                f'{await stepik_service.generate_certificate(state, clbk, exist_cert=True, w_text=True)}')
         path = await stepik_service.generate_certificate(state, clbk,
                                                          w_text=True,
                                                          exist_cert=True)
@@ -269,7 +265,7 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=5)
         await state.clear()
-        logger_user_hand.debug(f'Exit {clbk_done.__name__=}')
+        logger_user_hand.debug(f'Exit')
         return
 
     access_token = await stepik_service.get_stepik_access_token()
@@ -281,12 +277,10 @@ async def clbk_done(
             number = await redis_data.incr('end_number')
             number_str = str(number).zfill(6)
             await state.update_data(end_number=number_str)
-            logger_user_hand.debug(f'{number_str=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла не предвиденная ошибка,'
-                                              ' обратитесь к'
-                                              ' администратору.')
+                                              ' обратитесь к администратору.')
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await state.clear()
             return
@@ -296,7 +290,6 @@ async def clbk_done(
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
                                                              w_text=True)
-
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
@@ -318,15 +311,13 @@ async def clbk_done(
                                               reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
-            logger_user_hand.debug(f'Exit {clbk_done.__name__=}')
 
-            # Запись в базу данных о выданном сертификате
-            data_to_save = {
-                    'tg_user_name': tg_user_name,
-                    'name_on_cert': await state.get_value('full_name'),
-                    f'{course_id}': number_str,
-                    'course_id': course_id}
-            await redis_data.hset(tg_user_id, mapping=data_to_save)
+            # Запись в базу данных о выданном сертификате  # data_to_save = {
+            #         'tg_user_name': tg_user_name,  #         'name_on_cert':
+            #         await state.get_value('full_name'),  #         f'{
+            #         course_id}': number_str,  #         'course_id':
+            #         course_id}  # await redis_data.hset(tg_user_id,
+            #         mapping=data_to_save)
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)

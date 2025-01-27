@@ -16,6 +16,3 @@ class FSMQuiz(StatesGroup):
     fill_link_cert = State()
     # fill_email = State()
     end = State()
-
-class FSMPromoCode(StatesGroup):
-    start_promo = State()
