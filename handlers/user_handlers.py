@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService
+from utils import StepikService, get_username
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -265,6 +265,11 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=5)
         await state.clear()
+        await msg_processor.send_message_with_delay(clbk.message.chat.id,
+                text=f'{await get_username(clbk)}, '
+                     f'у нас для Вас нашелся '
+                     f'промокод со скидкой😀\n'
+                     f'🎁 ПРОМОКОД 🎁', delay=15)
         logger_user_hand.debug(f'Exit')
         return
 
@@ -311,13 +316,12 @@ async def clbk_done(
                                               reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
-
-            # Запись в базу данных о выданном сертификате  # data_to_save = {
-            #         'tg_user_name': tg_user_name,  #         'name_on_cert':
-            #         await state.get_value('full_name'),  #         f'{
-            #         course_id}': number_str,  #         'course_id':
-            #         course_id}  # await redis_data.hset(tg_user_id,
-            #         mapping=data_to_save)
+            await msg_processor.send_message_with_delay(
+                    clbk.message.chat.id, text=f'{await get_username(clbk)}, '
+                                               f'у нас для Вас нашелся '
+                                               f'промокод со скидкой😀\n'
+                                               f'🎁 ПРОМОКОД 🎁',
+                    delay=15)
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)

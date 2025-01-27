@@ -677,3 +677,26 @@ class MessageProcessor:
                                exc_info=True)
         finally:
             await value.delete()
+
+    async def send_message_with_delay(
+            self, chat_id: int, text: str, delay: int, **kwargs) -> Message:
+        """
+        Sends a message with a specified delay.
+        Args:
+            chat_id (int): The ID of the chat where the message will be sent.
+            text (str): The text of the message.
+            delay (int): The delay in seconds before sending the message.
+            **kwargs: Additional arguments for the `send_message` method.
+        Returns:
+            Message: The sent message object.
+        """
+        logger_utils.debug(f'Entry {MessageProcessor.send_message_with_delay.__name__}')
+
+        await asyncio.sleep(delay)
+
+        # Send the message
+        message = await self._type_update.bot.send_message(chat_id=chat_id,
+                text=text, **kwargs)
+
+        logger_utils.debug(f'Message sent: {message.message_id}')
+        return message
