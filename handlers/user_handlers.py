@@ -14,6 +14,7 @@ from keyboards import (BUTT_COURSES,
                        kb_back_cancel,
                        kb_butt_cancel,
                        kb_courses,
+                       kb_create_promo,
                        kb_end_quiz,
                        kb_select_gender)
 from lexicon.lexicon_ru import LexiconRu
@@ -32,8 +33,29 @@ async def cmd_start(msg: Message, state: FSMContext):
     await msg_processor.deletes_messages(msgs_for_del=True, msgs_for_reset=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
-    await msg_processor.save_msg_id(value, msgs_for_del=True,
-                                    msgs_for_reset=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
+
+
+@user_router.callback_query(F.data == 'get_promo')
+async def temp(clbk: CallbackQuery):
+    await clbk.message.edit_text('Выберите курс, по которому хотите получить'
+                                 ' скидку👇', reply_markup=kb_create_promo)
+    await clbk.answer()
+
+
+@user_router.callback_query(F.data == '/cancel', StateFilter(default_state))
+async def clbk_cancel(clbk: CallbackQuery, state: FSMContext):
+    msg_processor = MessageProcessor(clbk, state)
+
+    try:
+        await state.clear()
+    except Exception as err:
+        logger_user_hand.error(f'{err=}', exc_info=True)
+
+    value = await clbk.message.edit_text(LexiconRu.text_survey,
+                                         reply_markup=kb_butt_quiz)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
+    await clbk.answer()
 
 
 @user_router.callback_query(F.data == 'back',
@@ -90,8 +112,7 @@ async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
     await msg_processor.deletes_messages(msgs_for_del=True)
     value = await clbk.message.edit_text(LexiconRu.text_data_done,
                                          reply_markup=kb_back_cancel)
-    await msg_processor.save_msg_id(value, msgs_for_del=True,
-                                    msgs_for_reset=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_link_cert)
     await clbk.answer()
     logger_user_hand.debug('Exit')
@@ -109,8 +130,8 @@ async def msg_other(msg: Message, state: FSMContext):
 
 
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
-async def clbk_back(clbk: CallbackQuery, state: FSMContext):
-    logger_user_hand.debug(f'Entry {clbk_back.__name__=}')
+async def clbk_cancel_in_state(clbk: CallbackQuery, state: FSMContext):
+    logger_user_hand.debug(f'Entry {clbk_cancel_in_state.__name__=}')
     msg_processor = MessageProcessor(clbk, state)
 
     try:
@@ -120,10 +141,9 @@ async def clbk_back(clbk: CallbackQuery, state: FSMContext):
 
     value = await clbk.message.edit_text(LexiconRu.text_survey,
                                          reply_markup=kb_butt_quiz)
-    await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                    msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
-    logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
+    logger_user_hand.debug(f'Exit {clbk_cancel_in_state.__name__=}')
 
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
@@ -143,9 +163,8 @@ async def clbk_sex(clbk: CallbackQuery, state: FSMContext):
     msg_processor = MessageProcessor(clbk, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(gender=clbk.data)
-    value = await clbk.message.edit_text(LexiconRu.text_select_course,
-                                         reply_markup=kb_courses)
-    await msg_processor.save_msg_id(value, msgs_for_reset=True)
+    await clbk.message.edit_text(LexiconRu.text_select_course,
+                                 reply_markup=kb_courses)
     await state.set_state(FSMQuiz.fill_course)
     await clbk.answer()
 
@@ -157,15 +176,15 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext):
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True,
-                                                    msgs_for_reset=True)
+    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_date_of_revocation)
     await clbk.answer()
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-        name.startswith(('id_3', 'id_4', 'id_5', 'id_6'))]),
-        StateFilter(FSMQuiz.fill_course))
+                                        name.startswith(('id_3', 'id_4',
+                                               'id_5', 'id_6'))]),
+                            StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
 
@@ -194,10 +213,7 @@ async def msg_full_name(msg: Message, state: FSMContext):
     await state.update_data(full_name=msg.text)
     logger_user_hand.debug(f'{await state.get_data()=}')
     await msg_processor.deletes_messages(msgs_for_del=True)
-    value = await msg.answer(LexiconRu.text_gender,
-                             reply_markup=kb_select_gender)
-    await msg_processor.save_msg_id(value, msgs_for_reset=True)
-
+    await msg.answer(LexiconRu.text_gender, reply_markup=kb_select_gender)
     await state.set_state(FSMQuiz.fill_gender)
 
 
@@ -212,8 +228,7 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
     value = await msg.answer(LexiconRu.text_data_done,
                              reply_markup=kb_back_cancel,
                              disable_web_page_preview=True)
-    await msg_processor.save_msg_id(value, msgs_for_del=True,
-                                    msgs_for_reset=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_link_cert)
     logger_user_hand.debug('Exit')
 
@@ -222,7 +237,7 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
 async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
         stepik: Stepik):
-    logger_user_hand.debug(f'Entry')
+    logger_user_hand.debug(f'Entry {clbk_done.__name__=}')
     msg_processor = MessageProcessor(clbk, state)
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
@@ -243,22 +258,18 @@ async def clbk_done(
 
     if cert:
         logger_user_hand.debug(
-                f'{await stepik_service.generate_certificate(state, clbk, 
-                                                             exist_cert=True,
-                                                             w_text=True)}')
-        path = await stepik_service.generate_certificate(state,
-                                                         clbk,
+                f'{await stepik_service.generate_certificate(state, clbk, exist_cert=True, w_text=True)}')
+        path = await stepik_service.generate_certificate(state, clbk,
                                                          w_text=True,
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz)
-        await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                        msgs_for_del=True)
+        await msg_processor.save_msg_id(value, msgs_for_del=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=5)
         await state.clear()
-        logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
+        logger_user_hand.debug(f'Exit {clbk_done.__name__=}')
         return
 
     access_token = await stepik_service.get_stepik_access_token()
@@ -274,8 +285,8 @@ async def clbk_done(
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла не предвиденная ошибка,'
-                                      ' обратитесь к'
-                                      ' администратору.')
+                                              ' обратитесь к'
+                                              ' администратору.')
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await state.clear()
             return
@@ -284,16 +295,15 @@ async def clbk_done(
             # генерация сертификата
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
-            w_text=True)
+                                                             w_text=True)
 
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла ошибка. Попробуйте '
-                                           'позже.\n'
-                                      'Или обратитесь к администратору.')
-            await msg_processor.deletes_msg_a_delay(value, 20,
-                                                    indication=True)
+                                              'позже.\n'
+                                              'Или обратитесь к администратору.')
+            await msg_processor.deletes_msg_a_delay(value, 20, indication=True)
             await state.clear()
             return
 
@@ -306,10 +316,9 @@ async def clbk_done(
             await stepik_service.send_certificate(clbk, path, state)
             value = await clbk.message.answer(LexiconRu.text_survey,
                                               reply_markup=kb_butt_quiz)
-            await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                            msgs_for_del=True)
+            await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
-            logger_user_hand.debug(f'Exit {clbk_back.__name__=}')
+            logger_user_hand.debug(f'Exit {clbk_done.__name__=}')
 
             # Запись в базу данных о выданном сертификате
             data_to_save = {
@@ -331,8 +340,7 @@ async def clbk_done(
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz)
         await msg_processor.deletes_msg_a_delay(value1, delay=5, indication=True)
-        await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                        msgs_for_del=True)
+        await msg_processor.save_msg_id(value, msgs_for_del=True)
         await state.clear()
         await clbk.answer()
     logger_user_hand.debug(f'Exit')
@@ -353,6 +361,5 @@ async def msg_sent_stepik_link(
             f'Дата отзыва: {await state.get_value('date')}')
     await state.set_state(FSMQuiz.end)
     await msg.delete()
-    value = await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
-                             f'<code>{text}</code>', reply_markup=kb_end_quiz)
-    await msg_processor.save_msg_id(value, msgs_for_reset=True)
+    await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
+                     f'<code>{text}</code>', reply_markup=kb_end_quiz)

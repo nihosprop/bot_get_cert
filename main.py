@@ -10,7 +10,7 @@ from aiogram.enums import ParseMode
 
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
-from handlers import admin_handlers, other_handlers, user_handlers, promo_handlers
+from handlers import admin_handlers, other_handlers, user_handlers
 from middlewares.outer import RedisMiddleware, ThrottlingMiddleware
 
 logger_main = logging.getLogger(__name__)
@@ -54,7 +54,6 @@ async def main():
         await set_main_menu(bot)
 
         # routers
-        dp.include_router(promo_handlers.promo_router)
         dp.include_router(admin_handlers.admin_router)
         dp.include_router(user_handlers.user_router)
         dp.include_router(other_handlers.other_router)
