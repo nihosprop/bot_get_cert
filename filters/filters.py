@@ -11,6 +11,25 @@ from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
 
+class StateGroupFilter(BaseFilter):
+    """
+    Фильтр для проверки, принадлежит ли текущее состояние пользователя
+    к указанной группе состояний (StatesGroup).
+    Можно использовать на уровне роутера, чтобы автоматически
+    фильтровать апдейты по всем состояниям, принадлежащим определенной группе.
+    Атрибуты:
+        state_group (StatesGroup): Группа состояний (например, FSMPromoCode),
+                                      к которой будет применяться фильтр.
+    Пример использования для фильтрации на уровне роутеров:
+        router.message.filter(StateGroupFilter(FSMPromoCode))
+        router.callback_query.filter(StateGroupFilter(FSMPromoCode))
+    """
+    def __init__(self, state_group):
+        self.state_group = state_group
+
+    async def __call__(self, event: Message | CallbackQuery, state: FSMContext) -> bool:
+        current_state = await state.get_state()
+        return current_state in [state.state for state in self.state_group.__states__.values()]
 
 class IsValidProfileLink(BaseFilter):
     """
