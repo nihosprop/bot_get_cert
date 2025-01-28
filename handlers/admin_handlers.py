@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import F, Router
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from redis.asyncio import Redis
@@ -37,10 +38,12 @@ async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-@admin_router.callback_query(F.data == 'newsletter', FSMAdminPanel.admin_menu)
+@admin_router.callback_query(F.data == 'newsletter',
+                             StateFilter(FSMAdminPanel.admin_menu))
 async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer(f'Кнопка в разработке', show_alert=True)
 
-@admin_router.message()
+@admin_router.message(StateFilter(FSMAdminPanel.admin_menu,
+                                  FSMAdminPanel.newsletter))
 async def other_msg(msg: Message):
     await msg.delete()

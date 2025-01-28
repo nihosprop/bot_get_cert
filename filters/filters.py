@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from zoneinfo import available_timezones
 
 from aiogram.enums import ContentType
 from aiogram.filters import BaseFilter
