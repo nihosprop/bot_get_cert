@@ -13,7 +13,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile, Message
+from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
 from redis.asyncio import Redis
 
 from keyboards import BUTT_COURSES
@@ -423,7 +423,7 @@ class StepikService:
                 data.update({'template_name': template,
                              'cert_number': cert_number, 'full_name': full_name})
 
-            except Exception as err:
+            except Exception:
                 logger_utils.error(f'Не удалось получить данные пользователя '
                                    f'из Redis хранилища', exc_info=True)
                 raise
@@ -679,24 +679,22 @@ class MessageProcessor:
             await value.delete()
 
     async def send_message_with_delay(
-            self, chat_id: int, text: str, delay: int, **kwargs) -> Message:
+            self, chat_id: int, text: str, delay: int, preview_link: str) -> Message:
         """
         Sends a message with a specified delay.
-        Args:
-            chat_id (int): The ID of the chat where the message will be sent.
-            text (str): The text of the message.
-            delay (int): The delay in seconds before sending the message.
-            **kwargs: Additional arguments for the `send_message` method.
-        Returns:
-            Message: The sent message object.
+        :param chat_id: The ID of the chat where the message will be sent.
+        :param text:
+        :param delay: The delay in seconds before sending the message.
+        :param preview_link: Link for a preview.
+        :return Message: Message: The sent message object.
         """
-        logger_utils.debug(f'Entry {MessageProcessor.send_message_with_delay.__name__}')
-
+        logger_utils.debug(f'Entry')
         await asyncio.sleep(delay)
 
         # Send the message
-        message = await self._type_update.bot.send_message(chat_id=chat_id,
-                text=text, **kwargs)
+        message = await self._type_update.bot.send_message(
+                chat_id=chat_id, text=text,
+                link_preview_options=LinkPreviewOptions(url=preview_link))
 
-        logger_utils.debug(f'Message sent: {message.message_id}')
+        logger_utils.debug(f'Exit')
         return message
