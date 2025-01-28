@@ -30,7 +30,7 @@ logger_user_hand = logging.getLogger(__name__)
 
 @user_router.message(F.text == '/start')
 async def cmd_start(msg: Message, state: FSMContext):
-    await msg.delete()
+    # await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()

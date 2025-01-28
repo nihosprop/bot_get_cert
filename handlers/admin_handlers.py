@@ -40,7 +40,7 @@ async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
 
 @admin_router.callback_query(F.data == 'newsletter',
                              StateFilter(FSMAdminPanel.admin_menu))
-async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
+async def cmd_exit(clbk: CallbackQuery):
     await clbk.answer(f'Кнопка в разработке', show_alert=True)
 
 @admin_router.message(StateFilter(FSMAdminPanel.admin_menu,
