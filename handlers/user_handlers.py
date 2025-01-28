@@ -266,7 +266,7 @@ async def clbk_done(
         await msg_processor.send_message_with_delay(clbk.message.chat.id,
                     text=LexiconRu.text_promo.format(
                             end_date=await get_end_date()),
-                    delay=2, preview_link=Links.link_questions_to_ivan)
+                    delay=15, preview_link=Links.link_questions_to_ivan)
         logger_user_hand.debug(f'Exit')
         return
 
