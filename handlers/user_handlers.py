@@ -30,7 +30,7 @@ logger_user_hand = logging.getLogger(__name__)
 @user_router.message(F.text == '/start')
 async def cmd_start(msg: Message, state: FSMContext):
     msg_processor = MessageProcessor(msg, state)
-    await msg_processor.deletes_messages(msgs_for_del=True, msgs_for_reset=True)
+    await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -83,11 +83,10 @@ async def clbk_back_fill_course(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_gender))
 async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
     msg_processor = MessageProcessor(clbk, state)
-    await msg_processor.deletes_messages(msgs_for_del=True)
+    # await msg_processor.deletes_messages(msgs_for_del=True)
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                          reply_markup=kb_butt_cancel)
-    await msg_processor.save_msg_id(value, msgs_for_reset=True,
-                                    msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_full_name)
     await clbk.answer()
 
@@ -160,8 +159,6 @@ async def clbk_get_cert(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data.in_(BUTT_GENDER),
                             StateFilter(FSMQuiz.fill_gender))
 async def clbk_sex(clbk: CallbackQuery, state: FSMContext):
-    msg_processor = MessageProcessor(clbk, state)
-    await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(gender=clbk.data)
     await clbk.message.edit_text(LexiconRu.text_select_course,
                                  reply_markup=kb_courses)
