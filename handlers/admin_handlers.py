@@ -3,35 +3,44 @@ import logging
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from redis.asyncio import Redis
 
-from filters.filters import IsAdmin
+from filters.filters import IsAdmins
+from keyboards import kb_butt_quiz
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from states.states import FSMAdminPanel
+from utils import MessageProcessor
 
 admin_router = Router()
-admin_router.message.filter(IsAdmin())
+admin_router.message.filter(IsAdmins())
 
 logger_admin = logging.getLogger(__name__)
 
 
 @admin_router.message(F.text == '/admin')
-async def cmd_admin(msg: Message, state: FSMContext):
+async def cmd_admin(msg: Message, state: FSMContext, redis_data: Redis):
+    await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
     await msg.delete()
-    await msg.answer(LexiconRu.text_adm_panel, reply_markup=kb_admin)
+    end_cert = str(await redis_data.get('end_number')).zfill(6)
+    await msg.answer(LexiconRu.text_adm_panel.format(end_cert=end_cert),
+                     reply_markup=kb_admin)
     await state.set_state(FSMAdminPanel.admin_menu)
 
 
 @admin_router.callback_query(F.data == 'exit')
 async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(state=None)
-    await clbk.message.edit_text(f'Вы вышли из админ-панели✅')
+    await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
+                                 f'{LexiconRu.text_survey}',
+                                 reply_markup=kb_butt_quiz)
     await clbk.answer()
 
 
-@admin_router.message(FSMAdminPanel.newsletter)
-async def msg_newsletter(msg: Message, state: FSMContext):
-    # await MessageProcessor(msg, state).broadcast(text=msg.text)
+@admin_router.callback_query(F.data == 'newsletter', FSMAdminPanel.admin_menu)
+async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
+    await clbk.answer(f'Кнопка в разработке', show_alert=True)
+
+@admin_router.message()
+async def other_msg(msg: Message):
     await msg.delete()
-    await msg.answer('Рассылка произведена✅', reply_markup=kb_admin)
-    await state.set_state(FSMAdminPanel.admin_menu)

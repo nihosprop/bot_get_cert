@@ -482,7 +482,7 @@ class StepikService:
             await clbk.message.answer_document(pdf_file,
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
-                                                       ' обучении!🤝')
+                                                       ' обучении!🤓')
 
             # Логируем успешную отправку
             logger_utils.info(
@@ -701,7 +701,7 @@ class MessageProcessor:
         return message
 
 
-async def get_end_date(days: int = 10):
+async def shifts_the_date_forward(days: int = 10):
     expire_date = datetime.now() + timedelta(days=days)
     months: dict[int, str] = {1: 'января', 2: 'февраля', 3: 'марта', 4: 'апреля',
             5: 'мая', 6: 'июня', 7: 'июля', 8: 'августа', 9: 'сентября',

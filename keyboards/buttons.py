@@ -2,10 +2,7 @@ import logging
 
 logger_buttons = logging.getLogger(__name__)
 
-ADMIN_PANEL_BUTT: dict[str, str] = {
-        'newsletter': 'Рассылка',
-        'replace_text': 'Сопутствующий текст',
-        'exit': 'Выход'}
+ADMIN_PANEL_BUTT: dict[str, str] = {'newsletter': 'Рассылка', 'exit': 'Выход'}
 
 BUTT_CANCEL: dict[str, str] = {'cancel': '❌ОТМЕНА'}
 BUTT_BACK: dict[str, str] = {'back': '🔙 Назад'}
@@ -25,4 +22,4 @@ BUTT_COURSES: dict[str, str] = {
 
 BUTT_URL_PROMO: dict[str, str] = {
         'Лучший по Python.Часть 2':
-        'https://stepik.org/a/221885/pay?promo=15f84e690c978074'}
+            'https://stepik.org/a/221885/pay?promo=15f84e690c978074'}

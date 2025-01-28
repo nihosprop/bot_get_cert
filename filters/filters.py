@@ -16,7 +16,7 @@ class StateGroupFilter(BaseFilter):
     Фильтр для проверки, принадлежит ли текущее состояние пользователя
     к указанной группе состояний (StatesGroup).
     Можно использовать на уровне роутера, чтобы автоматически
-    фильтровать апдейты по всем состояниям, принадлежащим определенной группе.
+    фильтровать апдэйты по всем состояниям, принадлежащим определенной группе.
     Атрибуты:
         state_group (StatesGroup): Группа состояний (например, FSMPromoCode),
                                       к которой будет применяться фильтр.
@@ -52,14 +52,16 @@ class IsValidProfileLink(BaseFilter):
         return False
 
 
-class IsAdmin(BaseFilter):
-    async def __call__(self, msg: Message, superadmin) -> bool:
+class IsAdmins(BaseFilter):
+    async def __call__(self, msg: Message, admins: str) -> bool:
         logger_filters.debug('Entry')
+
         user_id = str(msg.from_user.id)
-        logger_filters.debug(f'In {__class__.__name__}:{user_id=}'
-                             f':{superadmin=}\n{user_id == superadmin=}')
+        admins_id = admins.split()
+
+        logger_filters.debug(f'{admins_id}')
         logger_filters.debug('Exit')
-        return user_id == superadmin
+        return user_id in admins_id
 
 
 class IsFullName(BaseFilter):
@@ -135,6 +137,7 @@ class IsCorrectData(BaseFilter):
                 await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                         indication=True)
                 raise ValueError
+
             logger_filters.debug(f'Exit Done {__class__.__name__}')
             return {'date': date_str}
 
@@ -143,6 +146,9 @@ class IsCorrectData(BaseFilter):
             logger_filters.debug(f'Exit False {__class__.__name__}')
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
+            value = await msg.answer('Дата не корректна.\n'
+                                     'Будьте внимательны при вводе🧐')
+            await msg_processor.deletes_msg_a_delay(value, 5, indication=True)
             return False
 
 

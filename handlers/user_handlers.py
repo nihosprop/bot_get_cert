@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, get_end_date
+from utils import StepikService, shifts_the_date_forward
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -30,6 +30,7 @@ logger_user_hand = logging.getLogger(__name__)
 
 @user_router.message(F.text == '/start')
 async def cmd_start(msg: Message, state: FSMContext):
+    await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
@@ -39,6 +40,7 @@ async def cmd_start(msg: Message, state: FSMContext):
 
 @user_router.callback_query(F.data == 'get_promo')
 async def temp(clbk: CallbackQuery):
+
     await clbk.message.edit_text('Выберите курс, по которому хотите получить'
                                  ' скидку👇', reply_markup=kb_create_promo)
     await clbk.answer()
@@ -199,7 +201,7 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
     await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     reminder = await msg.answer(
-            "Пожалуйста, используйте кнопки для взаимодействия с ботом.")
+            "Пожалуйста, используйте кнопки для взаимодействия с ботом🙃")
     await msg_processor.deletes_msg_a_delay(reminder, delay=5, indication=True)
 
 
@@ -240,9 +242,8 @@ async def clbk_done(
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
 
-    value1 = await clbk.message.edit_text('Ваши данные проверяются✅\n'
-                                          'Ожидайте выдачи сертификата🏆\n',
-                                          reply_markup=kb_butt_quiz)
+    value1 = await clbk.message.edit_text('Ваши данные проверяются⌛\n'
+                                          'Ожидайте выдачи сертификата📜\n')
     await clbk.answer('Идет проверка…')
 
     tg_user_id = str(clbk.from_user.id)
@@ -264,9 +265,9 @@ async def clbk_done(
         await msg_processor.deletes_msg_a_delay(value1, delay=1)
         await state.clear()
         await msg_processor.send_message_with_delay(clbk.message.chat.id,
-                    text=LexiconRu.text_promo.format(
-                            end_date=await get_end_date()),
-                    delay=15, preview_link=Links.link_questions_to_ivan)
+             text=LexiconRu.text_promo.format(
+                     end_date=await shifts_the_date_forward()), delay=15,
+                     preview_link=Links.link_questions_to_ivan)
         logger_user_hand.debug(f'Exit')
         return
 
@@ -279,6 +280,7 @@ async def clbk_done(
             number = await redis_data.incr('end_number')
             number_str = str(number).zfill(6)
             await state.update_data(end_number=number_str)
+            await redis_data.set('end_number', number_str)
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла не предвиденная ошибка,'
@@ -295,9 +297,9 @@ async def clbk_done(
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
-            value = await clbk.message.answer('Произошла ошибка. Попробуйте '
-                                              'позже.\n'
-                                              'Или обратитесь к администратору.')
+            value = await clbk.message.answer('Произошла ошибка😯\nПопробуйте '
+                                              'позже или обратитесь к'
+                                              ' администратору🤖')
             await msg_processor.deletes_msg_a_delay(value, 20, indication=True)
             await state.clear()
             return
@@ -314,9 +316,11 @@ async def clbk_done(
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
             await msg_processor.send_message_with_delay(clbk.message.chat.id,
-                    text=LexiconRu.text_promo.format(
-                            end_date=await get_end_date()),
-                    delay=15, preview_link=Links.link_questions_to_ivan)
+                                                        text=LexiconRu.text_promo.format(
+                                                                end_date=await
+                                                                shifts_the_date_forward()),
+                                                        delay=15,
+                                                        preview_link=Links.link_questions_to_ivan)
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
