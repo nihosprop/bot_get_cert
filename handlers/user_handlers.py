@@ -20,10 +20,11 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService
+from utils import StepikService, get_end_date
 from utils.utils import MessageProcessor
 
 user_router = Router()
+logger = logging.getLogger("my_handler_logger")
 logger_user_hand = logging.getLogger(__name__)
 
 
@@ -260,10 +261,12 @@ async def clbk_done(
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz)
         await msg_processor.save_msg_id(value, msgs_for_del=True)
-        await msg_processor.deletes_msg_a_delay(value1, delay=5)
+        await msg_processor.deletes_msg_a_delay(value1, delay=1)
         await state.clear()
         await msg_processor.send_message_with_delay(clbk.message.chat.id,
-                                                    text=LexiconRu.text_promo, delay=2, preview_link=Links.link_questions_to_ivan)
+                    text=LexiconRu.text_promo.format(
+                            end_date=await get_end_date()),
+                    delay=2, preview_link=Links.link_questions_to_ivan)
         logger_user_hand.debug(f'Exit')
         return
 
@@ -310,9 +313,10 @@ async def clbk_done(
                                               reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=5)
-            await msg_processor.send_message_with_delay(
-                    clbk.message.chat.id, text=LexiconRu.text_promo, delay=15,
-                    preview_link=Links.link_questions_to_ivan)
+            await msg_processor.send_message_with_delay(clbk.message.chat.id,
+                    text=LexiconRu.text_promo.format(
+                            end_date=await get_end_date()),
+                    delay=15, preview_link=Links.link_questions_to_ivan)
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)

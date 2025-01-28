@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.state import default_state
 from aiogram.types import Message

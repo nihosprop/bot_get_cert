@@ -2,8 +2,8 @@ version: 1
 disable_existing_loggers: True
 
 formatters:
-  default:
-    format: '[{asctime}] #{levelname:<8} {filename:<17}:{lineno:4} - <{funcName}> - {message}'
+  simple:
+    format: '[{asctime}] - {message}'
     datefmt: '%Y.%m.%d %H:%M:%S'
     style: '{'
 
@@ -27,7 +27,7 @@ handlers:
   default:
     class: logging.StreamHandler
     level: DEBUG
-    formatter: default
+    formatter: formatter_1
 
   stdout:
     class: logging.StreamHandler
@@ -76,11 +76,6 @@ loggers:
     propagate: no
 
   config_data.config:
-    level: DEBUG
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  database.db_utils:
     level: DEBUG
     handlers: [stdout, warning_file, critical_file]
     propagate: no

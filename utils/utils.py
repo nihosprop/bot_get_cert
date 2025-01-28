@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 import io
 
+from datetime import datetime, timedelta
 from PyPDF2 import PdfReader, PdfWriter
 from aiogram.client.session import aiohttp
 from reportlab.pdfbase.ttfonts import TTFont
@@ -698,3 +699,11 @@ class MessageProcessor:
 
         logger_utils.debug(f'Exit')
         return message
+
+
+async def get_end_date(days: int = 10):
+    expire_date = datetime.now() + timedelta(days=days)
+    months: dict[int, str] = {1: 'января', 2: 'февраля', 3: 'марта', 4: 'апреля',
+            5: 'мая', 6: 'июня', 7: 'июля', 8: 'августа', 9: 'сентября',
+            10: 'октября', 11: 'ноября', 12: 'декабря'}
+    return f'{expire_date.day} {months[expire_date.month]}'
