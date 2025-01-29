@@ -3,7 +3,6 @@ import logging
 import os
 from dataclasses import dataclass
 import io
-import httpx
 
 from datetime import datetime, timedelta
 from PyPDF2 import PdfReader, PdfWriter
@@ -67,10 +66,6 @@ class StepikService:
                 'grant_type': 'client_credentials',
                 'client_id': self.client_id,
                 'client_secret': self.client_secret}
-
-        client = httpx.Client(http2=True, verify=False)
-        response = client.post(url, data=data, timeout=30)
-        logger_utils.debug(f'{response=}')
 
         try:
             async with (aiohttp.ClientSession() as session):
