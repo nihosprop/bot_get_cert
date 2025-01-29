@@ -310,7 +310,7 @@ async def clbk_done(
             value = await clbk.message.answer(LexiconRu.text_survey,
                                               reply_markup=kb_butt_quiz)
             await msg_processor.save_msg_id(value, msgs_for_del=True)
-            await msg_processor.deletes_msg_a_delay(value1, delay=5)
+            await msg_processor.deletes_msg_a_delay(value1, delay=1)
             await msg_processor.send_message_with_delay(clbk.message.chat.id,
                                                         text=LexiconRu.text_promo.format(
                                                                 end_date=await
