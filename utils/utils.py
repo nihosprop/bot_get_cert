@@ -3,6 +3,7 @@ import logging
 import os
 from dataclasses import dataclass
 import io
+import httpx
 
 from datetime import datetime, timedelta
 from PyPDF2 import PdfReader, PdfWriter
@@ -23,6 +24,7 @@ logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
+
 
 async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
@@ -55,7 +57,7 @@ class StepikService:
         :raises: RuntimeError, если не удалось получить токен.
         """
         cached_token = await self.redis_client.get('stepik_token')
-        url = 'https://178.248.239.111/oauth2/token/'
+        url = 'https://stepik.org/oauth2/token/'
 
         if cached_token:
             logger_utils.debug("Используется кэшированный токен из Redis.")
@@ -65,6 +67,10 @@ class StepikService:
                 'grant_type': 'client_credentials',
                 'client_id': self.client_id,
                 'client_secret': self.client_secret}
+
+        response = httpx.post(url, data=data)
+        logger_utils.debug(f'{response.json()=}')
+
         try:
             async with (aiohttp.ClientSession() as session):
                 async with session.post(url,
