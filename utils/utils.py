@@ -68,8 +68,10 @@ class StepikService:
                 'client_id': self.client_id,
                 'client_secret': self.client_secret}
 
-        response = httpx.post(url, data=data, timeout=30)
-        logger_utils.debug(f'{response.json()=}')
+        client = httpx.Client(http2=True, verify=False)
+        response = client.get(url=url)
+        # response = httpx.post(url, data=data, timeout=30)
+        logger_utils.debug(f'{response=}')
 
         try:
             async with (aiohttp.ClientSession() as session):
