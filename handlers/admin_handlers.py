@@ -32,9 +32,10 @@ async def cmd_admin(msg: Message, state: FSMContext, redis_data: Redis):
 @admin_router.callback_query(F.data == 'exit')
 async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(state=None)
-    await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
+    value = await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
                                  f'{LexiconRu.text_survey}',
                                  reply_markup=kb_butt_quiz)
+    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
 
 
