@@ -68,7 +68,7 @@ class StepikService:
                 'client_id': self.client_id,
                 'client_secret': self.client_secret}
 
-        response = httpx.post(url, data=data)
+        response = httpx.post(url, data=data, timeout=30)
         logger_utils.debug(f'{response.json()=}')
 
         try:
