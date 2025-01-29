@@ -17,7 +17,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
 from redis.asyncio import Redis
 
-from keyboards import BUTT_COURSES, kb_butt_quiz
+from keyboards import BUTT_COURSES
 
 logger_utils = logging.getLogger(__name__)
 
@@ -524,19 +524,19 @@ class MessageProcessor:
     _type_update: Message | CallbackQuery
     _state: FSMContext
 
-    async def deletes_messages(
-            self, msgs_for_del=False, msgs_remove_kb=False,
-            msgs_for_reset=False) -> None:
+    async def deletes_messages(self,
+                               msg_remove: str = str | None,
+                               msgs_for_del=False,
+                               msgs_remove_kb=False) -> None:
         """
         Deleting messages from a chat based on passed parameters.
         This method removes various types of messages from a chat.
         Messages are deleted only if the corresponding parameters
         are set to True.
-        If no parameters are specified, the method does not perform any
-        actions.
-        :param msgs_for_reset: Bool
-        :param msgs_for_del: Bool
-        :param msgs_remove_kb: Bool
+        If no parameters are specified, the method does not perform any actions.
+        :param msg_remove: Key for remove msg.
+        :param msgs_for_del:
+        :param msgs_remove_kb:
         :return: None
         """
         logger_utils.debug(f'Entry')
@@ -548,8 +548,7 @@ class MessageProcessor:
 
         kwargs: dict = {
                 'msgs_for_del': msgs_for_del,
-                'msgs_remove_kb': msgs_remove_kb,
-                'msgs_for_reset': msgs_for_reset}
+                'msgs_remove_kb': msgs_remove_kb}
 
         keys = [key for key, val in kwargs.items() if val]
         logger_utils.debug(f'{keys=}')
@@ -572,28 +571,25 @@ class MessageProcessor:
         logger_utils.debug('Exit')
 
     async def save_msg_id(
-            self, value: Message | CallbackQuery, msgs_for_del=False,
-            msgs_remove_kb=False, msgs_for_reset=False) -> None:
+            self, value: Message | CallbackQuery,
+            msg_remove: str | None = None,
+            msgs_for_del=False,
+            msgs_remove_kb=False) -> None:
         """
-        The writes_msg_id_to_storage method is intended for writing an identifier
-        messages in the store depending on the values of the passed flags.
-        It analyzes the method signature, determines the parameters with the set
-        defaults to True, and then stores the message ID
-        in the corresponding list in the object's state.
-        After the recording process is completed, a success message is logged.
-        completion of the operation.
-        :param msgs_for_reset:
-        :param value: Message | CallbackQuery
-        :param msgs_for_del: bool
-        :param msgs_remove_kb: bool
+        :param msg_remove: key for remove message on ID.
+        :param value: Message | CallbackQuery.
+        :param msgs_for_del:
+        :param msgs_remove_kb:
         :return: None
         """
         logger_utils.debug('Entry')
+        if key := msg_remove:
+            await self._state.update_data(
+                    {key: str(self._type_update.message_id)})
 
         flags: dict = {
                 'msgs_for_del': msgs_for_del,
-                'msgs_remove_kb': msgs_remove_kb,
-                'msgs_for_reset': msgs_for_reset}
+                'msgs_remove_kb': msgs_remove_kb}
 
         for key, val in flags.items():
             logger_utils.debug('Start writing data to storage…')
@@ -639,16 +635,17 @@ class MessageProcessor:
 
         logger_utils.debug('Exit')
 
-    async def delete_message(self, key='msg_id_for_del') -> None:
+    async def delete_message(self, key='msg_del_on_key') -> None:
         """
         Удаляет сообщение, используя указанный ключ. Метод извлекает данные из
         состояния и использует их для удаления сообщения с указанным ключом.
         Args: key (str): Ключ, по которому будет найдено сообщение
-        удаление. По умолчанию «msg_id_for_change». Возвращает: None.
+        удаление. По умолчанию «msg_id_for_del». Возвращает: None.
         :param key: str
         :return: None
         """
         logger_utils.debug('Entry')
+
         data = await self._state.get_data()
         chat_id = self._type_update.message.chat.id
         await self._type_update.bot.delete_message(chat_id=chat_id,

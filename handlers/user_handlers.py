@@ -261,10 +261,20 @@ async def clbk_done(
         await stepik_service.send_certificate(clbk, path, state)
         await msg_processor.deletes_msg_a_delay(value1, delay=1)
         await state.clear()
-        await msg_processor.send_message_with_delay(clbk.message.chat.id,
+
+        msg_promo_id = await redis_data.get('msg_promo')
+        if msg_promo_id:
+            await clbk.bot.delete_message(str(clbk.message.chat.id),
+                                          msg_promo_id)
+
+        msg_promo = await msg_processor.send_message_with_delay(
+                clbk.message.chat.id,
              text=LexiconRu.text_promo.format(
-                     end_date=await shifts_the_date_forward()), delay=15,
+                     end_date=await shifts_the_date_forward()), delay=20,
                      preview_link=Links.link_questions_to_ivan)
+        # запись id промо месаги для удаления
+        await redis_data.set('msg_promo', str(msg_promo.message_id))
+
         logger_user_hand.debug(f'Exit')
         return
 
@@ -305,12 +315,18 @@ async def clbk_done(
             # отправка сертификата
             await stepik_service.send_certificate(clbk, path, state)
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
-            await msg_processor.send_message_with_delay(clbk.message.chat.id,
-                                            text=LexiconRu.text_promo.format(
-                                              end_date=await
-                                                shifts_the_date_forward()),
-                                                  delay=17,
+
+            msg_promo_id = await redis_data.get('msg_promo')
+            if msg_promo_id:
+                await clbk.bot.delete_message(str(clbk.message.chat.id),
+                                              msg_promo_id)
+
+            msg_promo = await msg_processor.send_message_with_delay(
+                clbk.message.chat.id, text=LexiconRu.text_promo.format(
+                    end_date=await shifts_the_date_forward()), delay=17,
                                     preview_link=Links.link_questions_to_ivan)
+            # запись id промо месаги для удаления
+            await redis_data.set('msg_promo', str(msg_promo.message_id))
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
