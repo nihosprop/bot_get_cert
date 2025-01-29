@@ -67,8 +67,10 @@ class StepikService:
                 'client_secret': self.client_secret}
         try:
             async with (aiohttp.ClientSession() as session):
-                async with session.post(url, data=data, allow_redirects=True)\
-                                                                        as resp:
+                async with session.post(url,
+                                        data=data,
+                                        allow_redirects=True,
+                                        ssl=False) as resp:
                     if resp.status != 200:
                         error_message = await resp.text()
                         logger_utils.error(
