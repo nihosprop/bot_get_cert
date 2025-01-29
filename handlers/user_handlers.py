@@ -306,11 +306,11 @@ async def clbk_done(
             await stepik_service.send_certificate(clbk, path, state)
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
             await msg_processor.send_message_with_delay(clbk.message.chat.id,
-                                                        text=LexiconRu.text_promo.format(
-                                                                end_date=await
-                                                                shifts_the_date_forward()),
-                                                        delay=15,
-                                                        preview_link=Links.link_questions_to_ivan)
+                                            text=LexiconRu.text_promo.format(
+                                              end_date=await
+                                                shifts_the_date_forward()),
+                                                  delay=17,
+                                    preview_link=Links.link_questions_to_ivan)
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)

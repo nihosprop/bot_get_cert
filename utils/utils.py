@@ -17,7 +17,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
 from redis.asyncio import Redis
 
-from keyboards import BUTT_COURSES
+from keyboards import BUTT_COURSES, kb_butt_quiz
 
 logger_utils = logging.getLogger(__name__)
 
