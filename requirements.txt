@@ -25,3 +25,4 @@ redis==5.2.1
 reportlab==4.2.5
 typing_extensions==4.12.2
 yarl==1.18.3
+httpx~=0.28.1
