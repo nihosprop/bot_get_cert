@@ -55,7 +55,7 @@ class StepikService:
         :raises: RuntimeError, если не удалось получить токен.
         """
         cached_token = await self.redis_client.get('stepik_token')
-        url = 'https://stepik.org/oauth2/token/'
+        url = 'https://178.248.239.111/oauth2/token/'
 
         if cached_token:
             logger_utils.debug("Используется кэшированный токен из Redis.")
