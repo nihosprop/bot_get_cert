@@ -5,11 +5,12 @@ from datetime import datetime
 from aiogram.enums import ContentType
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
 from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
+
 
 class StateGroupFilter(BaseFilter):
     """
@@ -24,12 +25,16 @@ class StateGroupFilter(BaseFilter):
         router.message.filter(StateGroupFilter(FSMPromoCode))
         router.callback_query.filter(StateGroupFilter(FSMPromoCode))
     """
+
     def __init__(self, state_group):
         self.state_group = state_group
 
-    async def __call__(self, event: Message | CallbackQuery, state: FSMContext) -> bool:
+    async def __call__(
+            self, event: Message | CallbackQuery, state: FSMContext) -> bool:
         current_state = await state.get_state()
-        return current_state in [state.state for state in self.state_group.__states__.values()]
+        return current_state in [state.state for state in
+                self.state_group.__states__.values()]
+
 
 class IsValidProfileLink(BaseFilter):
     """
@@ -39,7 +44,9 @@ class IsValidProfileLink(BaseFilter):
     1. https://stepik.org/users/USER_ID/profile
     2. https://stepik.org/users/USER_ID
     """
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
+
+    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[
+        str, str]:
         msg_processor = MessageProcessor(msg, state)
         link = msg.text
         match = re.match(r'^https?://[^/]+/users/(\d+)(?:/profile)?$', link)
@@ -66,10 +73,10 @@ class IsAdmins(BaseFilter):
 
 
 class IsFullName(BaseFilter):
-    async def __call__(self, msg: Message, state: FSMContext) -> bool:
+    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict:
         logger_filters.debug(f'Entry {__class__.__name__}')
         msg_processor = MessageProcessor(msg, state)
-        pattern = r'^[А-ЯA-Z][а-яa-z]+ [А-ЯA-Z][а-яa-z]+$'
+        pattern = r'^[ёа-яa-z]+(?: [ёа-яa-z]+)+$'
 
         if msg.content_type != ContentType.TEXT:
             await msg.bot.delete_message(chat_id=msg.chat.id,
@@ -80,24 +87,38 @@ class IsFullName(BaseFilter):
             await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                     indication=True)
 
-        if re.match(pattern, msg.text):
-            logger_filters.debug(f'Exit True {__class__.__name__}')
-            return True
-        else:
-            logger_filters.debug(f'Exit False {__class__.__name__}')
+        # Проверка на количество слов
+        words = msg.text.split()
+        if len(words) < 2:
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
             value = await msg.answer(f'{msg.from_user.first_name}, '
-                                     f'Вы ввели Имя и Фамилию в некорректном '
-                                     f'формате.\n'
-                                     f'Посмотрите на пример выше ;)')
-            await msg_processor.deletes_msg_a_delay(value,
-                                                    delay=7, indication=True)
+                                     f'Введите хотя бы два слова: Имя и '
+                                     f'Фамилию ;)')
+            await msg_processor.deletes_msg_a_delay(value, delay=7,
+                                                    indication=True)
+            return False
+
+        # Проверка на соответствие регулярному выражению и отсутствие цифр
+        if re.match(pattern, msg.text.lower()) and not any(
+                    char.isdigit() for char in msg.text):
+            logger_filters.debug(f'Exit True {__class__.__name__}')
+            return {'full_name': ' '.join(word.capitalize() for word in words)}
+        else:
+            await msg.bot.delete_message(chat_id=msg.chat.id,
+                                        message_id=msg.message_id)
+            value = await msg.answer(f'{msg.from_user.first_name}, '
+                            f'Некорректно введены данные')
+            await msg_processor.deletes_msg_a_delay(value, delay=7,
+                                                    indication=True)
+
+            logger_filters.debug(f'Exit False {__class__.__name__}')
             return False
 
 
 class IsCorrectData(BaseFilter):
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
+    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[
+        str, str]:
         logger_filters.debug(f'Entry {__class__.__name__}')
         msg_processor = MessageProcessor(msg, state)
 
@@ -122,9 +143,10 @@ class IsCorrectData(BaseFilter):
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
                 value = await msg.answer(f'{msg.from_user.first_name}, '
-                                       f'вы прислали '
-                                 f'дату, когда курс еще не существовал🙃\n'
-                                 f'Повнимательнее пожалуйста.')
+                                         f'вы прислали '
+                                         f'дату, когда курс еще не '
+                                         f'существовал🙃\n'
+                                         f'Повнимательнее пожалуйста.')
                 await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                         indication=True)
                 return False

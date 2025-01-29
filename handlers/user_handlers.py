@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, shifts_the_date_forward, get_username
+from utils import StepikService, shifts_the_date_forward
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -206,11 +206,11 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
 
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
-async def msg_full_name(msg: Message, state: FSMContext):
+async def msg_full_name(msg: Message, state: FSMContext, full_name):
     await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
-    await state.update_data(full_name=msg.text)
+    await state.update_data(full_name=full_name)
     logger_user_hand.debug(f'{await state.get_data()=}')
     await msg_processor.deletes_messages(msgs_for_del=True)
     await msg.answer(LexiconRu.text_gender, reply_markup=kb_select_gender)
@@ -259,9 +259,6 @@ async def clbk_done(
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
-        value = await clbk.message.answer(LexiconRu.text_survey,
-                                          reply_markup=kb_butt_quiz)
-        await msg_processor.save_msg_id(value, msgs_for_del=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=1)
         await state.clear()
         await msg_processor.send_message_with_delay(clbk.message.chat.id,
@@ -307,9 +304,6 @@ async def clbk_done(
         try:
             # отправка сертификата
             await stepik_service.send_certificate(clbk, path, state)
-            value = await clbk.message.answer(LexiconRu.text_survey,
-                                              reply_markup=kb_butt_quiz)
-            await msg_processor.save_msg_id(value, msgs_for_del=True)
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
             await msg_processor.send_message_with_delay(clbk.message.chat.id,
                                                         text=LexiconRu.text_promo.format(
