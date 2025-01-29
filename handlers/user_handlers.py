@@ -264,8 +264,8 @@ async def clbk_done(
 
         msg_promo_id = await redis_data.get('msg_promo')
         if msg_promo_id:
-            await clbk.bot.delete_message(str(clbk.message.chat.id),
-                                          msg_promo_id)
+            await clbk.bot.delete_message(chat_id=str(clbk.message.chat.id),
+                                          message_id=msg_promo_id)
 
         msg_promo = await msg_processor.send_message_with_delay(
                 clbk.message.chat.id,
@@ -323,7 +323,7 @@ async def clbk_done(
 
             msg_promo = await msg_processor.send_message_with_delay(
                 clbk.message.chat.id, text=LexiconRu.text_promo.format(
-                    end_date=await shifts_the_date_forward()), delay=17,
+                    end_date=await shifts_the_date_forward()), delay=20,
                                     preview_link=Links.link_questions_to_ivan)
             # запись id промо месаги для удаления
             await redis_data.set('msg_promo', str(msg_promo.message_id))
