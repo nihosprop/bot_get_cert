@@ -460,8 +460,7 @@ class StepikService:
             logger_utils.debug(f'Exit')
             raise
 
-    @staticmethod
-    async def send_certificate(clbk: CallbackQuery, output_file: str,
+    async def send_certificate(self, clbk: CallbackQuery, output_file: str,
                                state: FSMContext) \
             -> None:
         """
@@ -479,15 +478,21 @@ class StepikService:
 
             # Отправка файла пользователю
             pdf_file = FSInputFile(output_file)
+            data = await self.redis_client.hget(name=str(clbk.from_user.id),
+                                               key=str(await state.get_value(
+                                                       'course_id')))
+            logger_utils.debug(f'{data=}')
+
             await clbk.message.answer_document(pdf_file,
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
                                                        ' обучении!🤓')
 
             # Логируем успешную отправку
-            logger_utils.info(
-                f"Сертификат {output_file.split('\\')[-1]} успешно отправлен"
-                f" {clbk.from_user.first_name}:{clbk.from_user.id}")
+            logger_utils.info(f'Выдан сертификат '
+                              f'{output_file.split('\\')[-1]}:'
+                              f'{await get_username(clbk)}:'
+                              f'{clbk.from_user.id}')
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",

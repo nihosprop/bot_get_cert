@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, shifts_the_date_forward
+from utils import StepikService, shifts_the_date_forward, get_username
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -305,10 +305,6 @@ async def clbk_done(
             return
 
         try:
-            logger_user_hand.info(f'Выдан сертификат {number_str} '
-                                  f'пользователю {clbk.from_user.first_name}'
-                                  f':{clbk.from_user.id}')
-
             # отправка сертификата
             await stepik_service.send_certificate(clbk, path, state)
             value = await clbk.message.answer(LexiconRu.text_survey,
