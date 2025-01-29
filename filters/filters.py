@@ -47,6 +47,7 @@ class IsValidProfileLink(BaseFilter):
         if match:
             stepik_user_id: str = match.group(1)
             return {'stepik_user_id': stepik_user_id}
+        await msg.delete()
         value = await msg.answer(f'{msg.from_user.first_name}, ваша ссылка на '
                                  f'профиль не корректна, попробуйте еще раз.')
         await msg_processor.deletes_msg_a_delay(value, delay=6, indication=True)
