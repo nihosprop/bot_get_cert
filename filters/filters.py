@@ -45,8 +45,7 @@ class IsValidProfileLink(BaseFilter):
     2. https://stepik.org/users/USER_ID
     """
 
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[
-        str, str]:
+    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
         msg_processor = MessageProcessor(msg, state)
         link = msg.text
         match = re.match(r'^https?://[^/]+/users/(\d+)(?:/profile)?$', link)
@@ -76,49 +75,57 @@ class IsFullName(BaseFilter):
     async def __call__(self, msg: Message, state: FSMContext) -> bool | dict:
         logger_filters.debug(f'Entry {__class__.__name__}')
         msg_processor = MessageProcessor(msg, state)
-        pattern = r'^[ёа-яa-z]+(?: [ёа-яa-z]+)+$'
+
+        # - Разрешает дефисы в словах (но не в начале/конце)
+        # - Разрешает пробел между словами
+        pattern = r'''
+            ^
+            [ёа-яa-z]+(?:-[ёа-яa-z]+)?  # Первое слово (с возможным дефисом)
+            (?:\s+[ёа-яa-z]+(?:-[ёа-яa-z]+)?)+  # Остальные слова
+            $
+        '''
 
         if msg.content_type != ContentType.TEXT:
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                         message_id=msg.message_id)
-            value = await msg.answer(f'{msg.from_user.first_name}, '
-                                     f'введите пожалуйста Имя и Фамилию текстом '
-                                     f';)')
-            await msg_processor.deletes_msg_a_delay(value, delay=6,
-                                                    indication=True)
+            await self._delete_and_notify(msg, msg_processor)
+            return False
 
-        # Проверка на количество слов
-        words = msg.text.split()
+        text = msg.text.strip()
+        words = text.split()
+
+        # Проверяем количество слов (минимум 2)
         if len(words) < 2:
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                         message_id=msg.message_id)
-            value = await msg.answer(f'{msg.from_user.first_name}, '
-                                     f'Введите хотя бы два слова: Имя и '
-                                     f'Фамилию ;)')
-            await msg_processor.deletes_msg_a_delay(value, delay=7,
-                                                    indication=True)
+            await self._delete_and_notify(msg, msg_processor,
+                    message="Введите хотя бы два слова: Имя и Фамилию ;)")
             return False
 
-        # Проверка на соответствие регулярному выражению и отсутствие цифр
-        if re.match(pattern, msg.text.lower()) and not any(
-                    char.isdigit() for char in msg.text):
+        # Проверяем регулярное выражение и отсутствие цифр
+        if (re.fullmatch(pattern, text,
+                         flags=re.VERBOSE | re.IGNORECASE) and not any(
+                char.isdigit() for char in text)):
+            # Капитализируем каждую часть слов с дефисами
+            capitalized_words = [
+                    "-".join(part.capitalize() for part in word.split("-")) for
+                    word in words]
             logger_filters.debug(f'Exit True {__class__.__name__}')
-            return {'full_name': ' '.join(word.capitalize() for word in words)}
+            return {'full_name': ' '.join(capitalized_words)}
         else:
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                        message_id=msg.message_id)
-            value = await msg.answer(f'{msg.from_user.first_name}, '
-                            f'Некорректно введены данные')
-            await msg_processor.deletes_msg_a_delay(value, delay=7,
-                                                    indication=True)
-
-            logger_filters.debug(f'Exit False {__class__.__name__}')
+            await self._delete_and_notify(msg, msg_processor,
+                    message="Некорректно введены данные")
             return False
+
+    @staticmethod
+    async def _delete_and_notify(msg, msg_processor, message: str = None):
+        """Удаляет сообщение и отправляет уведомление"""
+        await msg.bot.delete_message(chat_id=msg.chat.id,
+                                     message_id=msg.message_id)
+        if message:
+            response = await msg.answer(f"{msg.from_user.first_name}, {message}")
+            await msg_processor.deletes_msg_a_delay(response, delay=7,
+                                                    indication=True)
 
 
 class IsCorrectData(BaseFilter):
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[
-        str, str]:
+    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
         logger_filters.debug(f'Entry {__class__.__name__}')
         msg_processor = MessageProcessor(msg, state)
 

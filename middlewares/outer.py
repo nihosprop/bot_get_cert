@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram import BaseMiddleware
@@ -94,3 +95,18 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         logger_middl_outer.debug(f'Exit {__class__.__name__}')
         return await handler(event, data)
+
+
+class TimingMiddleware(BaseMiddleware):
+    async def __call__(
+            self, handler: Callable[[Message, dict[str, Any]], Awaitable[Any]],
+            event: Message, data: dict[str, Any]) -> Any:
+        start_time = time.monotonic()
+        result = await handler(event, data)
+        duration = time.monotonic() - start_time
+
+        if duration > 0.1:  # 100 мс
+            logger_middl_outer.warning(
+                f"Хэндлер {handler.__name__} выполнился за {duration:.2f} сек!")
+
+        return result

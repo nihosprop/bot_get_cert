@@ -11,7 +11,9 @@ from aiogram.enums import ParseMode
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
 from handlers import admin_handlers, other_handlers, user_handlers
-from middlewares.outer import RedisMiddleware, ThrottlingMiddleware
+from middlewares.outer import (RedisMiddleware,
+                               ThrottlingMiddleware,
+                               TimingMiddleware)
 
 logger_main = logging.getLogger(__name__)
 
@@ -59,6 +61,7 @@ async def main():
         dp.include_router(other_handlers.other_router)
 
         # middlewares
+        dp.message.middleware(TimingMiddleware())
         dp.update.middleware(RedisMiddleware(redis=redis_data))
         dp.message.outer_middleware(
                 ThrottlingMiddleware(storage=storage_throttling, ttl=700))
