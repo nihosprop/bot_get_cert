@@ -255,7 +255,7 @@ async def clbk_done(
 
     if cert:
         path = await stepik_service.generate_certificate(state, clbk,
-                                                         w_text=True,
+                                                         w_text=False,
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
