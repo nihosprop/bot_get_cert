@@ -7,6 +7,7 @@ from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+from utils import get_username
 from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
@@ -38,23 +39,30 @@ class StateGroupFilter(BaseFilter):
 
 class IsValidProfileLink(BaseFilter):
     """
-    Проверяет, является ли валидной ссылкой на профиль,
-    где цифры в URL это ID пользователя.
-    Поддерживает два формата ссылок:
-    1. https://stepik.org/users/USER_ID/profile
-    2. https://stepik.org/users/USER_ID
+    Проверяет, содержит ли сообщение валидную ссылку на профиль,
+    где цифры в URL это ID пользователя. Поддерживает:
+    1. Ссылки внутри текста с пробелами/переносами
+    2. Форматы:
+       - https://stepik.org/users/USER_ID
+       - https://stepik.org/users/USER_ID/profile
+       - https://stepik.org/users/USER_ID/
     """
-
     async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
         msg_processor = MessageProcessor(msg, state)
-        link = msg.text
-        match = re.match(r'^https?://[^/]+/users/(\d+)(?:/profile)?$', link)
+        text = msg.text.strip()
+
+        # Ищет ссылку в любом месте текста
+        match = re.search(r'\bhttps?://[^\s/]+/users/(\d+)(?:/profile)?/?\b',
+                text, re.IGNORECASE)
+
         if match:
-            stepik_user_id: str = match.group(1)
+            stepik_user_id = match.group(1)
             return {'stepik_user_id': stepik_user_id}
+
         await msg.delete()
-        value = await msg.answer(f'{msg.from_user.first_name}, ваша ссылка на '
-                                 f'профиль не корректна, попробуйте еще раз.')
+        value = await msg.answer(
+                f'{await get_username(msg)}, ваша ссылка на профиль не корректна, '
+                f'попробуйте еще раз.')
         await msg_processor.deletes_msg_a_delay(value, delay=6, indication=True)
         return False
 
@@ -119,7 +127,7 @@ class IsFullName(BaseFilter):
         await msg.bot.delete_message(chat_id=msg.chat.id,
                                      message_id=msg.message_id)
         if message:
-            response = await msg.answer(f"{msg.from_user.first_name}, {message}")
+            response = await msg.answer(f"{await get_username(msg)}, {message}")
             await msg_processor.deletes_msg_a_delay(response, delay=7,
                                                     indication=True)
 
@@ -149,7 +157,7 @@ class IsCorrectData(BaseFilter):
             if date_obj.date() < start_kurse.date():
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
-                value = await msg.answer(f'{msg.from_user.first_name}, '
+                value = await msg.answer(f'{await get_username(msg)}, '
                                          f'вы прислали '
                                          f'дату, когда курс еще не '
                                          f'существовал🙃\n'
@@ -161,7 +169,7 @@ class IsCorrectData(BaseFilter):
             if date_obj.date() > datetime.now().date():
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
-                value = await msg.answer(f'{msg.from_user.first_name},'
+                value = await msg.answer(f'{await get_username(msg)},'
                                          f' ваша дата из будущего😄\n'
                                          f'Повнимательнее пожалуйста.')
                 await msg_processor.deletes_msg_a_delay(value, delay=6,

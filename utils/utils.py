@@ -24,7 +24,6 @@ logger_utils = logging.getLogger(__name__)
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
 
-
 async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
        Возвращает имя пользователя.
