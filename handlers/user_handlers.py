@@ -303,7 +303,7 @@ async def clbk_done(
             # генерация сертификата
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
-                                                             w_text=True)
+                                                             w_text=False)
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
