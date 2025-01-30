@@ -484,8 +484,6 @@ class StepikService:
             data = await self.redis_client.hget(name=str(clbk.from_user.id),
                                                key=str(await state.get_value(
                                                        'course_id')))
-            logger_utils.debug(f'{data=}')
-
             await clbk.message.answer_document(pdf_file,
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
