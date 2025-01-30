@@ -34,7 +34,8 @@ async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(state=None)
     value = await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
                                  f'{LexiconRu.text_survey}',
-                                 reply_markup=kb_butt_quiz)
+                                 reply_markup=kb_butt_quiz,
+                                         disable_web_page_preview=True)
     await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
 
