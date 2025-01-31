@@ -128,12 +128,18 @@ async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
 @user_router.message(StateFilter(default_state), F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, state: FSMContext):
+    msg_processor = MessageProcessor(msg, state)
+    if msg.text == '/admin':
+        await msg.delete()
+        value = await msg.answer('Эта команда для администраторов 😉')
+        await msg_processor.deletes_msg_a_delay(value, delay=4, indication=True)
+        return
+
     await msg.delete()
     value = await msg.answer(f'{await get_username(msg)}, используйте '
                              f'пожалуйста кнопки для взаимодействия с ботом🙂')
 
-    await MessageProcessor(msg, state).deletes_msg_a_delay(value, delay=5,
-                                                           indication=True)
+    await msg_processor.deletes_msg_a_delay(value, delay=5, indication=True)
 
 
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))

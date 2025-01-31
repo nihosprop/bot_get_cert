@@ -30,7 +30,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     user_id = int(_type_update.from_user.id)
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
-        status = chat_member.is_member
+        status: bool = chat_member.is_member
         logger_utils.debug(f'Проверка человека:{user_id} в чате {status=}')
     except TelegramBadRequest as err:
         logger_utils.debug(f'{err=}')
