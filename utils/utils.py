@@ -26,16 +26,30 @@ logger_utils = logging.getLogger(__name__)
 # executor = ThreadPoolExecutor(max_workers=4)
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
+    logger_utils.debug('Entry')
     target_chat = '@best_python1'
-    user_id = int(_type_update.from_user.id)
+    user_id = _type_update.from_user.id
+    logger_utils.debug(f'{user_id=}')
+    status = None
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
-        status: bool = chat_member.is_member
-        logger_utils.debug(f'Проверка человека:{user_id} в чате {status=}')
-    except TelegramBadRequest as err:
+        logger_utils.debug(f'{chat_member=}')
+        try:
+            status = chat_member.is_member
+            logger_utils.debug(f'{status=}')
+        except Exception:
+            status = chat_member.status in {'member', 'administrator',
+                    'creator'}
+            logger_utils.debug(f'{status=}')
+        else:
+            return status
+
+    except Exception as err:
         logger_utils.debug(f'{err=}')
         return False
+
     else:
+        logger_utils.debug('Exit')
         return status
 
 async def get_username(_type_update: Message | CallbackQuery) -> str:
