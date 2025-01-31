@@ -24,7 +24,7 @@ from utils import StepikService, shifts_the_date_forward
 from utils.utils import MessageProcessor
 
 user_router = Router()
-logger = logging.getLogger("my_handler_logger")
+logger = logging.getLogger()
 logger_user_hand = logging.getLogger(__name__)
 
 
@@ -258,7 +258,7 @@ async def clbk_done(
 
     if cert:
         path = await stepik_service.generate_certificate(state, clbk,
-                                                         w_text=False,
+                                                         w_text=True,
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
@@ -303,7 +303,7 @@ async def clbk_done(
             # генерация сертификата
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
-                                                             w_text=False)
+                                                             w_text=True)
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
@@ -320,6 +320,7 @@ async def clbk_done(
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
 
             msg_promo_id = await redis_data.get('msg_promo')
+
             if msg_promo_id:
                 await clbk.bot.delete_message(str(clbk.message.chat.id),
                                               msg_promo_id)

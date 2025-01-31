@@ -3,6 +3,7 @@ import logging
 from logging.config import dictConfig
 
 import yaml
+import os
 from aiogram.fsm.storage.redis import Redis, RedisStorage
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -17,18 +18,24 @@ logger_main = logging.getLogger(__name__)
 
 
 async def main():
-    with open('logs/logging_setting/log_config.yml', 'rt') as file:
-        log_config = yaml.safe_load(file.read())
-    dictConfig(log_config)
-    logger_main.info('Loading logging settings success')
 
     config: Config = load_config()
+
+    with open('logs/logging_setting/log_config.yml', 'rt') as file:
+        config_str = file.read()
+    config_str = config_str.replace('${LOG_LEVEL}', config.level_log)
+    log_config = yaml.safe_load(config_str)
+
+    dictConfig(log_config)
+
+    logger_main.info('Loading logging & config success')
+
     bot = Bot(token=config.tg_bot.token,
               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     # Redis for FSM (db=0)
     redis_fsm = Redis(host=config.redis_host, port=6379, db=0,
-                   decode_responses=True)
+                      decode_responses=True)
     storage = RedisStorage(redis=redis_fsm)
 
     # Redis for throttling storage (db=1)

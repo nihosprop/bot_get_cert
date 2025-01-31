@@ -26,7 +26,7 @@ filters:
 handlers:
   default:
     class: logging.StreamHandler
-    level: DEBUG
+    level: ${LOG_LEVEL}
     formatter: formatter_1
 
   stdout:
@@ -56,71 +56,71 @@ handlers:
 
 loggers:
   handlers.admin_handlers:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [ stdout, warning_file, critical_file ]
     propagate: no
 
   middlewares.outer:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   handlers.user_handlers:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   handlers.other_handlers:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   config_data.config:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   filters.filters:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   keyboards.keyboard_utils:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   keyboards.keyboards:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   keyboards.set_menu:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   lexicon.lexicon_ru:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   states.states:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
   utils.utils:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
 
   __main__:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers: [stdout, warning_file, critical_file]
     propagate: no
 
 root:
-  level: DEBUG
+  level: ${LOG_LEVEL}
   handlers: [default]
