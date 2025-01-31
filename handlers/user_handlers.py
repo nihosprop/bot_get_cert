@@ -204,7 +204,8 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
     await msg.delete()
     msg_processor = MessageProcessor(msg, state)
     reminder = await msg.answer(
-            "Пожалуйста, используйте кнопки для взаимодействия с ботом🙃")
+            f'{await get_username(msg)} пожалуйста, используйте кнопки для '
+            f'взаимодействия с ботом🙃')
     await msg_processor.deletes_msg_a_delay(reminder, delay=5, indication=True)
 
 
