@@ -26,13 +26,14 @@ logger_utils = logging.getLogger(__name__)
 # executor = ThreadPoolExecutor(max_workers=4)
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
-    target_chat = '@best_python1/1'
-    user_id = _type_update.from_user.id
+    target_chat = '@best_python1'
+    user_id = int(_type_update.from_user.id)
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
-        status = chat_member.status in {'member', 'administrator', 'creator'}
-        logger_utils.debug(f'Проверка человека в чате {status}')
-    except TelegramBadRequest:
+        status = chat_member.is_member
+        logger_utils.debug(f'Проверка человека:{user_id} в чате {status=}')
+    except TelegramBadRequest as err:
+        logger_utils.debug(f'{err=}')
         return False
     else:
         return status
