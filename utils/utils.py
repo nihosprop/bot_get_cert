@@ -417,7 +417,6 @@ class StepikService:
         course_id = data.get('course').split('_')[-1]
 
         if exist_cert:
-            logger_utils.debug(f'Сертификат есть !!!')
             try:
                 user_data = await self.redis_client.hget(user_tg_id, course_id)
                 logger_utils.debug(f'{user_data=}')
@@ -454,6 +453,9 @@ class StepikService:
                                          value=f'{cert_number}:'
                                                f'{full_name}:'
                                                f'{template_name}')
+            await self.redis_client.set('info_data_user', f'TG_ID-{user_tg_id}:'
+                                    f'{await get_username(type_update)}:'
+                                    f'{cert_number}:{full_name}:{template_name}')
 
             logger_utils.debug(f'Exit')
             return output_file
@@ -464,8 +466,7 @@ class StepikService:
             raise
 
     async def send_certificate(self, clbk: CallbackQuery, output_file: str,
-                               state: FSMContext) \
-            -> None:
+                               state: FSMContext) -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
         :param state:
@@ -491,9 +492,7 @@ class StepikService:
 
             # Логируем успешную отправку
             logger_utils.info(f'Выдан сертификат '
-                              f'{output_file.split('\\')[-1]}:'
-                              f'{await get_username(clbk)}:'
-                              f'{clbk.from_user.id}')
+                              f'{await self.redis_client.get('info_data_user')}')
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",

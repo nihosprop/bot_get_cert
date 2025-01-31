@@ -20,7 +20,7 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, shifts_the_date_forward
+from utils import StepikService, shifts_the_date_forward, get_username
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -248,7 +248,6 @@ async def clbk_done(
 
     value1 = await clbk.message.edit_text('Ваши данные проверяются⌛\n'
                                           'Ожидайте выдачи сертификата📜\n')
-    await clbk.answer('Идет проверка…')
 
     tg_user_id = str(clbk.from_user.id)
     stepik_user_id = await state.get_value('stepik_user_id')
@@ -258,12 +257,14 @@ async def clbk_done(
     logger_user_hand.debug(f'{cert=}')
 
     if cert:
+        await clbk.answer('Идет проверка…')
         path = await stepik_service.generate_certificate(state, clbk,
                                                          w_text=True,
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
         await msg_processor.deletes_msg_a_delay(value1, delay=1)
+        logger_user_hand.info(f'Выслана копия {await get_username(clbk)}')
         await state.clear()
 
         msg_promo_id = await redis_data.get('msg_promo')
@@ -301,6 +302,7 @@ async def clbk_done(
             return
 
         try:
+            await clbk.answer('Идет проверка…')
             # генерация сертификата
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
@@ -339,8 +341,8 @@ async def clbk_done(
             await state.clear()
             await clbk.answer()
     else:
-        value = await clbk.message.answer('У вас пока нет сертификата этого'
-                                          ' курса')
+        value = await clbk.message.answer(f'{await get_username(clbk)}, у вас '
+                                          f'пока нет сертификата этого курса🙁')
         await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz,
