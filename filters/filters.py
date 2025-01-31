@@ -13,30 +13,6 @@ from utils.utils import MessageProcessor
 logger_filters = logging.getLogger(__name__)
 
 
-class StateGroupFilter(BaseFilter):
-    """
-    Фильтр для проверки, принадлежит ли текущее состояние пользователя
-    к указанной группе состояний (StatesGroup).
-    Можно использовать на уровне роутера, чтобы автоматически
-    фильтровать апдэйты по всем состояниям, принадлежащим определенной группе.
-    Атрибуты:
-        state_group (StatesGroup): Группа состояний (например, FSMPromoCode),
-                                      к которой будет применяться фильтр.
-    Пример использования для фильтрации на уровне роутеров:
-        router.message.filter(StateGroupFilter(FSMPromoCode))
-        router.callback_query.filter(StateGroupFilter(FSMPromoCode))
-    """
-
-    def __init__(self, state_group):
-        self.state_group = state_group
-
-    async def __call__(
-            self, event: Message | CallbackQuery, state: FSMContext) -> bool:
-        current_state = await state.get_state()
-        return current_state in [state.state for state in
-                self.state_group.__states__.values()]
-
-
 class IsValidProfileLink(BaseFilter):
     """
     Проверяет, содержит ли сообщение валидную ссылку на профиль,
@@ -74,7 +50,7 @@ class IsAdmins(BaseFilter):
         user_id = str(msg.from_user.id)
         admins_id = admins.split()
 
-        logger_filters.debug(f'{admins_id}')
+        logger_filters.debug(f'{admins_id=}')
         logger_filters.debug('Exit')
         return user_id in admins_id
 
@@ -136,6 +112,7 @@ class IsCorrectData(BaseFilter):
     async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
         logger_filters.debug(f'Entry {__class__.__name__}')
         msg_processor = MessageProcessor(msg, state)
+        username = await get_username(msg)
 
         if msg.content_type != ContentType.TEXT:
             await msg.bot.delete_message(chat_id=msg.chat.id,
@@ -150,14 +127,13 @@ class IsCorrectData(BaseFilter):
         start_kurse = datetime.strptime('01.03.2024', "%d.%m.%Y")
         date_str = msg.text
         logger_filters.debug(f'{date_str=}')
-
         try:
             date_obj = datetime.strptime(date_str, "%d.%m.%Y")
 
             if date_obj.date() < start_kurse.date():
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
-                value = await msg.answer(f'{await get_username(msg)}, '
+                value = await msg.answer(f'{username}, '
                                          f'вы прислали '
                                          f'дату, когда курс еще не '
                                          f'существовал🙃\n'
@@ -169,8 +145,7 @@ class IsCorrectData(BaseFilter):
             if date_obj.date() > datetime.now().date():
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
-                value = await msg.answer(f'{await get_username(msg)},'
-                                         f' ваша дата из будущего😄\n'
+                value = await msg.answer(f'{username}, ваша дата из будущего😄\n'
                                          f'Повнимательнее пожалуйста.')
                 await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                         indication=True)
@@ -180,7 +155,8 @@ class IsCorrectData(BaseFilter):
             return {'date': date_str}
 
         except ValueError as err:
-            logger_filters.warning(f'Некорректная дата: {err=}')
+            logger_filters.warning(f'Некорректная дата:{username}:'
+                                   f'{msg.from_user.id}:{err=}')
             logger_filters.debug(f'Exit False {__class__.__name__}')
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
