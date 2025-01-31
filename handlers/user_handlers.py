@@ -126,7 +126,7 @@ async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
         {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, state: FSMContext):
     await msg.delete()
-    value = await msg.answer(f'{msg.from_user.first_name}, используйте '
+    value = await msg.answer(f'{await get_username(msg)}, используйте '
                              f'пожалуйста кнопки для взаимодействия с ботом🙂')
 
     await MessageProcessor(msg, state).deletes_msg_a_delay(value, delay=5,
