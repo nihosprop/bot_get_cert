@@ -12,6 +12,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
+from aiogram.methods.get_chat_member import GetChatMember
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
@@ -23,6 +24,18 @@ logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
+
+async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
+    target_chat = '@best_python1'
+    user_id = _type_update.from_user.id
+    try:
+        chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
+        status = chat_member.status in {'member', 'administrator', 'creator'}
+        logger_utils.debug(f'Проверка человека в чате {status}')
+    except TelegramBadRequest:
+        return False
+    else:
+        return status
 
 async def get_username(_type_update: Message | CallbackQuery) -> str:
     """

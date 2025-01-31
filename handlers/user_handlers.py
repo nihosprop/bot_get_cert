@@ -20,7 +20,10 @@ from keyboards import (BUTT_COURSES,
 from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import StepikService, shifts_the_date_forward, get_username
+from utils import (StepikService,
+                   shifts_the_date_forward,
+                   get_username,
+                   check_user_in_group)
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -153,6 +156,12 @@ async def clbk_cancel_in_state(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
 async def clbk_get_cert(clbk: CallbackQuery, state: FSMContext):
+    if not await check_user_in_group(clbk):
+        await clbk.answer('Вы еще не вступили в нашу дружную группу Лучший по'
+                          ' Python ☺️',
+                          show_alert=True)
+        return
+
     msg_processor = MessageProcessor(clbk, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
