@@ -172,7 +172,7 @@ async def clbk_get_cert(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data.in_(BUTT_GENDER),
                             StateFilter(FSMQuiz.fill_gender))
-async def clbk_sex(clbk: CallbackQuery, state: FSMContext):
+async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
     await state.update_data(gender=clbk.data)
     await clbk.message.edit_text(LexiconRu.text_select_course,
                                  reply_markup=kb_courses)
