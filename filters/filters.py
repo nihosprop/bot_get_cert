@@ -5,7 +5,7 @@ from datetime import datetime
 from aiogram.enums import ContentType
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import Message
 
 from utils import get_username
 from utils.utils import MessageProcessor
