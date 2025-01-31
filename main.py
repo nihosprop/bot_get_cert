@@ -56,8 +56,6 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     try:
-        logger_main.info('Loading from a db.json success')
-
         await set_main_menu(bot)
 
         # routers
