@@ -26,7 +26,7 @@ logger_utils = logging.getLogger(__name__)
 # executor = ThreadPoolExecutor(max_workers=4)
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
-    target_chat = '@best_python1'
+    target_chat = '@best_python1/1'
     user_id = _type_update.from_user.id
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
