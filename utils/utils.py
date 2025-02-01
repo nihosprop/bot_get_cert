@@ -29,7 +29,6 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     target_chat = '@best_python1'
     user_id = _type_update.from_user.id
     logger_utils.debug(f'{user_id=}')
-    # status = None
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
         logger_utils.debug(f'{chat_member=}')
@@ -466,7 +465,6 @@ class StepikService:
             # Выполняем синхронную операцию в отдельном потоке
             output_file, template_name = await asyncio.to_thread(self.sync_generate_certificate,
                                                                  data, w_text)
-            # Сохраняем данные в Redis
             cert_number = await state_data.get_value('end_number')
             full_name = await state_data.get_value('full_name')
             logger_utils.debug(f'{user_tg_id=}\n'
@@ -475,12 +473,14 @@ class StepikService:
                                f'{full_name=}\n'
                                f'{user_tg_id}={cert_number}:{full_name}:{template_name}')
 
+            # Сохраняем данные в Redis
             await self.redis_client.hset(name=user_tg_id,
                                          key=course_id,
                                          value=f'{cert_number}:'
                                                f'{full_name}:'
                                                f'{template_name}')
-            await self.redis_client.set('info_data_user', f'TG_ID-{user_tg_id}:'
+            await self.redis_client.set(
+                    f'{user_tg_id}_info_data', f'TG_ID-{user_tg_id}:'
                                     f'{await get_username(type_update)}:'
                                     f'{cert_number}:{full_name}:{template_name}')
 
@@ -519,7 +519,9 @@ class StepikService:
 
             # Логируем успешную отправку
             logger_utils.info(f'Выдан сертификат '
-                              f'{await self.redis_client.get('info_data_user')}')
+                              f''
+                              f'{await self.redis_client.get(
+                                      f'{clbk.from_user.id}_info_data')}')
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",
