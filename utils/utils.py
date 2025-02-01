@@ -493,10 +493,11 @@ class StepikService:
             raise
 
     async def send_certificate(self, clbk: CallbackQuery, output_file: str,
-                               state: FSMContext) -> None:
+                               state: FSMContext, is_copy=False) -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
-        :param state:
+        :param is_copy: Флаг True, если отправляется копия.
+        :param state: Контекст состояний.
         :param clbk: CallbackQuery от пользователя.
         :param output_file: Путь к файлу сертификата.
         """
@@ -518,10 +519,14 @@ class StepikService:
                                                ' обучении!🤓')
 
             # Логируем успешную отправку
-            logger_utils.info(f'Выдан сертификат '
-                              f''
-                              f'{await self.redis_client.get(
-                                      f'{clbk.from_user.id}_info_data')}')
+            if is_copy:
+                logger_utils.info(f'Выдана копия '
+                                  f'{await self.redis_client.get(
+                                          f'{clbk.from_user.id}_info_data')}')
+            else:
+                logger_utils.info(f'Выдан сертификат '
+                                  f'{await self.redis_client.get(
+                                          f'{clbk.from_user.id}_info_data')}')
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",

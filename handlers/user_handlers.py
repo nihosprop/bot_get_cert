@@ -277,9 +277,8 @@ async def clbk_done(
                                                          w_text=w_text,
                                                          exist_cert=True)
         # отправка сертификата
-        await stepik_service.send_certificate(clbk, path, state)
+        await stepik_service.send_certificate(clbk, path, state, is_copy=True)
         await msg_processor.deletes_msg_a_delay(value1, delay=1)
-        logger_user_hand.info(f'Выслана копия {await get_username(clbk)}:{tg_user_id}')
         await state.clear()
 
         msg_promo_id = await redis_data.get(f'{clbk.from_user.id}_msg_promo_id')
