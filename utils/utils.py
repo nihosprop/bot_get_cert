@@ -519,14 +519,14 @@ class StepikService:
                                                ' обучении!🤓')
 
             # Логируем успешную отправку
+            user_info_data = await self.redis_client.get(
+                                          f'{clbk.from_user.id}_info_data')
+            if user_info_data is None:
+                user_info_data = f'{await get_username(clbk)}:{clbk.from_user.id}'
             if is_copy:
-                logger_utils.info(f'Выдана копия '
-                                  f'{await self.redis_client.get(
-                                          f'{clbk.from_user.id}_info_data')}')
+                logger_utils.info(f'Выдана копия {user_info_data}')
             else:
-                logger_utils.info(f'Выдан сертификат '
-                                  f'{await self.redis_client.get(
-                                          f'{clbk.from_user.id}_info_data')}')
+                logger_utils.info(f'Выдан сертификат {user_info_data}')
 
         except Exception as err:
             logger_utils.error(f"Ошибка при отправке файла: {err}",
