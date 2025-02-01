@@ -158,7 +158,7 @@ async def clbk_cancel_in_state(clbk: CallbackQuery, state: FSMContext):
                                          disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
-    logger_user_hand.debug(f'Exit {clbk_cancel_in_state.__name__=}')
+    logger_user_hand.debug(f'Exit')
 
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
