@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
@@ -254,7 +255,7 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
 @user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.end))
 async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
-        stepik: Stepik):
+        stepik: Stepik, w_text: bool):
     logger_user_hand.debug(f'Entry {clbk_done.__name__=}')
     msg_processor = MessageProcessor(clbk, state)
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
@@ -273,7 +274,7 @@ async def clbk_done(
     if cert:
         await clbk.answer('Идет проверка…')
         path = await stepik_service.generate_certificate(state, clbk,
-                                                         w_text=True,
+                                                         w_text=w_text,
                                                          exist_cert=True)
         # отправка сертификата
         await stepik_service.send_certificate(clbk, path, state)
@@ -281,18 +282,32 @@ async def clbk_done(
         logger_user_hand.info(f'Выслана копия {await get_username(clbk)}')
         await state.clear()
 
-        msg_promo_id = await redis_data.get('msg_promo')
-        if msg_promo_id:
-            await clbk.bot.delete_message(chat_id=str(clbk.message.chat.id),
-                                          message_id=msg_promo_id)
+        msg_promo_id = await redis_data.get(f'{clbk.from_user.id}_msg_promo_id')
+        logger_user_hand.debug(f'Взятие id промо мсг для '
+                               f'удаления {msg_promo_id=}')
 
-        msg_promo = await msg_processor.send_message_with_delay(
-                clbk.message.chat.id,
-             text=LexiconRu.text_promo.format(
-                     end_date=await shifts_the_date_forward()), delay=20,
-                     preview_link=Links.link_questions_to_ivan)
-        # запись id промо месаги для удаления
-        await redis_data.set('msg_promo', str(msg_promo.message_id))
+        try:
+            if msg_promo_id:
+                await clbk.bot.delete_message(chat_id=str(clbk.message.chat.id),
+                                              message_id=msg_promo_id)
+        except TelegramBadRequest as err:
+            logger_user_hand.error(f'{err=}')
+
+        try:
+            msg_promo = await msg_processor.send_message_with_delay(
+                    clbk.message.chat.id,
+                    text=LexiconRu.text_promo.format(
+                         end_date=await shifts_the_date_forward()), delay=15,
+                         preview_link=Links.link_questions_to_ivan)
+
+            # запись и логирование id промо месаги для удаления
+            logger_user_hand.debug(
+                f'Запись id_промо_мсг:{clbk.from_user.id}_msg_promo_id')
+            await redis_data.set(
+                    f'{clbk.from_user.id}_msg_promo_id',
+                    str(msg_promo.message_id))
+        except Exception as err:
+            logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
 
         logger_user_hand.debug(f'Exit')
         return
@@ -320,7 +335,7 @@ async def clbk_done(
             # генерация сертификата
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
-                                                             w_text=True)
+                                                             w_text=w_text)
             logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
@@ -336,18 +351,26 @@ async def clbk_done(
             await stepik_service.send_certificate(clbk, path, state)
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
 
-            msg_promo_id = await redis_data.get('msg_promo')
+            # взятие id_promo сообщения для удаления
+            msg_promo_id = await redis_data.get(
+                    f'{clbk.from_user.id}_msg_promo_id')
+            logger_user_hand.debug(f'Серт не в наличии, id промо мсг для '
+                                   f'удаления {msg_promo_id=}')
 
             if msg_promo_id:
+                logger_user_hand.debug(f'Удаляем {msg_promo_id=}')
                 await clbk.bot.delete_message(str(clbk.message.chat.id),
                                               msg_promo_id)
 
             msg_promo = await msg_processor.send_message_with_delay(
                 clbk.message.chat.id, text=LexiconRu.text_promo.format(
-                    end_date=await shifts_the_date_forward()), delay=20,
+                    end_date=await shifts_the_date_forward()), delay=15,
                                     preview_link=Links.link_questions_to_ivan)
             # запись id промо месаги для удаления
-            await redis_data.set('msg_promo', str(msg_promo.message_id))
+            await redis_data.set(f'{clbk.from_user.id}_msg_promo_id',
+                                str(msg_promo.message_id))
+            logger_user_hand.debug(f'Запись id промо мсг для удаления '
+                                   f'{msg_promo.message_id=}')
 
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)

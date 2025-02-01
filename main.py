@@ -3,7 +3,6 @@ import logging
 from logging.config import dictConfig
 
 import yaml
-import os
 from aiogram.fsm.storage.redis import Redis, RedisStorage
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -73,7 +72,7 @@ async def main():
         await bot.delete_webhook(drop_pending_updates=True)
         logger_main.info('Start bot')
         await dp.start_polling(bot, admins=config.tg_bot.id_admins,
-                               stepik=config.stepik)
+                               stepik=config.stepik, w_text=config.w_text)
     except Exception as err:
         logger_main.exception(err)
         raise

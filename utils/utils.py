@@ -12,7 +12,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
-from aiogram.methods.get_chat_member import GetChatMember
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
@@ -30,7 +29,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     target_chat = '@best_python1'
     user_id = _type_update.from_user.id
     logger_utils.debug(f'{user_id=}')
-    status = None
+    # status = None
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
         logger_utils.debug(f'{chat_member=}')
@@ -42,6 +41,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
                     'creator'}
             logger_utils.debug(f'{status=}')
         else:
+            logger_utils.debug('Exit')
             return status
 
     except Exception as err:
@@ -510,13 +510,13 @@ class StepikService:
 
             # Отправка файла пользователю
             pdf_file = FSInputFile(output_file)
-            data = await self.redis_client.hget(name=str(clbk.from_user.id),
-                                               key=str(await state.get_value(
+            await self.redis_client.hget(name=str(clbk.from_user.id),
+                                        key=str(await state.get_value(
                                                        'course_id')))
             await clbk.message.answer_document(pdf_file,
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
-                                                       ' обучении!🤓')
+                                               ' обучении!🤓')
 
             # Логируем успешную отправку
             logger_utils.info(f'Выдан сертификат '
@@ -549,7 +549,6 @@ class MessageProcessor:
     _state: FSMContext
 
     async def deletes_messages(self,
-                               msg_remove: str = str | None,
                                msgs_for_del=False,
                                msgs_remove_kb=False) -> None:
         """
@@ -558,7 +557,6 @@ class MessageProcessor:
         Messages are deleted only if the corresponding parameters
         are set to True.
         If no parameters are specified, the method does not perform any actions.
-        :param msg_remove: Key for remove msg.
         :param msgs_for_del:
         :param msgs_remove_kb:
         :return: None
