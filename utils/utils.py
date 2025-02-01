@@ -56,8 +56,7 @@ async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
        Возвращает имя пользователя.
        Если first_name отсутствует, использует username.
-       Если username также отсутствует, возвращает "Аноним".
-
+       Если username также отсутствует, возвращает user_id.
        :param _type_update: Объект Message или CallbackQuery.
        :return: Имя пользователя.
        """
