@@ -1,8 +1,5 @@
 import asyncio
-import inspect
 import logging
-import os
-import time
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict
 
@@ -11,6 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.types import CallbackQuery, Message, TelegramObject, User
 
+from utils import get_username
 from utils.utils import MessageProcessor
 from lexicon.lexicon_ru import LexiconRu
 
@@ -44,7 +42,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         Args: storage (RedisStorage): An object for interacting with Redis.
         ttl (int | None, optional): The time-to-live for the key in
         milliseconds. If None, rate limiting is disabled.
-        :param storage: RedisStorage
+        :param storage: RedisStorage.
         :param ttl:
         """
         self.storage = storage
@@ -82,10 +80,11 @@ class ThrottlingMiddleware(BaseMiddleware):
             if isinstance(event, CallbackQuery):
                 await event.answer()
 
-            asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 5))
+            asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 6,
+                                                                  indication=True))
             await self.storage.redis.set(name=throttl_user_id, value=2, px=5000)
 
-            logger_middl_outer.warning(f'Throttling:{throttl_user_id=}')
+            logger_middl_outer.warning(f'Throttling:{await get_username(event)}:{throttl_user_id}')
             logger_middl_outer.debug(f'Exit {__class__.__name__}')
             return
 
