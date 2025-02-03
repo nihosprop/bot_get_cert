@@ -22,9 +22,11 @@ async def main():
 
     with open('logs/logging_setting/log_config.yml', 'rt') as file:
         config_str = file.read()
-    config_str = config_str.replace('${LOG_LEVEL}', config.level_log)
+    # вставляем(заменяем шаблоны на) переменные окружения
+    config_str = config_str.replace(
+            '${LOG_LEVEL}', config.level_log).replace(
+            '${PATH_TO_REC_LOGS}', config.path_to_logs)
     log_config = yaml.safe_load(config_str)
-
     dictConfig(log_config)
 
     logger_main.info('Loading logging & config success')

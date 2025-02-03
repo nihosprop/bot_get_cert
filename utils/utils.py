@@ -524,6 +524,7 @@ class StepikService:
                                           f'{clbk.from_user.id}_info_data')
             if user_info_data is None:
                 user_info_data = f'{await get_username(clbk)}:{clbk.from_user.id}'
+
             if is_copy:
                 logger_utils.info(f'Выдана копия {user_info_data}')
             else:

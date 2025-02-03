@@ -315,7 +315,6 @@ async def clbk_done(
     value1 = await clbk.message.edit_text('Ваши данные проверяются⌛\n'
                                           'Ожидайте выдачи сертификата📜\n')
 
-    tg_user_id = str(clbk.from_user.id)
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
     access_token = await stepik_service.get_stepik_access_token()
