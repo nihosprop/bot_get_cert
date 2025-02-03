@@ -190,7 +190,58 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data.in_(
         [name for name in BUTT_COURSES if name.startswith(('id_1', 'id_2'))]),
         StateFilter(FSMQuiz.fill_course))
-async def clbk_select_course(clbk: CallbackQuery, state: FSMContext):
+async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
+                             stepik: Stepik, redis_data: Redis, w_text: bool):
+    stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
+                                   redis_data)
+    msg_processor = MessageProcessor(clbk, state)
+    course_id = str(clbk.data).split('_')[-1]
+    cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
+                                                course_id)
+    logger_user_hand.debug(f'{cert=}')
+    if cert:
+
+        value = await clbk.message.edit_text('У вас есть сертификат этого '
+                                             'курса 🤓\nВысылаем 📜☺️\n')
+        try:
+            path = await stepik_service.generate_certificate(state, clbk,
+                                                         w_text=w_text,
+                                                     exist_cert=True)
+            # отправка сертификата
+            await stepik_service.send_certificate(clbk, path, state, is_copy=True)
+        except Exception as err:
+            logger_user_hand.debug(f'{err.__class__.__name__=}', exc_info=True)
+
+        await msg_processor.deletes_msg_a_delay(value, delay=5)
+        await state.clear()
+
+        msg_promo_id = await redis_data.get(f'{clbk.from_user.id}_msg_promo_id')
+        logger_user_hand.debug(f'Взятие id промо мсг для '
+                               f'удаления {msg_promo_id=}')
+        try:
+            if msg_promo_id:
+                await clbk.bot.delete_message(chat_id=str(clbk.message.chat.id),
+                                              message_id=msg_promo_id)
+        except TelegramBadRequest as err:
+            logger_user_hand.error(f'{err=}')
+
+        try:
+            msg_promo = await msg_processor.send_message_with_delay(
+                    clbk.message.chat.id, text=LexiconRu.text_promo.format(
+                            end_date=await shifts_the_date_forward()), delay=15,
+                    preview_link=Links.link_questions_to_ivan)
+
+            # запись и логирование id промо месаги для удаления
+            logger_user_hand.debug(
+                    f'Запись id_промо_мсг:{clbk.from_user.id}_msg_promo_id')
+            await redis_data.set(f'{clbk.from_user.id}_msg_promo_id',
+                    str(msg_promo.message_id))
+        except Exception as err:
+            logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
+
+        logger_user_hand.debug(f'Exit')
+        return
+
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
@@ -267,50 +318,6 @@ async def clbk_done(
     tg_user_id = str(clbk.from_user.id)
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
-
-    cert = await stepik_service.check_cert_in_user(tg_user_id, course_id)
-    logger_user_hand.debug(f'{cert=}')
-
-    if cert:
-        await clbk.answer('Идет проверка…')
-        path = await stepik_service.generate_certificate(state, clbk,
-                                                         w_text=w_text,
-                                                         exist_cert=True)
-        # отправка сертификата
-        await stepik_service.send_certificate(clbk, path, state, is_copy=True)
-        await msg_processor.deletes_msg_a_delay(value1, delay=1)
-        await state.clear()
-
-        msg_promo_id = await redis_data.get(f'{clbk.from_user.id}_msg_promo_id')
-        logger_user_hand.debug(f'Взятие id промо мсг для '
-                               f'удаления {msg_promo_id=}')
-
-        try:
-            if msg_promo_id:
-                await clbk.bot.delete_message(chat_id=str(clbk.message.chat.id),
-                                              message_id=msg_promo_id)
-        except TelegramBadRequest as err:
-            logger_user_hand.error(f'{err=}')
-
-        try:
-            msg_promo = await msg_processor.send_message_with_delay(
-                    clbk.message.chat.id,
-                    text=LexiconRu.text_promo.format(
-                         end_date=await shifts_the_date_forward()), delay=15,
-                         preview_link=Links.link_questions_to_ivan)
-
-            # запись и логирование id промо месаги для удаления
-            logger_user_hand.debug(
-                f'Запись id_промо_мсг:{clbk.from_user.id}_msg_promo_id')
-            await redis_data.set(
-                    f'{clbk.from_user.id}_msg_promo_id',
-                    str(msg_promo.message_id))
-        except Exception as err:
-            logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
-
-        logger_user_hand.debug(f'Exit')
-        return
-
     access_token = await stepik_service.get_stepik_access_token()
     certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
                                                              course_id,

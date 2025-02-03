@@ -16,10 +16,12 @@ from lexicon.lexicon_ru import LexiconRu
 logger_middl_outer = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).parent.parent
 
+
 class RedisMiddleware(BaseMiddleware):
     """
     Передает Redis клиент в контекст, для доступа в хэндлерах
     """
+
     def __init__(self, redis):
         self.redis_data = redis
 
@@ -87,11 +89,12 @@ class ThrottlingMiddleware(BaseMiddleware):
             if isinstance(event, CallbackQuery):
                 await event.answer()
 
-            asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 6,
-                                                                  indication=True))
+            asyncio.create_task(
+                msg_processor.deletes_msg_a_delay(event, 6, indication=True))
             await self.storage.redis.set(name=throttl_user_id, value=2, px=5000)
 
-            logger_middl_outer.warning(f'Throttling:{await get_username(event)}:{throttl_user_id}')
+            logger_middl_outer.warning(
+                f'Throttling:{await get_username(event)}:{throttl_user_id}')
             logger_middl_outer.debug(f'Exit {__class__.__name__}')
             return
 
@@ -100,7 +103,8 @@ class ThrottlingMiddleware(BaseMiddleware):
             return
 
         if not check_user:
-            await self.storage.redis.set(name=throttl_user_id, value=1, px=self.ttl)
+            await self.storage.redis.set(name=throttl_user_id, value=1,
+                                         px=self.ttl)
 
         logger_middl_outer.debug(f'Exit {__class__.__name__}')
         return await handler(event, data)
