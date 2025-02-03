@@ -22,6 +22,7 @@ class Config:
     stepik: Stepik
     level_log: str
     w_text: bool
+    path_to_logs: str
 
 
 def load_config(path: str | None = None) -> Config:
@@ -32,7 +33,11 @@ def load_config(path: str | None = None) -> Config:
     stepik_client_cecret = env('STEPIK_CLIENT_CECRET')
     level_log = env('LOG_LEVEL', 'INFO')
     w_text = env('W_TEXT_ENABLED', False)
-    return Config(tg_bot=TgBot(token=env('BOT_TOKEN'), id_admins=env('ID_ADMIN')),
+    path_to_logs = env.str('PATH_TO_REC_LOGS')
+    return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
+                               id_admins=env('ID_ADMIN')),
                   stepik=Stepik(client_id=stepik_client_id,
                                 client_cecret=stepik_client_cecret),
-                  redis_host=redis_host, level_log=level_log, w_text=w_text)
+                  redis_host=redis_host,
+                  level_log=level_log,
+                  w_text=w_text, path_to_logs=path_to_logs)
