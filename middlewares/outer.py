@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram import BaseMiddleware
+from aiogram.enums import ChatType
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.types import CallbackQuery, Message, TelegramObject, User
@@ -60,6 +61,12 @@ class ThrottlingMiddleware(BaseMiddleware):
         Additional data. Returns: Any: The result of calling the next handler.
         """
         logger_middl_outer.debug(f'Entry {__class__.__name__}')
+        # Проверяем тип чата
+        if hasattr(event, 'chat') and event.chat.type in [
+                ChatType.GROUP,
+                ChatType.SUPERGROUP]:
+            # Если это групповой чат, пропускаем тротлинг
+            return await handler(event, data)
 
         state: FSMContext = data.get('state')
         msg_processor = MessageProcessor(event, state)
