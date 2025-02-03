@@ -24,8 +24,7 @@ async def main():
         config_str = file.read()
     # вставляем(заменяем шаблоны на) переменные окружения
     config_str = config_str.replace(
-            '${LOG_LEVEL}', config.level_log).replace(
-            '${PATH_TO_REC_LOGS}', config.path_to_logs)
+            '${LOG_LEVEL}', config.level_log)
     log_config = yaml.safe_load(config_str)
     dictConfig(log_config)
 
