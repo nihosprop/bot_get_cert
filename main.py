@@ -28,7 +28,6 @@ async def main():
     dictConfig(log_config)
 
     logger_main.info('Loading logging & config success')
-
     bot = Bot(token=config.tg_bot.token,
               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
