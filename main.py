@@ -20,7 +20,7 @@ async def main():
 
     config: Config = load_config()
 
-    with open('logs/logging_setting/log_config.yml', 'rt') as file:
+    with open('app/logs/logging_setting/log_config.yml', 'rt') as file:
         config_str = file.read()
     # вставляем(заменяем шаблоны на) переменные окружения
     config_str = config_str.replace(
