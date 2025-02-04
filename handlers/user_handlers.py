@@ -200,7 +200,6 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
                                                 course_id)
     logger_user_hand.debug(f'{cert=}')
     if cert:
-
         value = await clbk.message.edit_text('У вас есть сертификат этого '
                                              'курса 🤓\nВысылаем 📜☺️\n')
         try:
@@ -208,7 +207,9 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
                                                          w_text=w_text,
                                                      exist_cert=True)
             # отправка сертификата
-            await stepik_service.send_certificate(clbk, path, state, is_copy=True)
+            await stepik_service.send_certificate(clbk, path, state,
+                                                  is_copy=True,
+                                                  course_id=course_id)
         except Exception as err:
             logger_user_hand.debug(f'{err.__class__.__name__=}', exc_info=True)
 
@@ -341,7 +342,6 @@ async def clbk_done(
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
                                                              w_text=w_text)
-            logger_user_hand.debug(f'{path=}')
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла ошибка😯\nПопробуйте '
@@ -353,7 +353,8 @@ async def clbk_done(
 
         try:
             # отправка сертификата
-            await stepik_service.send_certificate(clbk, path, state)
+            await stepik_service.send_certificate(clbk, path, state,
+                                                  course_id=course_id)
             await msg_processor.deletes_msg_a_delay(value1, delay=1)
 
             # взятие id_promo сообщения для удаления

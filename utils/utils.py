@@ -464,8 +464,8 @@ class StepikService:
         course_id = data.get('course').split('_')[-1]
         try:
             # Выполняем синхронную операцию в отдельном потоке
-            output_file, template_name = await asyncio.to_thread(self.sync_generate_certificate,
-                                                                 data, w_text)
+            output_file, template_name = await asyncio.to_thread(
+                    self.sync_generate_certificate, data, w_text)
             cert_number = await state_data.get_value('end_number')
             full_name = await state_data.get_value('full_name')
             logger_utils.debug(f'{user_tg_id=}\n'
@@ -480,10 +480,13 @@ class StepikService:
                                          value=f'{cert_number}:'
                                                f'{full_name}:'
                                                f'{template_name}')
-            await self.redis_client.set(
-                    f'{user_tg_id}_info_data', f'TG_ID-{user_tg_id}:'
-                                    f'{await get_username(type_update)}:'
-                                    f'{cert_number}:{full_name}:{template_name}')
+            logger_utils.info(
+                f'Данные сохранены в Redis: '
+                f'user_tg_id={user_tg_id}, course_id={course_id}')
+            # await self.redis_client.set(
+            #         f'{user_tg_id}_info_data', f'TG_ID-{user_tg_id}:'
+            #                         f'{await get_username(type_update)}:'
+            #                         f'{cert_number}:{full_name}:{template_name}')
 
             logger_utils.debug(f'Exit')
             return output_file
@@ -494,9 +497,11 @@ class StepikService:
             raise
 
     async def send_certificate(self, clbk: CallbackQuery, output_file: str,
-                               state: FSMContext, is_copy=False) -> None:
+                               state: FSMContext, course_id: str, is_copy=False)\
+            -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
+        :param course_id: IG курса на Stepik
         :param is_copy: Флаг True, если отправляется копия.
         :param state: Контекст состояний.
         :param clbk: CallbackQuery от пользователя.
@@ -509,22 +514,28 @@ class StepikService:
                 logger_utils.error(f"Файл {output_file} не найден.")
                 return
 
-            # Отправка файла пользователю
             pdf_file = FSInputFile(output_file)
-            await self.redis_client.hget(name=str(clbk.from_user.id),
-                                        key=str(await state.get_value(
-                                                       'course_id')))
+            # await self.redis_client.hget(name=str(clbk.from_user.id),
+            #                             key=str(await state.get_value(
+            #                                            'course_id')))
+
+            # Отправка файла пользователю
             await clbk.message.answer_document(pdf_file,
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
                                                ' обучении!🤓')
+            # logger_utils.debug(f'{course_id=}')
 
+            user_data = await self.redis_client.hget(str(
+                    clbk.from_user.id), course_id)
+            # if not user_data:
+            #     cert_number = await state.get_value('', 'not_defined')
+            #     full_name = await state.get_value('full_name')
+            #     template_name = ...
+            #     user_data = ...
+            user_info_data = (f'TG_ID-[{clbk.from_user.id}:'
+                              f'{await get_username(clbk)}]:{user_data}')
             # Логируем успешную отправку
-            user_info_data = await self.redis_client.get(
-                                          f'{clbk.from_user.id}_info_data')
-            if user_info_data is None:
-                user_info_data = f'{await get_username(clbk)}:{clbk.from_user.id}'
-
             if is_copy:
                 logger_utils.info(f'Выдана копия {user_info_data}')
             else:
@@ -544,7 +555,6 @@ class StepikService:
             except Exception as err:
                 logger_utils.error(
                     f"Ошибка при удалении файла {output_file}: {err}")
-
 
 @dataclass
 class MessageProcessor:
@@ -735,7 +745,6 @@ class MessageProcessor:
 
         logger_utils.debug(f'Exit')
         return message
-
 
 async def shifts_the_date_forward(days: int = 10):
     expire_date = datetime.now() + timedelta(days=days)

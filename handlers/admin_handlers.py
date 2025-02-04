@@ -11,19 +11,25 @@ from keyboards import kb_butt_quiz
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from states.states import FSMAdminPanel
-from utils import MessageProcessor
+from utils import MessageProcessor, get_username
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
 
 logger_admin = logging.getLogger(__name__)
 
+'TG_ID-[5104989832:Екатерина]:000827:Екатерина Аношина:1 часть жен.pdf'
 
 @admin_router.message(F.text == '/admin')
 async def cmd_admin(msg: Message, state: FSMContext, redis_data: Redis):
     await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
     await msg.delete()
     end_cert = str(await redis_data.get('end_number')).zfill(6)
+
+    user_data = await redis_data.hgetall(str(msg.from_user.id))
+    logger_admin.debug(f'Данные юзера: TD_ID-[{msg.from_user.id}:'
+                       f'{await get_username(msg)}]:{user_data=}')
+
     await msg.answer(LexiconRu.text_adm_panel.format(end_cert=end_cert),
                      reply_markup=kb_admin)
     await state.set_state(FSMAdminPanel.admin_menu)
