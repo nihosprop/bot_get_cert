@@ -524,8 +524,6 @@ class StepikService:
                                                caption='Ваш сертификат готов! 🎉\n'
                                                'Желаем удачи в дальнейшем'
                                                ' обучении!🤓')
-            # logger_utils.debug(f'{course_id=}')
-
             user_data = await self.redis_client.hget(str(
                     clbk.from_user.id), course_id)
             # if not user_data:
