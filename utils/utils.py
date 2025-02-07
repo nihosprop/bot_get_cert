@@ -480,7 +480,7 @@ class StepikService:
                                          value=f'{cert_number}:'
                                                f'{full_name}:'
                                                f'{template_name}')
-            logger_utils.info(
+            logger_utils.debug(
                 f'Данные сохранены в Redis: '
                 f'user_tg_id={user_tg_id}, course_id={course_id}')
             # await self.redis_client.set(
