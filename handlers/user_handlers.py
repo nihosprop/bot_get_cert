@@ -22,9 +22,9 @@ from lexicon.lexicon_ru import LexiconRu, Links
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
 from utils import (StepikService,
-                   shifts_the_date_forward,
+                   check_user_in_group,
                    get_username,
-                   check_user_in_group)
+                   shifts_the_date_forward)
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -33,9 +33,8 @@ logger_user_hand = logging.getLogger(__name__)
 
 
 @user_router.message(F.text == '/start')
-async def cmd_start(msg: Message, state: FSMContext):
-    # await msg.delete()
-    msg_processor = MessageProcessor(msg, state)
+async def cmd_start(
+        msg: Message, state: FSMContext, msg_processor: MessageProcessor):
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz,
@@ -90,9 +89,8 @@ async def clbk_back_fill_course(clbk: CallbackQuery, state: FSMContext):
 
 
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_gender))
-async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
-    msg_processor = MessageProcessor(clbk, state)
-    # await msg_processor.deletes_messages(msgs_for_del=True)
+async def clbk_back_fill_(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                          reply_markup=kb_butt_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -102,9 +100,10 @@ async def clbk_back_fill_(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'back',
                             StateFilter(FSMQuiz.fill_link_cert))
-async def clbk_back_fill_link_cert(clbk: CallbackQuery, state: FSMContext):
+async def clbk_back_fill_link_cert(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
-    msg_processor = MessageProcessor(clbk, state)
+
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -114,9 +113,9 @@ async def clbk_back_fill_link_cert(clbk: CallbackQuery, state: FSMContext):
 
 
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.end))
-async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
+async def clbk_back_end(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
-    msg_processor = MessageProcessor(clbk, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
     value = await clbk.message.edit_text(LexiconRu.text_data_done,
                                          reply_markup=kb_back_cancel)
@@ -128,8 +127,7 @@ async def clbk_back_end(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.message(StateFilter(default_state), F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}))
-async def msg_other(msg: Message, state: FSMContext):
-    msg_processor = MessageProcessor(msg, state)
+async def msg_other(msg: Message, msg_processor: MessageProcessor):
     if msg.text == '/admin':
         await msg.delete()
         value = await msg.answer('Эта команда для администраторов 😉')
@@ -144,10 +142,9 @@ async def msg_other(msg: Message, state: FSMContext):
 
 
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
-async def clbk_cancel_in_state(clbk: CallbackQuery, state: FSMContext):
+async def clbk_cancel_in_state(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug(f'Entry {clbk_cancel_in_state.__name__=}')
-    msg_processor = MessageProcessor(clbk, state)
-
     try:
         await state.clear()
     except Exception as err:
@@ -162,14 +159,13 @@ async def clbk_cancel_in_state(clbk: CallbackQuery, state: FSMContext):
 
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
-async def clbk_get_cert(clbk: CallbackQuery, state: FSMContext):
+async def clbk_get_cert(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     if not await check_user_in_group(clbk):
         await clbk.answer('Вы еще не вступили в нашу дружную группу Лучший по'
-                          ' Python ☺️',
-                          show_alert=True)
+                          ' Python ☺️', show_alert=True)
         return
 
-    msg_processor = MessageProcessor(clbk, state)
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                          reply_markup=kb_butt_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -190,22 +186,23 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data.in_(
         [name for name in BUTT_COURSES if name.startswith(('id_1', 'id_2'))]),
         StateFilter(FSMQuiz.fill_course))
-async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
-                             stepik: Stepik, redis_data: Redis, w_text: bool):
+async def clbk_select_course(
+        clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
+        redis_data: Redis, w_text: bool, msg_processor: MessageProcessor):
+
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
-    msg_processor = MessageProcessor(clbk, state)
     course_id = str(clbk.data).split('_')[-1]
     cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
-                                                course_id)
+                                                   course_id)
     logger_user_hand.debug(f'{cert=}')
     if cert:
         value = await clbk.message.edit_text('У вас есть сертификат этого '
                                              'курса 🤓\nВысылаем 📜☺️\n')
         try:
             path = await stepik_service.generate_certificate(state, clbk,
-                                                         w_text=w_text,
-                                                     exist_cert=True)
+                                                             w_text=w_text,
+                                                             exist_cert=True)
             # отправка сертификата
             await stepik_service.send_certificate(clbk, path, state,
                                                   is_copy=True,
@@ -236,7 +233,7 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
             logger_user_hand.debug(
                     f'Запись id_промо_мсг:{clbk.from_user.id}_msg_promo_id')
             await redis_data.set(f'{clbk.from_user.id}_msg_promo_id',
-                    str(msg_promo.message_id))
+                                 str(msg_promo.message_id))
         except Exception as err:
             logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
 
@@ -252,8 +249,7 @@ async def clbk_select_course(clbk: CallbackQuery, state: FSMContext,
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-                                        name.startswith(('id_3', 'id_4',
-                                               'id_5', 'id_6'))]),
+                            name.startswith(('id_3', 'id_4', 'id_5', 'id_6'))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
@@ -262,14 +258,14 @@ async def clbk_select_empty_course(clbk: CallbackQuery):
 @user_router.message(
         StateFilter(FSMQuiz.fill_gender, FSMQuiz.fill_course, FSMQuiz.end),
         F.content_type.in_({"text", "sticker", "photo", "video", "document"}))
-async def delete_unexpected_messages(msg: Message, state: FSMContext):
+async def delete_unexpected_messages(
+        msg: Message, msg_processor: MessageProcessor):
     """
     Удаляет сообщения пользователя, если он отправляет текст/медиа, вместо
     нажатия на кнопку.
     """
     logger_user_hand.debug(f"Перехвачено сообщение типа: {msg.content_type}")
     await msg.delete()
-    msg_processor = MessageProcessor(msg, state)
     reminder = await msg.answer(
             f'{await get_username(msg)} пожалуйста, используйте кнопки для '
             f'взаимодействия с ботом🙃')
@@ -277,9 +273,10 @@ async def delete_unexpected_messages(msg: Message, state: FSMContext):
 
 
 @user_router.message(StateFilter(FSMQuiz.fill_full_name), IsFullName())
-async def msg_full_name(msg: Message, state: FSMContext, full_name):
+async def msg_full_name(
+        msg: Message, state: FSMContext, full_name,
+        msg_processor: MessageProcessor):
     await msg.delete()
-    msg_processor = MessageProcessor(msg, state)
     logger_user_hand.debug(f'{await state.get_state()=}')
     await state.update_data(full_name=full_name)
     logger_user_hand.debug(f'{await state.get_data()=}')
@@ -290,10 +287,11 @@ async def msg_full_name(msg: Message, state: FSMContext, full_name):
 
 @user_router.message(StateFilter(FSMQuiz.fill_date_of_revocation),
                      IsCorrectData())
-async def msg_sent_date(msg: Message, state: FSMContext, date: str):
+async def msg_sent_date(
+        msg: Message, state: FSMContext, date: str,
+        msg_processor: MessageProcessor):
     await msg.delete()
     logger_user_hand.debug('Entry')
-    msg_processor = MessageProcessor(msg, state)
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(date=date)
     value = await msg.answer(LexiconRu.text_data_done,
@@ -307,9 +305,9 @@ async def msg_sent_date(msg: Message, state: FSMContext, date: str):
 @user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.end))
 async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
-        stepik: Stepik, w_text: bool):
+        stepik: Stepik, w_text: bool, msg_processor: MessageProcessor):
+
     logger_user_hand.debug(f'Entry {clbk_done.__name__=}')
-    msg_processor = MessageProcessor(clbk, state)
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
 
@@ -369,12 +367,12 @@ async def clbk_done(
                                               msg_promo_id)
 
             msg_promo = await msg_processor.send_message_with_delay(
-                clbk.message.chat.id, text=LexiconRu.text_promo.format(
-                    end_date=await shifts_the_date_forward()), delay=15,
-                                    preview_link=Links.link_questions_to_ivan)
+                    clbk.message.chat.id, text=LexiconRu.text_promo.format(
+                            end_date=await shifts_the_date_forward()), delay=15,
+                    preview_link=Links.link_questions_to_ivan)
             # запись id промо месаги для удаления
             await redis_data.set(f'{clbk.from_user.id}_msg_promo_id',
-                                str(msg_promo.message_id))
+                                 str(msg_promo.message_id))
             logger_user_hand.debug(f'Запись id промо мсг для удаления '
                                    f'{msg_promo.message_id=}')
 
@@ -399,8 +397,8 @@ async def clbk_done(
 
 @user_router.message(StateFilter(FSMQuiz.fill_link_cert), IsValidProfileLink())
 async def msg_sent_stepik_link(
-        msg: Message, state: FSMContext, stepik_user_id: str):
-    msg_processor = MessageProcessor(msg, state)
+        msg: Message, state: FSMContext, stepik_user_id: str,
+        msg_processor: MessageProcessor):
     # запись Stepik_user_id
     await state.update_data(stepik_user_id=stepik_user_id)
     await msg_processor.deletes_messages(msgs_for_del=True)

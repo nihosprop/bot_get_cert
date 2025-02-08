@@ -18,12 +18,15 @@ admin_router.message.filter(IsAdmins())
 
 logger_admin = logging.getLogger(__name__)
 
+
 @admin_router.message(F.text == '/admin')
-async def cmd_admin(msg: Message, state: FSMContext, redis_data: Redis):
-    await MessageProcessor(msg, state).deletes_messages(msgs_for_del=True)
+async def cmd_admin(
+        msg: Message, state: FSMContext, redis_data: Redis, admins,
+        msg_processor: MessageProcessor):
+    logger_admin.debug(f'Админы: {admins=}')
+    await msg_processor.deletes_messages(msgs_for_del=True)
     await msg.delete()
     end_cert = str(await redis_data.get('end_number')).zfill(6)
-
     user_data = await redis_data.hgetall(str(msg.from_user.id))
     logger_admin.debug(f'Данные юзера: TD_ID-[{msg.from_user.id}:'
                        f'{await get_username(msg)}]:{user_data=}')
@@ -34,13 +37,14 @@ async def cmd_admin(msg: Message, state: FSMContext, redis_data: Redis):
 
 
 @admin_router.callback_query(F.data == 'exit')
-async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
+async def cmd_exit(
+        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     await state.set_state(state=None)
     value = await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
-                                 f'{LexiconRu.text_survey}',
-                                 reply_markup=kb_butt_quiz,
+                                         f'{LexiconRu.text_survey}',
+                                         reply_markup=kb_butt_quiz,
                                          disable_web_page_preview=True)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
 
 
@@ -49,7 +53,8 @@ async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
 async def cmd_exit(clbk: CallbackQuery):
     await clbk.answer(f'Кнопка в разработке', show_alert=True)
 
-@admin_router.message(StateFilter(FSMAdminPanel.admin_menu,
-                                  FSMAdminPanel.newsletter))
+
+@admin_router.message(
+        StateFilter(FSMAdminPanel.admin_menu, FSMAdminPanel.newsletter))
 async def other_msg(msg: Message):
     await msg.delete()

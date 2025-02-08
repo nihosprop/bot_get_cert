@@ -12,7 +12,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
 from redis.asyncio import Redis
@@ -23,6 +23,11 @@ logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
+
+
+async def notify_admins(ids_admins: str) -> None:
+    pass
+
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     logger_utils.debug('Entry')
@@ -468,11 +473,6 @@ class StepikService:
                     self.sync_generate_certificate, data, w_text)
             cert_number = await state_data.get_value('end_number')
             full_name = await state_data.get_value('full_name')
-            logger_utils.debug(f'{user_tg_id=}\n'
-                               f'{course_id=}\n'
-                               f'{cert_number=}\n'
-                               f'{full_name=}\n'
-                               f'{user_tg_id}={cert_number}:{full_name}:{template_name}')
 
             # Сохраняем данные в Redis
             await self.redis_client.hset(name=user_tg_id,
@@ -496,8 +496,11 @@ class StepikService:
             logger_utils.debug(f'Exit')
             raise
 
-    async def send_certificate(self, clbk: CallbackQuery, output_file: str,
-                               state: FSMContext, course_id: str, is_copy=False)\
+    async def send_certificate(self,
+                               clbk: CallbackQuery,
+                               output_file: str,
+                               state: FSMContext,
+                               course_id: str, is_copy=False)\
             -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
@@ -515,9 +518,6 @@ class StepikService:
                 return
 
             pdf_file = FSInputFile(output_file)
-            # await self.redis_client.hget(name=str(clbk.from_user.id),
-            #                             key=str(await state.get_value(
-            #                                            'course_id')))
 
             # Отправка файла пользователю
             await clbk.message.answer_document(pdf_file,
@@ -526,11 +526,6 @@ class StepikService:
                                                ' обучении!🤓')
             user_data = await self.redis_client.hget(str(
                     clbk.from_user.id), course_id)
-            # if not user_data:
-            #     cert_number = await state.get_value('', 'not_defined')
-            #     full_name = await state.get_value('full_name')
-            #     template_name = ...
-            #     user_data = ...
             user_info_data = (f'TG_ID-[{clbk.from_user.id}:'
                               f'{await get_username(clbk)}]:{user_data}')
             # Логируем успешную отправку
@@ -540,7 +535,7 @@ class StepikService:
                 logger_utils.info(f'Выдан сертификат {user_info_data}')
 
         except Exception as err:
-            logger_utils.error(f"Ошибка при отправке файла: {err}",
+            logger_utils.error(f"Ошибка при отправке файла: {err=}",
                                exc_info=True)
             value = await clbk.message.answer('Что-то пошло не так, сообщите'
                                       ' администратору.')
@@ -552,7 +547,8 @@ class StepikService:
                 logger_utils.debug(f"Файл {output_file} удалён.")
             except Exception as err:
                 logger_utils.error(
-                    f"Ошибка при удалении файла {output_file}: {err}")
+                    f"Ошибка при удалении файла {output_file}: "
+                    f"{err.__class__.__name__}")
 
 @dataclass
 class MessageProcessor:
