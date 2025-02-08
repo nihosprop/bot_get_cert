@@ -30,4 +30,5 @@ jobs:
           push: true
           # С каким тегом будет загружен образ
           # Переменные тоже поддерживаются
-          tags: niwibonihs/bot_get_cert:v1.1
+          #tags: niwibonihs/bot_get_cert:v1.1
+          tags: niwibonihs/bot_get_cert:latest
