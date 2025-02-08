@@ -11,7 +11,9 @@ from aiogram.enums import ParseMode
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
 from handlers import admin_handlers, other_handlers, user_handlers
-from middlewares.outer import RedisMiddleware, ThrottlingMiddleware
+from middlewares.outer import (RedisMiddleware,
+                               ThrottlingMiddleware,
+                               MsgProcMiddleware)
 
 logger_main = logging.getLogger(__name__)
 
