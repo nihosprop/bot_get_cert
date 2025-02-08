@@ -113,7 +113,9 @@ class ThrottlingMiddleware(BaseMiddleware):
 class MsgProcMiddleware(BaseMiddleware):
     """
     Middleware для обработки Message и callback-запросов.
-    Добавляет класс MessageProcessor в контекст(в данные (data)), который может
+    Добавляет экземпляр класса MessageProcessor в контекст(в данные (data)),
+    который
+    может
     быть использован в обработчиках для дополнительной обработки сообщений.
     Attrs: None
     """
