@@ -57,7 +57,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             event: Message | CallbackQuery, data: Dict[str, Any]) -> Any:
         """Handles an event and applies the frequency limitation. If rate
         limiting is enabled and the user has exceeded the allowed frequency,
-        the event is ignored and the user receives an appropriate
+        the event is ignored, and the user receives an appropriate
         notification. Args: handler (Callable): The next handler in the chain.
         event (TelegramObject): The current event. data (Dict[str, Any]):
         Additional data. Returns: Any: The result of calling the next handler.
@@ -107,4 +107,29 @@ class ThrottlingMiddleware(BaseMiddleware):
                                          px=self.ttl)
 
         logger_middl_outer.debug(f'Exit {__class__.__name__}')
+        return await handler(event, data)
+
+
+class MsgProcMiddleware(BaseMiddleware):
+    """
+    Middleware для обработки Message и callback-запросов.
+    Добавляет класс MessageProcessor в контекст(в данные (data)), который может
+    быть использован в обработчиках для дополнительной обработки сообщений.
+    Attrs: None
+    """
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            event: Message | CallbackQuery, data: Dict[str, Any]) -> Any:
+        """
+        Обрабатывает event(входящее событие).
+        Args:
+            handler: Обработчик, который будет вызван после middleware.
+            event: Входящее событие (Message или CallbackQuery).
+            data: Словарь с данными, которые передаются между middleware и обработчиками.
+        Returns:
+            handler.
+        """
+        processor = MessageProcessor(event, _state=data["state"])
+        data["msg_processor"] = processor
         return await handler(event, data)
