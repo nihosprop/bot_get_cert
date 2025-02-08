@@ -64,6 +64,7 @@ async def main():
 
         # middlewares
         dp.update.middleware(RedisMiddleware(redis=redis_data))
+        dp.update.middleware(MsgProcMiddleware())
         dp.message.outer_middleware(
                 ThrottlingMiddleware(storage=storage_throttling, ttl=700))
         dp.callback_query.outer_middleware(
