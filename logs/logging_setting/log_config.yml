@@ -55,6 +55,11 @@ handlers:
     filters: [error_critical_filter]
 
 loggers:
+  queues.que_utils:
+    level: ${LOG_LEVEL}
+    handlers: [ stdout, warning_file, critical_file ]
+    propagate: no
+
   handlers.admin_handlers:
     level: ${LOG_LEVEL}
     handlers: [ stdout, warning_file, critical_file ]

@@ -7,7 +7,10 @@ from aiogram import BaseMiddleware
 from aiogram.enums import ChatType
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram.types import CallbackQuery, Message, TelegramObject, User
+from aiogram.types import (CallbackQuery,
+                           Message,
+                           TelegramObject,
+                           User)
 
 from utils import get_username
 from utils.utils import MessageProcessor
@@ -15,6 +18,19 @@ from lexicon.lexicon_ru import LexiconRu
 
 logger_middl_outer = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).parent.parent
+
+
+# class QueueRedisMiddleware(BaseMiddleware):
+#     """
+#     Передает Очередь  в контекст, для доступа в хэндлерах
+#     """
+#     def __init__(self, mailing_queue):
+#         self.mailing_queue = mailing_queue
+#
+#     async def __call__(self, handler, event, data):
+#         self.user_id = data.get('user_id')
+#         data['mailing_queue'] = self.mailing_queue
+#         return await handler(event, data)
 
 
 class RedisMiddleware(BaseMiddleware):
