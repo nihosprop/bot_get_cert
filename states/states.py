@@ -14,5 +14,4 @@ class FSMQuiz(StatesGroup):
     fill_course = State()
     fill_date_of_revocation = State()
     fill_link_cert = State()
-    # fill_email = State()
     end = State()
