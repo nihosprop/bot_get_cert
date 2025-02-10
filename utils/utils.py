@@ -12,7 +12,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
-from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
 from redis.asyncio import Redis
@@ -23,11 +23,6 @@ logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
 # executor = ThreadPoolExecutor(max_workers=4)
-
-
-async def notify_admins(ids_admins: str) -> None:
-    pass
-
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     logger_utils.debug('Entry')
@@ -577,14 +572,22 @@ class MessageProcessor:
 
         if isinstance(self._type_update, Message):
             chat_id = self._type_update.chat.id
-        else:
+        elif self._type_update and self._type_update.message:
             chat_id = self._type_update.message.chat.id
+        else:
+            logger_utils.error(f'Invalid type for _type_update or'
+                             f' missing message attribute.{AttributeError.__name__}')
+            return
 
         kwargs: dict = {
                 'msgs_for_del': msgs_for_del,
                 'msgs_remove_kb': msgs_remove_kb}
 
-        keys = [key for key, val in kwargs.items() if val]
+        keys = None
+        try:
+            keys = [key for key, val in kwargs.items() if val]
+        except Exception as err:
+            logger_utils.error(f'{err.__class__.__name__}', exc_info=True)
         logger_utils.debug(f'{keys=}')
 
         if keys:

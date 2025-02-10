@@ -8,8 +8,6 @@ from aiogram.exceptions import (TelegramRetryAfter,
 from arq import create_pool, Worker
 from arq.connections import RedisSettings
 
-from utils import get_username
-
 queue_logger = logging.getLogger(__name__)
 
 async def safe_send_message(ctx: dict,
@@ -19,7 +17,10 @@ async def safe_send_message(ctx: dict,
     """
     Асинхронно отправляет сообщение с обработкой ошибок и повторными попытками.
     """
+    queue_logger.debug('Entry')
+
     bot = ctx['bot']
+    queue_logger.debug(f'{ctx=}')
 
     for attempt in range(1, retries + 1):
         try:
@@ -49,6 +50,8 @@ async def safe_send_message(ctx: dict,
 
     queue_logger.error(f"Failed to send to {user_id} after {retries} attempts",
                        exc_info=True)
+
+    queue_logger.debug('Exit False')
     return False
 
 async def add_mailing_task(redis_que: RedisSettings, user_id: int,

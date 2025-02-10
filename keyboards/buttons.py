@@ -8,6 +8,7 @@ BUTT_CANCEL: dict[str, str] = {'cancel': '❌ОТМЕНА'}
 BUTT_BACK: dict[str, str] = {'back': '🔙 Назад'}
 BUTT_DONE: dict[str, str] = {'done': 'Подтвердить✅'}
 
+BUTT_NEWSLETTER: dict[str, str] = {}
 BUTT_START: dict[str, str] = {
         'get_cert': 'Получить сертификат',
         'get_promo': 'Получить промокод со скидкой'}

@@ -116,7 +116,10 @@ async def clbk_back_fill_link_cert(
 async def clbk_back_end(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
-    await msg_processor.deletes_messages(msgs_for_del=True)
+    try:
+        await msg_processor.deletes_messages(msgs_for_del=True)
+    except Exception as err:
+        logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
     value = await clbk.message.edit_text(LexiconRu.text_data_done,
                                          reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -125,8 +128,10 @@ async def clbk_back_end(
     logger_user_hand.debug('Exit')
 
 
-@user_router.message(StateFilter(default_state), F.content_type.in_(
-        {"text", "sticker", "photo", "video", "document"}))
+@user_router.message(StateFilter(default_state),
+                     ~F.text.in_({'/start'}),
+                     F.content_type.in_(
+                             {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, msg_processor: MessageProcessor):
     if msg.text == '/admin':
         await msg.delete()
