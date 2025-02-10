@@ -93,5 +93,6 @@ async def run_arq_worker(redis_que: RedisSettings, bot: Bot):
 
     worker = Worker(functions=[safe_send_message],
                     redis_settings=redis_que, on_startup=startup,
-                    max_jobs=5, handle_signals=False)
+                    max_jobs=5, handle_signals=False,
+                    health_check_interval=15)
     await worker.async_run()

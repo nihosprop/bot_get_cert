@@ -8,7 +8,7 @@ from arq.connections import RedisSettings
 from redis.asyncio import Redis
 
 from filters.filters import IsAdmins
-from keyboards import kb_butt_quiz
+from keyboards import kb_butt_quiz, kb_back_cancel
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
@@ -53,24 +53,28 @@ async def cmd_exit(
 
 @admin_router.callback_query(F.data == 'newsletter',
                             StateFilter(FSMAdminPanel.admin_menu))
-async def cmd_exit(clbk: CallbackQuery, state: FSMContext):
+async def clbk_newsletter(clbk: CallbackQuery, state: FSMContext,
+                          msg_processor: MessageProcessor):
     # await clbk.answer(f'Кнопка в разработке', show_alert=True)
-    await clbk.message.edit_text(f'Введите сообщение для рассылки.\n'
-                                 f'После отправки боту, начнется рассылка!')
+    value = await clbk.message.edit_text(f'Введите сообщение для рассылки.\n'
+                                 f'После отправки боту, начнется рассылка!',
+                                 reply_markup=kb_back_cancel)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMAdminPanel.newsletter)
     await clbk.answer()
 
 
 @admin_router.message(StateFilter(FSMAdminPanel.newsletter))
 async def other_msg(msg: Message, redis_data: Redis, redis_que: RedisSettings,
-                    state: FSMContext):
+                    state: FSMContext, msg_processor: MessageProcessor):
     logger_admin.debug('Entry')
-
+    await msg_processor.deletes_messages(msgs_for_del=True)
     msg_letter = msg.text
-    user_ids = set(map(int, filter(lambda _id: _id.isdigit(),
-    await redis_data.keys())))
-    logger_admin.debug(f"IDs пользователей: {user_ids}")
-    await msg.answer(f'Кол-во пользователей для рассылки: {len(user_ids)}')
+    await msg.delete()
+    user_ids = set(
+            map(int, filter(lambda _id: _id.isdigit(), await redis_data.keys())))
+
+    await msg.answer(f'Началась рассылка для {len(user_ids)} пользователей')
 
     try:
         await mass_mailing(redis_que=redis_que, user_ids=user_ids,
