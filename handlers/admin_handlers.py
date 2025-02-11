@@ -107,10 +107,11 @@ async def msg_for_newsletter(msg: Message, state: FSMContext,
     msg_letter = msg.text
     await state.update_data(msg_letter=msg_letter)
     value = await msg.answer('Проверьте сообщение.\n\n'
-                     'Подтвердите или отмените рассылку.',
+                     'Подтвердите или отмените рассылку.\n'
+                     'После завершения придет инфо-сообщение о количестве '
+                             'доставок.',
                      reply_markup=kb_done_newsletter)
     await state.update_data({'msg_del_on_key': str(value.message_id)})
-    # await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMAdminPanel.fill_confirm_newsletter)
 
     logger_admin.debug('Exit')
@@ -124,13 +125,12 @@ async def clbk_done_newsletter(clbk: CallbackQuery,
                                msg_processor: MessageProcessor,
                                admins: str):
     logger_admin.debug('Entry')
-    # await msg_processor.deletes_messages(msgs_for_del=True)
+
     await msg_processor.delete_message()
 
     msg_letter = await state.get_value('msg_letter')
     user_ids = set(
             map(int, filter(lambda _id: _id.isdigit(), await redis_data.keys())))
-
     end_cert = str(await redis_data.get('end_number')).zfill(6)
     admin_ids: str = admins
     try:
@@ -140,5 +140,6 @@ async def clbk_done_newsletter(clbk: CallbackQuery,
     except Exception as err:
         logger_admin.error(f'Ошибка: {err}', exc_info=True)
     await state.set_state(FSMAdminPanel.admin_menu)
+    await clbk.answer()
 
     logger_admin.debug('Exit')

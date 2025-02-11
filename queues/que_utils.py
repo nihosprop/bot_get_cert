@@ -56,22 +56,6 @@ async def safe_send_message(ctx: dict,
     queue_logger.debug('Exit False')
     return False
 
-# async def add_mailing_task(redis_que: RedisSettings, user_id: int,
-#                            message: str):
-#     """
-#     Добавляет задачи в очередь
-#     :param redis_que:
-#     :param user_id:
-#     :param message:
-#     :return:
-#     """
-#     queue_logger.debug('Entry')
-#     queue = await create_pool(redis_que)
-#     await queue.enqueue_job(function='safe_send_message',
-#                             user_id=user_id,
-#                             message=message)
-#     queue_logger.debug('Exit')
-
 async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
                        message: str, admin_ids: str, end_cert: str,  delay=0.1):
     """
@@ -89,22 +73,37 @@ async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
 
     queue = await create_pool(redis_que)
     admins = set(map(int, admin_ids.split()))
-    counter = 0
+    counter_users = 0
+    tasks = []
     for user_id in user_ids:
-        value = await queue.enqueue_job(function='safe_send_message',
+        job = await queue.enqueue_job(function='safe_send_message',
                                user_id=user_id,
                                message=message)
-        counter += 1 if value else 0
+        tasks.append(job)
         await asyncio.sleep(delay)
+
+    # Ожидание выполнения всех задач
+    results = []
+    for task in tasks:
+        try:
+            # Получаем результат задачи
+            result = await task.result()
+            # Если результат True, увеличиваем счетчик успешных отправок
+            if result:
+                counter_users += 1
+        except Exception as e:
+            queue_logger.error(f"Ошибка при выполнении задачи: {e}")
 
     # Добавляем задачу уведомления в очередь после завершения
     # отправки всех сообщений
     await queue.enqueue_job(function='on_mailing_completed',
-                            end_cert=end_cert, admins=admins)
+                            end_cert=end_cert, admins=admins,
+                            counter_users=counter_users)
 
     queue_logger.debug('Exit')
 
-async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int]):
+async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int],
+                               counter_users: int):
     """
     Callback-функция для уведомления администратора после завершения рассылки.
     """
@@ -115,10 +114,11 @@ async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int]):
     # Отправляем уведомление администратору
     for admin in admins:
         await bot.send_message(chat_id=admin,
-                text=f"Произведена рассылка.\n"
+                text=f"Произведена рассылка✅\n"
+                     f"Количество доставок: {counter_users}\n\n"
                 f"{LexiconRu.text_adm_panel.format(end_cert=end_cert)}",
                 reply_markup=kb_admin)
-        await asyncio.sleep(delay=0.1)
+        await asyncio.sleep(delay=0.2)
 
     queue_logger.debug("Exit")
 
