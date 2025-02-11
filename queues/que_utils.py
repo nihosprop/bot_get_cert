@@ -100,12 +100,11 @@ async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
     # Добавляем задачу уведомления в очередь после завершения
     # отправки всех сообщений
     await queue.enqueue_job(function='on_mailing_completed',
-                            end_cert=end_cert, admins=admins, counter=counter)
+                            end_cert=end_cert, admins=admins)
 
     queue_logger.debug('Exit')
 
-async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int],
-                               counter: int):
+async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int]):
     """
     Callback-функция для уведомления администратора после завершения рассылки.
     """
@@ -117,7 +116,6 @@ async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int],
     for admin in admins:
         await bot.send_message(chat_id=admin,
                 text=f"Произведена рассылка.\n"
-                     f"Количество доставок: {counter}\n\n"
                 f"{LexiconRu.text_adm_panel.format(end_cert=end_cert)}",
                 reply_markup=kb_admin)
         await asyncio.sleep(delay=0.1)
