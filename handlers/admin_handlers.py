@@ -102,13 +102,15 @@ async def clbk_newsletter(clbk: CallbackQuery, state: FSMContext,
 async def msg_for_newsletter(msg: Message, state: FSMContext,
                              msg_processor: MessageProcessor):
     logger_admin.debug('Entry')
+
     await msg_processor.deletes_messages(msgs_for_del=True)
     msg_letter = msg.text
     await state.update_data(msg_letter=msg_letter)
     value = await msg.answer('Проверьте сообщение.\n\n'
                      'Подтвердите или отмените рассылку.',
                      reply_markup=kb_done_newsletter)
-    await msg_processor.save_msg_id(value, msgs_for_del=True)
+    await state.update_data({'msg_del_on_key': str(value.message_id)})
+    # await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMAdminPanel.fill_confirm_newsletter)
 
     logger_admin.debug('Exit')
@@ -118,24 +120,25 @@ async def msg_for_newsletter(msg: Message, state: FSMContext,
                              StateFilter(FSMAdminPanel.fill_confirm_newsletter))
 async def clbk_done_newsletter(clbk: CallbackQuery,
                                redis_data: Redis, redis_que: RedisSettings,
-                               state: FSMContext, msg_processor: MessageProcessor):
+                               state: FSMContext,
+                               msg_processor: MessageProcessor,
+                               admins: str):
     logger_admin.debug('Entry')
-    await msg_processor.deletes_messages(msgs_for_del=True)
+    # await msg_processor.deletes_messages(msgs_for_del=True)
+    await msg_processor.delete_message()
+
     msg_letter = await state.get_value('msg_letter')
     user_ids = set(
             map(int, filter(lambda _id: _id.isdigit(), await redis_data.keys())))
 
+    end_cert = str(await redis_data.get('end_number')).zfill(6)
+    admin_ids: str = admins
     try:
         await mass_mailing(redis_que=redis_que, user_ids=user_ids,
-                           message=msg_letter)
+                           message=msg_letter, admin_ids=admin_ids,
+                           end_cert=end_cert)
     except Exception as err:
         logger_admin.error(f'Ошибка: {err}', exc_info=True)
-
-    end_cert = str(await redis_data.get('end_number')).zfill(6)
-
-    await clbk.message.edit_text(f'Произведена рассылка для {len(user_ids)} ' 
-    f'юзеров.\n\n{LexiconRu.text_adm_panel.format(end_cert=end_cert)}',
-                      reply_markup=kb_admin)
     await state.set_state(FSMAdminPanel.admin_menu)
 
     logger_admin.debug('Exit')

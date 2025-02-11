@@ -14,7 +14,11 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile, Message, LinkPreviewOptions
+from aiogram.types import (CallbackQuery,
+                           FSInputFile,
+                           Message,
+                           LinkPreviewOptions,
+                           Update)
 from redis.asyncio import Redis
 
 from keyboards import BUTT_COURSES
@@ -569,15 +573,24 @@ class MessageProcessor:
         :return: None
         """
         logger_utils.debug(f'Entry')
-
+        chat_id = None
         if isinstance(self._type_update, Message):
             chat_id = self._type_update.chat.id
-        elif self._type_update and self._type_update.message:
-            chat_id = self._type_update.message.chat.id
-        else:
-            logger_utils.error(f'Invalid type for _type_update or'
-                             f' missing message attribute.{AttributeError.__name__}')
-            return
+        elif isinstance(self._type_update, CallbackQuery):
+            if self._type_update.message:
+                chat_id = self._type_update.message.chat.id
+            else:
+                logger_utils.error("CallbackQuery does not contain a message.")
+                return
+        elif isinstance(self._type_update, Update):
+            if self._type_update.message:
+                chat_id = self._type_update.message.chat.id
+            elif self._type_update.callback_query and self._type_update.callback_query.message:
+                chat_id = self._type_update.callback_query.message.chat.id
+            else:
+                logger_utils.error(
+                        "Update does not contain a valid chat or message.")
+                return
 
         kwargs: dict = {
                 'msgs_for_del': msgs_for_del,
@@ -682,16 +695,36 @@ class MessageProcessor:
         :return: None
         """
         logger_utils.debug('Entry')
-
-        data = await self._state.get_data()
-        chat_id = self._type_update.message.chat.id
-        await self._type_update.bot.delete_message(chat_id=chat_id,
-                                                   message_id=data.get(key))
+        try:
+            chat_id = None
+            data = await self._state.get_data()
+            if isinstance(self._type_update, Message):
+                chat_id = self._type_update.chat.id
+            elif isinstance(self._type_update, CallbackQuery):
+                if self._type_update.message:
+                    chat_id = self._type_update.message.chat.id
+                else:
+                    logger_utils.error(
+                        "CallbackQuery does not contain a message.")
+                    return
+            elif isinstance(self._type_update, Update):
+                if self._type_update.message:
+                    chat_id = self._type_update.message.chat.id
+                elif self._type_update.callback_query and self._type_update.callback_query.message:
+                    chat_id = self._type_update.callback_query.message.chat.id
+                else:
+                    logger_utils.error(
+                        "Update does not contain a valid chat or message.")
+                    return
+            await self._type_update.bot.delete_message(chat_id=chat_id,
+                                                       message_id=data.get(key))
+        except Exception as err:
+            logger_utils.error(f'{err=}', exc_info=True)
         logger_utils.debug('Exit')
 
     @staticmethod
     async def deletes_msg_a_delay(value: Message,
-                                  delay: int, indication=False) -> None:
+                                  delay: int = 1, indication=False) -> None:
         """
          Deletes a message after a specified time interval.
          Arguments: value (types.Message): The message to delete.

@@ -8,6 +8,9 @@ from aiogram.exceptions import (TelegramRetryAfter,
 from arq import create_pool, Worker
 from arq.connections import RedisSettings
 
+from keyboards import kb_admin
+from lexicon import LexiconRu
+
 queue_logger = logging.getLogger(__name__)
 
 async def safe_send_message(ctx: dict,
@@ -20,7 +23,6 @@ async def safe_send_message(ctx: dict,
     queue_logger.debug('Entry')
 
     bot = ctx['bot']
-    queue_logger.debug(f'{ctx=}')
 
     for attempt in range(1, retries + 1):
         try:
@@ -54,26 +56,28 @@ async def safe_send_message(ctx: dict,
     queue_logger.debug('Exit False')
     return False
 
-async def add_mailing_task(redis_que: RedisSettings, user_id: int,
-                           message: str):
-    """
-    Добавляет задачи в очередь
-    :param redis_que:
-    :param user_id:
-    :param message:
-    :return:
-    """
-    queue_logger.debug('Entry')
-    queue = await create_pool(redis_que)
-    await queue.enqueue_job(function='safe_send_message',
-                            user_id=user_id,
-                            message=message)
-    queue_logger.debug('Exit')
+# async def add_mailing_task(redis_que: RedisSettings, user_id: int,
+#                            message: str):
+#     """
+#     Добавляет задачи в очередь
+#     :param redis_que:
+#     :param user_id:
+#     :param message:
+#     :return:
+#     """
+#     queue_logger.debug('Entry')
+#     queue = await create_pool(redis_que)
+#     await queue.enqueue_job(function='safe_send_message',
+#                             user_id=user_id,
+#                             message=message)
+#     queue_logger.debug('Exit')
 
 async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
-                       message: str, delay=0.1):
+                       message: str, admin_ids: str, end_cert: str,  delay=0.1):
     """
-    Массовая рассылка
+    Массовая рассылка и отправка уведомления после завершения.
+    :param admin_ids:
+    :param end_cert:
     :param delay:
     :param redis_que:
     :param user_ids:
@@ -83,18 +87,48 @@ async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
     queue_logger.debug('Entry')
     queue_logger.info(f"Рассылка началась для {len(user_ids)} юзеров")
 
+    queue = await create_pool(redis_que)
+    admins = set(map(int, admin_ids.split()))
+    counter = 0
     for user_id in user_ids:
-        await add_mailing_task(user_id=user_id,
-                               redis_que=redis_que,
+        value = await queue.enqueue_job(function='safe_send_message',
+                               user_id=user_id,
                                message=message)
+        counter += 1 if value else 0
         await asyncio.sleep(delay)
+
+    # Добавляем задачу уведомления в очередь после завершения
+    # отправки всех сообщений
+    await queue.enqueue_job(function='on_mailing_completed',
+                            end_cert=end_cert, admins=admins, counter=counter)
+
     queue_logger.debug('Exit')
+
+async def on_mailing_completed(ctx: dict, end_cert: str, admins: set[int],
+                               counter: int):
+    """
+    Callback-функция для уведомления администратора после завершения рассылки.
+    """
+    queue_logger.debug("Entry")
+
+    bot: Bot = ctx.get('bot')
+
+    # Отправляем уведомление администратору
+    for admin in admins:
+        await bot.send_message(chat_id=admin,
+                text=f"Произведена рассылка.\n"
+                     f"Количество доставок: {counter}\n\n"
+                f"{LexiconRu.text_adm_panel.format(end_cert=end_cert)}",
+                reply_markup=kb_admin)
+        await asyncio.sleep(delay=0.1)
+
+    queue_logger.debug("Exit")
 
 async def run_arq_worker(redis_que: RedisSettings, bot: Bot):
     async def startup(ctx):
         ctx['bot'] = bot  # Передаем бота в контекст
 
-    worker = Worker(functions=[safe_send_message],
+    worker = Worker(functions=[safe_send_message, on_mailing_completed],
                     redis_settings=redis_que, on_startup=startup,
                     max_jobs=5, handle_signals=False,
                     health_check_interval=15)
