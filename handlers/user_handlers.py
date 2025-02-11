@@ -136,13 +136,19 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
     if msg.text == '/admin':
         await msg.delete()
         value = await msg.answer('Эта команда для администраторов 😉')
+        logger_user_hand.warning(f'Тапнул админку:'
+                                 f'{msg.from_user.id}:'
+                          f'{await get_username(msg)}')
         await msg_processor.deletes_msg_a_delay(value, delay=4, indication=True)
         return
 
     await msg.delete()
     value = await msg.answer(f'{await get_username(msg)}, используйте '
                              f'пожалуйста кнопки для взаимодействия с ботом🙂')
-
+    logger_user_hand.warning(f'Работа с кнопками:Послано боту->'
+                             f'{msg.from_user.id}:'
+                      f'{await get_username(msg)}:'
+                      f'{msg.content_type}:{msg.text}')
     await msg_processor.deletes_msg_a_delay(value, delay=5, indication=True)
 
 
@@ -258,6 +264,8 @@ async def clbk_select_course(
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
+    logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
+                             f'{await get_username(clbk)}')
 
 
 @user_router.message(
@@ -269,7 +277,9 @@ async def delete_unexpected_messages(
     Удаляет сообщения пользователя, если он отправляет текст/медиа, вместо
     нажатия на кнопку.
     """
-    logger_user_hand.debug(f"Перехвачено сообщение типа: {msg.content_type}")
+    logger_user_hand.warning(f"Перехвачено сообщение:{msg.content_type}:"
+                             f"{msg.text}"
+                             f"{msg.from_user.id}:{await get_username(msg)}")
     await msg.delete()
     reminder = await msg.answer(
             f'{await get_username(msg)} пожалуйста, используйте кнопки для '

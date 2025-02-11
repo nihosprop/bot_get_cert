@@ -78,8 +78,11 @@ class IsFullName(BaseFilter):
 
         # Проверяем количество слов (минимум 2)
         if len(words) < 2:
+            logger_filters.warning(f'Не корректные ФИО:{msg.from_user.id}:'
+                                   f'{await get_username(msg)}:'
+                                   f'{msg.text}')
             await self._delete_and_notify(msg, msg_processor,
-                    message="Введите хотя бы два слова: Имя и Фамилию ;)")
+                    message="Введите хотя бы два слова: Имя и Фамилию 😉")
             return False
 
         # Проверяем регулярное выражение и отсутствие цифр
@@ -93,6 +96,9 @@ class IsFullName(BaseFilter):
             logger_filters.debug(f'Exit True {__class__.__name__}')
             return {'full_name': ' '.join(capitalized_words)}
         else:
+            logger_filters.warning(f'Не корректные ФИО:{msg.from_user.id}:'
+                                   f'{await get_username(msg)}:'
+                                   f'{msg.text}')
             await self._delete_and_notify(msg, msg_processor,
                     message="Некорректно введены данные")
             return False

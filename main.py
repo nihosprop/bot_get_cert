@@ -11,7 +11,7 @@ from arq.connections import RedisSettings
 
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
-from handlers import admin_handlers, other_handlers, user_handlers
+from handlers import admin_handlers, user_handlers
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
                                ThrottlingMiddleware)
@@ -68,7 +68,6 @@ async def main():
         # routers
         dp.include_router(admin_handlers.admin_router)
         dp.include_router(user_handlers.user_router)
-        dp.include_router(other_handlers.other_router)
 
         # middlewares
         dp.update.middleware(RedisMiddleware(redis=redis_data))

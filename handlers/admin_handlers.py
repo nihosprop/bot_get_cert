@@ -13,8 +13,7 @@ from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
 from states.states import FSMAdminPanel
-from utils import MessageProcessor
-
+from utils import MessageProcessor, get_username
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
@@ -52,6 +51,10 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
 async def msg_other(msg: Message):
     logger_admin.debug('Entry')
     await msg.delete()
+    logger_admin.warning(f'Работа с кнопками:Послано боту->'
+                        f'{msg.from_user.id}:'
+                        f'{await get_username(msg)}:'
+                        f'{msg.content_type}:{msg.text}')
     logger_admin.debug('Exit')
 
 @admin_router.message(F.text == '/admin')
