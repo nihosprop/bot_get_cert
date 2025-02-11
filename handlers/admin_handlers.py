@@ -36,7 +36,6 @@ async def cmd_start(
 async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
                                redis_data: Redis,
                                msg_processor: MessageProcessor):
-    # await msg_processor.deletes_messages(msgs_for_del=True)
     end_cert = str(await redis_data.get('end_number')).zfill(6)
 
     await clbk.message.edit_text(LexiconRu.text_adm_panel.format(end_cert=end_cert),
