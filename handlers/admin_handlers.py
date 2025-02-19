@@ -95,9 +95,8 @@ async def clbk_check_data_certs(clbk: CallbackQuery, state: FSMContext,
                       f'{clbk.from_user.id}:{await get_username(clbk)}')
     await clbk.answer('Сбор данных…')
     text = await get_data_users(clbk, redis_data=redis_data)
-    await clbk.answer('Обработка…')
     await clbk.message.edit_text(text=text)
-    await clbk.answer()
+    # await clbk.answer()
     await state.clear()
 
 @admin_router.callback_query(F.data == 'newsletter',
