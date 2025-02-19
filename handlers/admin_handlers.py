@@ -96,8 +96,13 @@ async def clbk_check_data_certs(clbk: CallbackQuery, state: FSMContext,
     await clbk.answer('Сбор данных…')
     text = await get_data_users(clbk, redis_data=redis_data)
     await clbk.message.edit_text(text=text)
-    # await clbk.answer()
     await state.clear()
+
+@admin_router.callback_query(F.data == 'add_admin',
+                             StateFilter(FSMAdminPanel.admin_menu))
+async def clbk_make_cert(clbk: CallbackQuery):
+    await clbk.answer('Копка в разработке', show_alert=True)
+
 
 @admin_router.callback_query(F.data == 'make_cert',
                              StateFilter(FSMAdminPanel.admin_menu))
