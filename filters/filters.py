@@ -162,7 +162,7 @@ class IsCorrectData(BaseFilter):
 
         except ValueError as err:
             logger_filters.warning(f'Некорректная дата:{username}:'
-                                   f'{msg.from_user.id}:{date_str}:{err}')
+                                   f'{msg.from_user.id}:{date_str=}:{err}')
             logger_filters.debug(f'Exit False {__class__.__name__}')
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
