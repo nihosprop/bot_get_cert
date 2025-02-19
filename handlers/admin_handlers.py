@@ -36,8 +36,7 @@ async def cmd_start(
 @admin_router.callback_query(F.data == 'back',
                              StateFilter(FSMAdminPanel.fill_newsletter))
 async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
-                               redis_data: Redis,
-                               msg_processor: MessageProcessor):
+                               redis_data: Redis):
     end_cert = str(await redis_data.get('end_number')).zfill(6)
 
     await clbk.message.edit_text(LexiconRu.text_adm_panel.format(end_cert=end_cert),
