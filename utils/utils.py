@@ -818,7 +818,7 @@ async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
     text = ''
     for num_course, users in data_users.items():
         qt_users = len(users)
-        user_names = '\n'.join(users)
+        user_names = ', '.join(users)
         text += (f'<code>Курс №{courses[num_course]} прошли {qt_users}:</code>\n'
                  f'{user_names}\n\n')
     return text
