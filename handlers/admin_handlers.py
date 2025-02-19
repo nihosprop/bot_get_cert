@@ -118,8 +118,8 @@ async def msg_for_newsletter(msg: Message, state: FSMContext,
     await state.update_data(msg_letter=msg_letter)
     value = await msg.answer('Проверьте сообщение.\n\n'
                      'Подтвердите или отмените рассылку.\n'
-                     'После завершения придет инфо-сообщение о количестве '
-                             'доставок.',
+                     'После завершения придет инфо-сообщение о количестве'
+                             ' доставок.',
                      reply_markup=kb_done_newsletter)
     await state.update_data({'msg_del_on_key': str(value.message_id)})
     await state.set_state(FSMAdminPanel.fill_confirm_newsletter)

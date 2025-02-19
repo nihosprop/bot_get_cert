@@ -806,17 +806,19 @@ async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
         _, data = await redis_data.hscan(user)
         logger_utils.debug(f'{data=}')
         try:
-            key = courses[''.join(data.keys())]
+            keys = data.keys()
+            logger_utils.debug(f'{keys=}')
         except Exception as err:
-            logger_utils.error(f'Ошибка чтения ключа {err}', exc_info=True)
+            logger_utils.error(f'Ошибка чтения ключа:DB-№2 {err}',
+                               exc_info=True)
         else:
-            # logger_admin.debug(f'{key=}')
-            data_users.setdefault(key, []).append(username)
-    logger_utils.debug(f'{data_users}')
+            for key in keys:
+                data_users.setdefault(key, []).append(username)
+    logger_utils.debug(f'{data_users=}')
     text = ''
     for num_course, users in data_users.items():
         qt_users = len(users)
         user_names = '\n'.join(users)
-        text += (f'<code>Курс №{num_course} прошли {qt_users}:</code>\n'
+        text += (f'<code>Курс №{courses[num_course]} прошли {qt_users}:</code>\n'
                  f'{user_names}\n\n')
     return text
