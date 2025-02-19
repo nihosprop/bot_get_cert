@@ -48,7 +48,8 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
 
 @admin_router.message(~F.text.in_({'/admin', '/start'}), F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}),
-                      ~StateFilter(FSMAdminPanel.fill_newsletter))
+                      ~StateFilter(FSMAdminPanel.fill_newsletter),
+                      ~StateFilter(FSMQuiz.fill_full_name))
 async def msg_other(msg: Message):
     logger_admin.debug('Entry')
     await msg.delete()
