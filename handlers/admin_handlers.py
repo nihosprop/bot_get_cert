@@ -60,6 +60,8 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
 async def cmd_admin(
         msg: Message, state: FSMContext, redis_data: Redis,
         msg_processor: MessageProcessor):
+    logger_admin.info(f'Зашел в админку:{msg.from_user.id}'
+                      f':{await get_username(msg)}')
     keys = set(filter(lambda _id: _id.isdigit(), await redis_data.keys()))
     logger_admin.debug(f'{keys=}')
 
