@@ -89,11 +89,10 @@ async def cmd_exit(
                              StateFilter(FSMAdminPanel.admin_menu))
 async def clbk_check_data_certs(clbk: CallbackQuery, state: FSMContext,
                                 redis_data: Redis):
+    await clbk.answer('Сбор данных…')
     text = await get_data_users(clbk, redis_data=redis_data)
-    await clbk.answer('Обработка данных…')
     await clbk.message.edit_text(text=text)
     await state.clear()
-    await clbk.answer()
 
 @admin_router.callback_query(F.data == 'newsletter',
                             StateFilter(FSMAdminPanel.admin_menu))
