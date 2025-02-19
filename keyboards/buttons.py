@@ -3,7 +3,8 @@ import logging
 logger_buttons = logging.getLogger(__name__)
 
 ADMIN_PANEL_BUTT: dict[str, str] = {'newsletter': 'Рассылка',
-        'certs_data': 'Данные по сертификатам', 'exit': 'Выход'}
+        'certs_data': 'Данные по сертификатам',
+        'make_cert': 'Сделать сертификат', 'exit': 'Выход'}
 
 BUTT_CANCEL: dict[str, str] = {'cancel': '❌ОТМЕНА'}
 BUTT_BACK: dict[str, str] = {'back': '🔙 Назад'}

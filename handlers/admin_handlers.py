@@ -99,6 +99,12 @@ async def clbk_check_data_certs(clbk: CallbackQuery, state: FSMContext,
     # await clbk.answer()
     await state.clear()
 
+@admin_router.callback_query(F.data == 'make_cert',
+                             StateFilter(FSMAdminPanel.admin_menu))
+async def clbk_make_cert(clbk: CallbackQuery):
+    await clbk.answer('Копка в разработке', show_alert=True)
+
+
 @admin_router.callback_query(F.data == 'newsletter',
                             StateFilter(FSMAdminPanel.admin_menu))
 async def clbk_newsletter(clbk: CallbackQuery, state: FSMContext,
