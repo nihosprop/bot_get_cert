@@ -65,7 +65,7 @@ async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
 
     if username := _type_update.from_user.username:
-        return f'@{username}'
+        return username
     elif first_name := _type_update.from_user.first_name:
         return first_name
     return str(_type_update.from_user.id)
