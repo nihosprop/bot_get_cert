@@ -35,6 +35,7 @@ logger_user_hand = logging.getLogger(__name__)
 @user_router.message(F.text == '/start')
 async def cmd_start(
         msg: Message, state: FSMContext, msg_processor: MessageProcessor):
+    logger_user_hand.info(f'cmd_start:{await get_username(msg)}')
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz,
