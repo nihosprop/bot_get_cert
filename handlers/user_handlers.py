@@ -129,8 +129,7 @@ async def clbk_back_end(
     logger_user_hand.debug('Exit')
 
 
-@user_router.message(StateFilter(default_state),
-                     ~F.text.in_({'/start'}),
+@user_router.message(StateFilter(default_state), ~F.text.in_({'/start'}),
                      F.content_type.in_(
                              {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, msg_processor: MessageProcessor):
@@ -139,7 +138,7 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
         value = await msg.answer('Эта команда для администраторов 😉')
         logger_user_hand.warning(f'Тапнул админку:'
                                  f'{msg.from_user.id}:'
-                          f'{await get_username(msg)}')
+                                 f'{await get_username(msg)}')
         await msg_processor.deletes_msg_a_delay(value, delay=4, indication=True)
         return
 
@@ -148,8 +147,8 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
                              f'пожалуйста кнопки для взаимодействия с ботом🙂')
     logger_user_hand.warning(f'Работа с кнопками:Послано боту->'
                              f'{msg.from_user.id}:'
-                      f'{await get_username(msg)}:'
-                      f'{msg.content_type}:{msg.text}')
+                             f'{await get_username(msg)}:'
+                             f'{msg.content_type}:{msg.text}')
     await msg_processor.deletes_msg_a_delay(value, delay=5, indication=True)
 
 
@@ -195,8 +194,8 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-@user_router.callback_query(F.data.in_(
-        [name for name in BUTT_COURSES if name.startswith(('id_1', 'id_2'))]),
+@user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
+        name.startswith(('id_1', 'id_2', 'id_3'))]),
         StateFilter(FSMQuiz.fill_course))
 async def clbk_select_course(
         clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
@@ -261,7 +260,8 @@ async def clbk_select_course(
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-                            name.startswith(('id_3', 'id_4', 'id_5', 'id_6'))]),
+                                        name.startswith(('id_4', 'id_5',
+                                        'id_6'))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс находиться в разработке', show_alert=True)
@@ -322,8 +322,7 @@ async def msg_sent_date(
 async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
         stepik: Stepik, w_text: bool, msg_processor: MessageProcessor):
-
-    logger_user_hand.debug(f'Entry {clbk_done.__name__=}')
+    logger_user_hand.debug('Entry')
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
 
@@ -348,6 +347,8 @@ async def clbk_done(
                                               ' обратитесь к администратору.')
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await state.clear()
+            logger_user_hand.debug('Exit:error')
+
             return
 
         try:
