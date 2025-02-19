@@ -63,7 +63,6 @@ async def get_username(_type_update: Message | CallbackQuery) -> str:
     :param _type_update: Объект Message или CallbackQuery.
     :return: Имя пользователя (str).
     """
-
     if username := _type_update.from_user.username:
         return username
     elif first_name := _type_update.from_user.first_name:

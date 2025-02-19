@@ -12,12 +12,11 @@ from keyboards import kb_butt_quiz, kb_back_cancel, kb_done_newsletter
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
-from states.states import FSMAdminPanel
+from states.states import FSMAdminPanel, FSMQuiz
 from utils import MessageProcessor, get_username
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
-
 logger_admin = logging.getLogger(__name__)
 
 
