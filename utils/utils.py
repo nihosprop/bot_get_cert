@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import re
 from dataclasses import dataclass
 import io
 
@@ -18,7 +19,8 @@ from aiogram.types import (CallbackQuery,
                            FSInputFile,
                            Message,
                            LinkPreviewOptions,
-                           Update)
+                           Update,
+                           ChatFullInfo)
 from redis.asyncio import Redis
 
 from keyboards import BUTT_COURSES
@@ -55,7 +57,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
         logger_utils.debug('Exit')
         return status
 
-async def get_username(_type_update: Message | CallbackQuery) -> str:
+async def get_username(_type_update: Message | CallbackQuery | ChatFullInfo) -> str:
     """
     Возвращает имя пользователя.
     Если username отсутствует, использует first_name.
@@ -63,8 +65,15 @@ async def get_username(_type_update: Message | CallbackQuery) -> str:
     :param _type_update: Объект Message или CallbackQuery.
     :return: Имя пользователя (str).
     """
+    if isinstance(_type_update, ChatFullInfo):
+        if username := _type_update.username:
+            return f'@{username}'
+        elif first_name := _type_update.first_name:
+            return first_name
+        return str(_type_update.id)
+
     if username := _type_update.from_user.username:
-        return username
+        return f'@{username}'
     elif first_name := _type_update.from_user.first_name:
         return first_name
     return str(_type_update.from_user.id)
@@ -779,3 +788,35 @@ async def shifts_the_date_forward(days: int = 10):
             5: 'мая', 6: 'июня', 7: 'июля', 8: 'августа', 9: 'сентября',
             10: 'октября', 11: 'ноября', 12: 'декабря'}
     return f'{expire_date.day} {months[expire_date.month]}'
+
+
+async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
+    cursor = '0'
+    user_ids = []
+    while cursor:
+        cursor, keys = await redis_data.scan(cursor, match='*')
+        user_ids.extend([key for key in keys if re.match(r'^\d{9,10}$', key)])
+    logger_utils.debug(f'{user_ids=}')
+
+    courses: dict = {'214271': 1, '221885': 2, '227627': 3}
+    data_users: dict[int, list] = {}
+    for user in user_ids:
+        chat_data = await clbk.bot.get_chat(int(user))
+        username = await get_username(chat_data)
+        _, data = await redis_data.hscan(user)
+        logger_utils.debug(f'{data=}')
+        try:
+            key = courses[''.join(data.keys())]
+        except Exception as err:
+            logger_utils.error(f'Ошибка чтения ключа {err}', exc_info=True)
+        else:
+            # logger_admin.debug(f'{key=}')
+            data_users.setdefault(key, []).append(username)
+    logger_utils.debug(f'{data_users}')
+    text = ''
+    for num_course, users in data_users.items():
+        qt_users = len(users)
+        user_names = '\n'.join(users)
+        text += (f'<code>Курс №{num_course} прошли {qt_users}:</code>\n'
+                 f'{user_names}\n\n')
+    return text

@@ -12,8 +12,8 @@ from keyboards import kb_butt_quiz, kb_back_cancel, kb_done_newsletter
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
-from states.states import FSMAdminPanel, FSMQuiz
-from utils import MessageProcessor, get_username
+from states.states import FSMAdminPanel
+from utils import MessageProcessor, get_username, get_data_users
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
@@ -85,6 +85,14 @@ async def cmd_exit(
     await msg_processor.save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
 
+@admin_router.callback_query(F.data == 'certs_data',
+                             StateFilter(FSMAdminPanel.admin_menu))
+async def clbk_check_data_certs(clbk: CallbackQuery, state: FSMContext,
+                                redis_data: Redis):
+    text = await get_data_users(clbk, redis_data=redis_data)
+    await clbk.message.edit_text(text=text)
+    await state.clear()
+    await clbk.answer()
 
 @admin_router.callback_query(F.data == 'newsletter',
                             StateFilter(FSMAdminPanel.admin_menu))

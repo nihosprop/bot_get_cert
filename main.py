@@ -35,10 +35,13 @@ async def setup_redis(config: Config) -> tuple[
     """Настройка Redis для FSM, throttling и данных пользователей."""
     redis_fsm = Redis(host=config.redis_host, port=6379, db=0,
                       decode_responses=True)
+
     redis_throttling = RedisStorage.from_url(
             f'redis://{config.redis_host}:6379/1')
+
     redis_data = Redis(host=config.redis_host, port=6379, db=2,
                        decode_responses=True)
+
     redis_que = RedisSettings(host=config.redis_host, port=6379, database=3)
 
     try:
