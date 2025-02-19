@@ -23,4 +23,6 @@ BUTT_COURSES: dict[str, str] = {
 
 BUTT_URL_PROMO: dict[str, str] = {
         'Лучший по Python.Часть 2':
-            'https://stepik.org/a/221885/pay?promo=15f84e690c978074'}
+            'https://stepik.org/a/221885/pay?promo=15f84e690c978074',
+        'Лучший по Python.Часть 3':
+            'https://stepik.org/a/227627/pay?promo=1efcc4ae783b90a0'}
