@@ -57,20 +57,18 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
 
 async def get_username(_type_update: Message | CallbackQuery) -> str:
     """
-       Возвращает имя пользователя.
-       Если first_name отсутствует, использует username.
-       Если username также отсутствует, возвращает user_id.
-       :param _type_update: Объект Message или CallbackQuery.
-       :return: Имя пользователя.
-       """
-    user_name = _type_update.from_user.first_name
+    Возвращает имя пользователя.
+    Если username отсутствует, использует first_name.
+    Если first_name также отсутствует, возвращает user_id.
+    :param _type_update: Объект Message или CallbackQuery.
+    :return: Имя пользователя (str).
+    """
 
-    if not user_name:
-        if username := _type_update.from_user.username:
-            return f'@{username}'
-        else:
-            return str(_type_update.from_user.id)
-    return user_name
+    if username := _type_update.from_user.username:
+        return f'@{username}'
+    elif first_name := _type_update.from_user.first_name:
+        return first_name
+    return str(_type_update.from_user.id)
 
 @dataclass
 class StepikService:
