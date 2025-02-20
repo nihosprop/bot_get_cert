@@ -51,10 +51,9 @@ async def temp(clbk: CallbackQuery):
     await clbk.answer()
 
 
-# ??????
 @user_router.callback_query(F.data == '/cancel', StateFilter(default_state))
 async def clbk_cancel(clbk: CallbackQuery, state: FSMContext):
-    logger_user_hand.info(f'clbk_cancel:{clbk.from_user.id}'
+    logger_user_hand.info(f'cancel_default_state:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
     msg_processor = MessageProcessor(clbk, state)
     try:
@@ -221,7 +220,7 @@ async def clbk_select_course(
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
     course_id = str(clbk.data).split('_')[-1]
-    logger_user_hand.info(f'Проверка наличия серт у:{clbk.from_user.id}'
+    logger_user_hand.info(f'Проверка наличия серт:{clbk.from_user.id}'
                           f':{await get_username(clbk)}:{clbk.data}')
     cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
                                                    course_id)
@@ -449,7 +448,7 @@ async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
         msg_processor: MessageProcessor):
     logger_user_hand.warning(f'Ссылка записана:{msg.from_user.id}'
-                           f':{await get_username(msg)}:{msg.text}')
+                           f':{await get_username(msg)}:[{msg.text}]')
     # запись Stepik_user_id
     await state.update_data(stepik_user_id=stepik_user_id)
     await msg_processor.deletes_messages(msgs_for_del=True)

@@ -60,7 +60,7 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
 async def cmd_admin(
         msg: Message, state: FSMContext, redis_data: Redis,
         msg_processor: MessageProcessor):
-    logger_admin.info(f'Зашел в админку:{msg.from_user.id}'
+    logger_admin.info(f'Вход в админку:{msg.from_user.id}'
                       f':{await get_username(msg)}')
     keys = set(filter(lambda _id: _id.isdigit(), await redis_data.keys()))
     logger_admin.debug(f'{keys=}')
@@ -79,14 +79,14 @@ async def cmd_admin(
 async def cmd_exit(
         clbk: CallbackQuery, state: FSMContext,
         msg_processor: MessageProcessor):
+    logger_admin.info(f'Выход из админки:'
+                      f'{clbk.from_user.id}:{await get_username(clbk)}')
     await state.set_state(state=None)
     value = await clbk.message.edit_text(f'Вы вышли из админ-панели✅\n'
                                          f'{LexiconRu.text_survey}',
                                          reply_markup=kb_butt_quiz,
                                          disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
-    logger_admin.info(f'Выход из админки:'
-                      f'{clbk.from_user.id}:{await get_username(clbk)}')
     await clbk.answer()
 
 @admin_router.callback_query(F.data == 'certs_data',
