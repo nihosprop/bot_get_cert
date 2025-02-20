@@ -35,7 +35,8 @@ logger_user_hand = logging.getLogger(__name__)
 @user_router.message(F.text == '/start')
 async def cmd_start(
         msg: Message, state: FSMContext, msg_processor: MessageProcessor):
-    logger_user_hand.info(f'cmd_start:{await get_username(msg)}')
+    logger_user_hand.info(f'cmd_start:{msg.from_user.id}'
+                          f':{await get_username(msg)}')
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz,
@@ -45,21 +46,21 @@ async def cmd_start(
 
 @user_router.callback_query(F.data == 'get_promo')
 async def temp(clbk: CallbackQuery):
-
     await clbk.message.edit_text('Выберите курс, по которому хотите получить'
                                  ' скидку👇', reply_markup=kb_create_promo)
     await clbk.answer()
 
 
+# ??????
 @user_router.callback_query(F.data == '/cancel', StateFilter(default_state))
 async def clbk_cancel(clbk: CallbackQuery, state: FSMContext):
+    logger_user_hand.info(f'clbk_cancel:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     msg_processor = MessageProcessor(clbk, state)
-
     try:
         await state.clear()
     except Exception as err:
         logger_user_hand.error(f'{err=}', exc_info=True)
-
     value = await clbk.message.edit_text(LexiconRu.text_survey,
                                          reply_markup=kb_butt_quiz,
                                          disable_web_page_preview=True)
@@ -155,6 +156,8 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
 async def clbk_cancel_in_state(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
+    logger_user_hand.info(f'clbk_cancel:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     logger_user_hand.debug(f'Entry {clbk_cancel_in_state.__name__=}')
     try:
         await state.clear()
@@ -172,7 +175,11 @@ async def clbk_cancel_in_state(
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
 async def clbk_get_cert(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
+    logger_user_hand.info(f'Запрос сертификата:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     if not await check_user_in_group(clbk):
+        logger_user_hand.info(f'Отсутствие в группе:{clbk.from_user.id}'
+                              f':{await get_username(clbk)}')
         await clbk.answer('Вы еще не вступили в нашу дружную группу Лучший по'
                           ' Python ☺️', show_alert=True)
         return
@@ -187,6 +194,8 @@ async def clbk_get_cert(
 @user_router.callback_query(F.data.in_(BUTT_GENDER),
                             StateFilter(FSMQuiz.fill_gender))
 async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
+    logger_user_hand.info(f'Выбран пол:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}:{clbk.data}')
     await state.update_data(gender=clbk.data)
     await clbk.message.edit_text(LexiconRu.text_select_course,
                                  reply_markup=kb_courses)
@@ -200,10 +209,11 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 async def clbk_select_course(
         clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
         redis_data: Redis, w_text: bool, msg_processor: MessageProcessor):
-
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
     course_id = str(clbk.data).split('_')[-1]
+    logger_user_hand.info(f'Проверка наличия серт у:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}:{clbk.data}')
     cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
                                                    course_id)
     logger_user_hand.debug(f'{cert=}')
@@ -250,11 +260,12 @@ async def clbk_select_course(
 
         logger_user_hand.debug(f'Exit')
         return
-
+    logger_user_hand.info(f'Серт на руках не обнаружен:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}:{clbk.data}')
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
-    await MessageProcessor(clbk, state).save_msg_id(value, msgs_for_del=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_date_of_revocation)
     await clbk.answer()
 
@@ -292,6 +303,8 @@ async def delete_unexpected_messages(
 async def msg_full_name(
         msg: Message, state: FSMContext, full_name,
         msg_processor: MessageProcessor):
+    logger_user_hand.info(f'Корректное ФИО:{msg.from_user.id}'
+                          f':{await get_username(msg)}')
     await msg.delete()
     logger_user_hand.debug(f'{await state.get_state()=}')
     await state.update_data(full_name=full_name)
@@ -306,8 +319,9 @@ async def msg_full_name(
 async def msg_sent_date(
         msg: Message, state: FSMContext, date: str,
         msg_processor: MessageProcessor):
-    await msg.delete()
     logger_user_hand.debug('Entry')
+
+    await msg.delete()
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(date=date)
     value = await msg.answer(LexiconRu.text_data_done,
@@ -315,6 +329,7 @@ async def msg_sent_date(
                              disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMQuiz.fill_link_cert)
+
     logger_user_hand.debug('Exit')
 
 

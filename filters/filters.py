@@ -93,7 +93,7 @@ class IsFullName(BaseFilter):
             capitalized_words = [
                     "-".join(part.capitalize() for part in word.split("-")) for
                     word in words]
-            logger_filters.debug(f'Exit True {__class__.__name__}')
+            logger_filters.debug(f'Exit {__class__.__name__}')
             return {'full_name': ' '.join(capitalized_words)}
         else:
             logger_filters.warning(f'Не корректные ФИО:{msg.from_user.id}:'
@@ -115,9 +115,11 @@ class IsFullName(BaseFilter):
 
 
 class IsCorrectData(BaseFilter):
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
+    async def __call__(self, msg: Message, state: FSMContext,
+                       msg_processor: MessageProcessor) -> bool | dict[
+                                                                str, str]:
         logger_filters.debug(f'Entry {__class__.__name__}')
-        msg_processor = MessageProcessor(msg, state)
+        # msg_processor = MessageProcessor(msg, state)
         username = await get_username(msg)
 
         if msg.content_type != ContentType.TEXT:
@@ -146,7 +148,7 @@ class IsCorrectData(BaseFilter):
                                          f'Повнимательнее пожалуйста.')
                 await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                         indication=True)
-                return False
+                raise ValueError
 
             if date_obj.date() > datetime.now().date():
                 await msg.bot.delete_message(chat_id=msg.chat.id,
@@ -160,9 +162,9 @@ class IsCorrectData(BaseFilter):
             logger_filters.debug(f'Exit Done {__class__.__name__}')
             return {'date': date_str}
 
-        except ValueError as err:
+        except ValueError:
             logger_filters.warning(f'Некорректная дата:{username}:'
-                                   f'{msg.from_user.id}:{date_str=}:{err}')
+                                   f'{msg.from_user.id}:{date_str}')
             logger_filters.debug(f'Exit False {__class__.__name__}')
             await msg.bot.delete_message(chat_id=msg.chat.id,
                                          message_id=msg.message_id)
