@@ -85,6 +85,8 @@ async def cmd_exit(
                                          reply_markup=kb_butt_quiz,
                                          disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
+    logger_admin.info(f'Выход из админки:'
+                      f'{clbk.from_user.id}:{await get_username(clbk)}')
     await clbk.answer()
 
 @admin_router.callback_query(F.data == 'certs_data',
@@ -164,7 +166,7 @@ async def clbk_done_newsletter(clbk: CallbackQuery,
                            message=msg_letter, admin_ids=admin_ids,
                            end_cert=end_cert)
     except Exception as err:
-        logger_admin.error(f'Ошибка: {err}', exc_info=True)
+        logger_admin.error(f'Ошибка при рассылке: {err}', exc_info=True)
     await state.set_state(FSMAdminPanel.admin_menu)
     await clbk.answer()
 
