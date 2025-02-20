@@ -553,7 +553,7 @@ class StepikService:
             except Exception as err:
                 logger_utils.error(
                     f"Ошибка при удалении файла {output_file}: "
-                    f"{err.__class__.__name__}")
+                    f"{err.__class__.__name__}", exc_info=True)
 
 @dataclass
 class MessageProcessor:

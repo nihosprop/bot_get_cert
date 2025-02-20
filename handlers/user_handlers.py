@@ -342,7 +342,8 @@ async def clbk_done(
     logger_user_hand.debug('Entry')
     stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
                                    redis_data)
-
+    logger_user_hand.info(f'Анкета проверяется:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     value1 = await clbk.message.edit_text('Ваши данные проверяются⌛\n'
                                           'Ожидайте выдачи сертификата📜\n')
 
@@ -365,12 +366,14 @@ async def clbk_done(
             await msg_processor.save_msg_id(value, msgs_for_del=True)
             await state.clear()
             logger_user_hand.debug('Exit:error')
-
             return
 
         try:
             await clbk.answer('Идет проверка…')
             # генерация сертификата
+            logger_user_hand.info(f'Генерация сертификата для'
+                                  f' :{clbk.from_user.id}'
+                                  f':{await get_username(clbk)}')
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
                                                              w_text=w_text)
@@ -416,6 +419,9 @@ async def clbk_done(
             await state.clear()
             await clbk.answer()
     else:
+        logger_user_hand.info(f'Отсутствует серт на Stepik'
+                              f':{clbk.from_user.id}'
+                              f':{await get_username(clbk)}')
         value = await clbk.message.answer(f'{await get_username(clbk)}, у вас '
                                           f'пока нет сертификата этого курса🙁')
         await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
@@ -433,6 +439,8 @@ async def clbk_done(
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
         msg_processor: MessageProcessor):
+    logger_user_hand.warning(f'Ссылка записана:{msg.from_user.id}'
+                           f':{await get_username(msg)}:{msg.text}')
     # запись Stepik_user_id
     await state.update_data(stepik_user_id=stepik_user_id)
     await msg_processor.deletes_messages(msgs_for_del=True)

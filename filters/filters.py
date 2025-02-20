@@ -36,6 +36,8 @@ class IsValidProfileLink(BaseFilter):
             return {'stepik_user_id': stepik_user_id}
 
         await msg.delete()
+        logger_filters.warning(f'Ссылка не корректна:{msg.from_user.id}'
+                              f':{await get_username(msg)}:{msg.text}')
         value = await msg.answer(
                 f'{await get_username(msg)}, ваша ссылка на профиль не корректна, '
                 f'попробуйте еще раз.')
