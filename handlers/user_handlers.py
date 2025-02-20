@@ -447,8 +447,8 @@ async def clbk_done(
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
         msg_processor: MessageProcessor):
-    logger_user_hand.warning(f'Ссылка записана:{msg.from_user.id}'
-                           f':{await get_username(msg)}:[{msg.text}]')
+    logger_user_hand.info(f'Ссылка записана:{msg.from_user.id}'
+                          f':{await get_username(msg)}:[{msg.text}]')
     # запись Stepik_user_id
     await state.update_data(stepik_user_id=stepik_user_id)
     await msg_processor.deletes_messages(msgs_for_del=True)
