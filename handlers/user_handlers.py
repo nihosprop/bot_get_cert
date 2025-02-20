@@ -324,6 +324,8 @@ async def msg_sent_date(
     await msg.delete()
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.update_data(date=date)
+    logger_user_hand.info(f'Дата записана:{msg.from_user.id}'
+                          f':{await get_username(msg)}:{date}')
     value = await msg.answer(LexiconRu.text_data_done,
                              reply_markup=kb_back_cancel,
                              disable_web_page_preview=True)
