@@ -72,6 +72,8 @@ async def clbk_cancel(clbk: CallbackQuery, state: FSMContext):
                             StateFilter(FSMQuiz.fill_date_of_revocation))
 async def clbk_back_fill_date(clbk: CallbackQuery, state: FSMContext):
     logger_user_hand.debug('Entry')
+    logger_user_hand.info(f'[fill_date -> fill_courses]:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     try:
         await clbk.message.edit_text(LexiconRu.text_select_course,
                                      reply_markup=kb_courses)
@@ -84,6 +86,8 @@ async def clbk_back_fill_date(clbk: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_course))
 async def clbk_back_fill_course(clbk: CallbackQuery, state: FSMContext):
+    logger_user_hand.info(f'[fill_courses -> fill_gender]:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     await clbk.message.edit_text(LexiconRu.text_gender,
                                  reply_markup=kb_select_gender)
     await state.set_state(FSMQuiz.fill_gender)
@@ -93,6 +97,8 @@ async def clbk_back_fill_course(clbk: CallbackQuery, state: FSMContext):
 @user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.fill_gender))
 async def clbk_back_fill_(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
+    logger_user_hand.info(f'[fill_gender -> fill_full_name]:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
                                          reply_markup=kb_butt_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -105,7 +111,8 @@ async def clbk_back_fill_(
 async def clbk_back_fill_link_cert(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
-
+    logger_user_hand.info(f'[fill_link_cert -> fill_date]:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -118,6 +125,8 @@ async def clbk_back_fill_link_cert(
 async def clbk_back_end(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
+    logger_user_hand.info(f'[end -> fill_link_cert]:{clbk.from_user.id}'
+                          f':{await get_username(clbk)}')
     try:
         await msg_processor.deletes_messages(msgs_for_del=True)
     except Exception as err:
@@ -146,7 +155,7 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
     await msg.delete()
     value = await msg.answer(f'{await get_username(msg)}, используйте '
                              f'пожалуйста кнопки для взаимодействия с ботом🙂')
-    logger_user_hand.warning(f'Работа с кнопками:Послано боту->'
+    logger_user_hand.warning(f'Работа с кнопками:Сообщение от->'
                              f'{msg.from_user.id}:'
                              f'{await get_username(msg)}:'
                              f'{msg.content_type}:{msg.text}')
@@ -156,7 +165,7 @@ async def msg_other(msg: Message, msg_processor: MessageProcessor):
 @user_router.callback_query(F.data == '/cancel', ~StateFilter(default_state))
 async def clbk_cancel_in_state(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
-    logger_user_hand.info(f'clbk_cancel:{clbk.from_user.id}'
+    logger_user_hand.info(f'cancel_in_state:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
     logger_user_hand.debug(f'Entry {clbk_cancel_in_state.__name__=}')
     try:
@@ -290,7 +299,7 @@ async def delete_unexpected_messages(
     нажатия на кнопку.
     """
     logger_user_hand.warning(f"Перехвачено сообщение:{msg.content_type}:"
-                             f"{msg.text}"
+                             f"{msg.text}:"
                              f"{msg.from_user.id}:{await get_username(msg)}")
     await msg.delete()
     reminder = await msg.answer(
