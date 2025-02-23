@@ -59,11 +59,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
 
 async def get_username(_type_update: Message | CallbackQuery | ChatFullInfo) -> str:
     """
-    Возвращает имя пользователя.
-    Если username отсутствует, использует first_name.
-    Если first_name также отсутствует, возвращает user_id.
-    :param _type_update: Объект Message или CallbackQuery.
-    :return: Имя пользователя (str).
+
     """
     if isinstance(_type_update, ChatFullInfo):
         if username := _type_update.username:
@@ -84,6 +80,37 @@ class StepikService:
     client_secret: str
     redis_client: Redis
 
+    async def is_private_account(self, stepik_user_id: str):
+        logger_utils.info(f'Проверка Stepik-аккаунта юзера на приватность:'
+                          f'[Stepik_ID:{stepik_user_id}]')
+        url = f'https://stepik.org/api/users/{stepik_user_id}'
+        try:
+            access_token = await self.get_stepik_access_token()
+            headers = {'Authorization': f'Bearer {access_token}'}
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers) as response:
+                    if response.status == 200:
+                        response_data = await response.json()
+                        users = response_data.get('users')
+                        logger_utils.debug(f'{users=}')
+                        if users:
+                            is_private = users[0]['is_private']
+                            logger_utils.info(f'Stepik_ID:{stepik_user_id}:'
+                                              f'{'Приватный' if is_private
+                                              else 'Публичный'}')
+                            return True if is_private else False
+                        else:
+                            logger_utils.warning(
+                                f'Данные юзера не найдены для'
+                                f' stepik_id:{stepik_user_id}')
+                    else:
+                        logger_utils.error(
+                            f'Неожиданный статус ответа: {response.status}',
+                                exc_info=True)
+        except Exception as err:
+            logger_utils.error(f'Ошибка при проверке приватности аккаунта'
+                               f' пользователя: {err}', exc_info=True)
+
     async def get_stepik_access_token(self) -> str:
         """
         Получает токен доступа для Stepik API.
@@ -94,7 +121,7 @@ class StepikService:
         url = 'https://stepik.org/oauth2/token/'
 
         if cached_token:
-            logger_utils.debug("Используется кэшированный токен из Redis.")
+            logger_utils.debug('Используется кэшированный токен из Redis.')
             return cached_token
 
         data = {
@@ -110,30 +137,30 @@ class StepikService:
                     if resp.status != 200:
                         error_message = await resp.text()
                         logger_utils.error(
-                            f"Ошибка при запросе токена: {error_message}",
+                            f'Ошибка при запросе токена: {error_message}',
                             exc_info=True)
                         raise RuntimeError(
-                            f"Не удалось получить токен: {error_message}")
+                            f'Не удалось получить токен: {error_message}')
                     response = await resp.json()
                     access_token = response.get('access_token')
                     if not access_token:
-                        raise RuntimeError("Токен не найден в ответе API.")
+                        raise RuntimeError('Токен не найден в ответе API.')
                     # Сохраняем токен в Redis с TTL
                     await self.redis_client.set('stepik_token', access_token,
                                                 ex=3600)
                     logger_utils.debug(
-                        "Токен успешно получен и сохранён в Redis.")
+                        'Токен успешно получен и сохранён в Redis.')
                     return access_token
 
         except aiohttp.ClientError as err:
-            logger_utils.error(f"Ошибка сети при запросе токена: {err}",
+            logger_utils.error(f'Ошибка сети при запросе токена: {err}',
                                exc_info=True)
-            raise RuntimeError(f"Ошибка сети: {err}")
+            raise RuntimeError(f'Ошибка сети: {err}')
 
         except Exception as err:
-            logger_utils.error(f"Неожиданная ошибка при запросе токена: {err}",
+            logger_utils.error(f'Неожиданная ошибка при запросе токена: {err}',
                                exc_info=True)
-            raise RuntimeError(f"Неожиданная ошибка: {err}")
+            raise RuntimeError(f'Неожиданная ошибка: {err}')
 
     async def check_cert_in_user(self, tg_user_id: str, course_id: str) \
             -> bool | str:
@@ -161,9 +188,8 @@ class StepikService:
             logger_utils.error(f'Ошибка при сохранении данных в Redis: {err}',
                                exc_info=True)
 
-    @staticmethod
-    async def check_cert_in_stepik(stepik_user_id: str, course_id: str,
-                                   access_token: str) -> bool:
+    async def check_cert_in_stepik(self, stepik_user_id: str, course_id: str,
+                                   access_token: str) -> bool | str:
         """
         Проверяет наличие сертификата у пользователя на Stepik.
         :param stepik_user_id: ID пользователя на Stepik.
@@ -171,6 +197,9 @@ class StepikService:
         :param access_token: Токен доступа Stepik API.
         :return: True, если сертификат найден, иначе False.
         """
+        if await self.is_private_account(stepik_user_id):
+            return 'PRIVATE'
+
         page_number = 1
         while True:
             try:
@@ -180,7 +209,7 @@ class StepikService:
                             'Authorization': 'Bearer ' + access_token}) as response:
                         if response.status == 429:
                             logger_utils.warning(
-                                'Превышен лимит запросов. Ожидание…')
+                                'Превышен лимит запросов. Ожидание… 10c')
                             await asyncio.sleep(10)
                         response.raise_for_status()
                         data = await response.json()
@@ -197,7 +226,7 @@ class StepikService:
                         else:
                             break  # Больше страниц нет
             except Exception as err:
-                logger_utils.error(f"Ошибка при запросе сертификатов: {err}",
+                logger_utils.error(f'Ошибка при запросе сертификатов: {err}',
                                    exc_info=True)
                 raise
         return False  # Сертификат за курс не найден
@@ -223,8 +252,8 @@ class StepikService:
 
             # Проверка значений gender и course
             if gender not in ('female', 'male'):
-                logger_utils.error(f"Неизвестное значение gender: {gender}")
-                raise ValueError(f"Неизвестное значение gender: {gender}")
+                logger_utils.error(f'Неизвестное значение gender: {gender}')
+                raise ValueError(f'Неизвестное значение gender: {gender}')
 
             if course not in ('Лучший по Python.Часть 1', 'Лучший по Python.Часть 2'):
                 logger_utils.error(f"Неизвестное значение course: {course}")
@@ -232,12 +261,12 @@ class StepikService:
 
         except KeyError as err:
             logger_utils.error(
-                f"Ошибка при извлечении данных из state_data: {err}",
+                f'Ошибка при извлечении данных из state_data: {err}',
                 exc_info=True)
             return None
         except Exception as err:
             logger_utils.error(
-                f"Неизвестная ошибка при извлечении данных из state_data: {err}",
+                f'Неизвестная ошибка при извлечении данных из state_data: {err}',
                 exc_info=True)
             return None
 
@@ -265,25 +294,25 @@ class StepikService:
             # Проверка, что template_name не равен None
             if template_name is None:
                 logger_utils.error(
-                    f"Не удалось определить шаблон для gender={gender}, course={course}")
+                    f'Не удалось определить шаблон для gender={gender}, course={course}')
                 raise ValueError("Имя шаблона не может быть None")
 
-            logger_utils.debug(f"Выбран шаблон: {template_name}")
+            logger_utils.debug(f'Выбран шаблон: {template_name}')
 
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
             output_file = os.path.join(base_dir, f'BestInPython_{number}.pdf')
 
             if not os.path.exists(font_path):
-                raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
+                raise FileNotFoundError(f'Файл шрифта не найден: {font_path}')
 
         except FileNotFoundError as err:
-            logger_utils.error(f"Ошибка при определении путей: {err}",
+            logger_utils.error(f'Ошибка при определении путей: {err}',
                                exc_info=True)
             return None
         except Exception as err:
             logger_utils.error(
-                f"Неизвестная ошибка при определении путей: {err}",
+                f'Неизвестная ошибка при определении путей: {err}',
                 exc_info=True)
             return None
 
@@ -291,7 +320,7 @@ class StepikService:
         try:
             pdfmetrics.registerFont(TTFont('BitterReg', font_path))
         except Exception as err:
-            logger_utils.error(f"Ошибка при регистрации шрифта: {err}",
+            logger_utils.error(f'Ошибка при регистрации шрифта: {err}',
                                exc_info=True)
             return None
 
@@ -341,7 +370,7 @@ class StepikService:
                 writer.write(fh)
 
         except Exception as err:
-            logger_utils.error(f"Ошибка при работе с PDF: {err}", exc_info=True)
+            logger_utils.error(f'Ошибка при работе с PDF: {err}', exc_info=True)
             return None
 
         # 5. Возврат результата
@@ -366,14 +395,14 @@ class StepikService:
             output_file = os.path.join(base_dir, f'BestInPython_{cert_number}.pdf')
 
             if not os.path.exists(font_path):
-                raise FileNotFoundError(f"Файл шрифта не найден: {font_path}")
+                raise FileNotFoundError(f'Файл шрифта не найден: {font_path}')
         except FileNotFoundError as err:
-            logger_utils.error(f"Ошибка при определении путей: {err}",
+            logger_utils.error(f'Ошибка при определении путей: {err}',
                                exc_info=True)
             return None
         except Exception as err:
             logger_utils.error(
-                    f"Неизвестная ошибка при определении путей: {err}",
+                    f'Неизвестная ошибка при определении путей: {err}',
                     exc_info=True)
             return None
 
@@ -381,7 +410,7 @@ class StepikService:
         try:
             pdfmetrics.registerFont(TTFont('BitterReg', font_path))
         except Exception as err:
-            logger_utils.error(f"Ошибка при регистрации шрифта: {err}",
+            logger_utils.error(f'Ошибка при регистрации шрифта: {err}',
                                exc_info=True)
             return None
 

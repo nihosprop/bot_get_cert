@@ -217,7 +217,7 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 async def clbk_select_course(
         clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
         redis_data: Redis, w_text: bool, msg_processor: MessageProcessor):
-    stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
+    stepik_service = StepikService(stepik.client_id, stepik.client_secret,
                                    redis_data)
     course_id = str(clbk.data).split('_')[-1]
     logger_user_hand.info(f'Проверка наличия серт:{clbk.from_user.id}'
@@ -348,7 +348,7 @@ async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
         stepik: Stepik, w_text: bool, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
-    stepik_service = StepikService(stepik.client_id, stepik.client_cecret,
+    stepik_service = StepikService(stepik.client_id, stepik.client_secret,
                                    redis_data)
     logger_user_hand.info(f'Анкета проверяется:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
@@ -361,6 +361,26 @@ async def clbk_done(
     certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
                                                              course_id,
                                                              access_token)
+    if certificates == 'PRIVATE':
+        value = await clbk.message.edit_text(f'{await get_username(clbk)},'
+                                     f' у вас приватный аккаунт на Stepik, '
+                                     f'бот не может проверить наличие сертификата.'
+                                     f' Отключите анонимность на время '
+                                     f'запроса:\n'
+                                     f'1.Зайти в Настройки\n'
+                                     f'2.Найти графу "Приватность"\n'
+                                     f'3.Снять галочку\n'
+                                     f'4.Нажать на "Сохранить изменения"\n'
+                                     f'5.Повторить анкету в боте\n\n'
+                                     f'После получения сертификата можете '
+                                     f'вернуть приватность, выставив галочку '
+                                     f'на место 😉\n\n'
+                                     f'Повторить анкету: <b>/start</b>')
+        await state.clear()
+        await msg_processor.save_msg_id(value, msgs_for_del=True)
+        await clbk.answer()
+        return
+
     if certificates:
         try:
             number = await redis_data.incr('end_number')

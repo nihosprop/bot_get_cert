@@ -12,7 +12,7 @@ class TgBot:
 @dataclass
 class Stepik:
     client_id: str
-    client_cecret: str
+    client_secret: str
 
 
 @dataclass
@@ -35,7 +35,7 @@ def load_config(path: str | None = None) -> Config:
     return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
                                id_admins=env('ID_ADMIN')),
                   stepik=Stepik(client_id=stepik_client_id,
-                                client_cecret=stepik_client_cecret),
+                                client_secret=stepik_client_cecret),
                   redis_host=redis_host,
                   level_log=level_log,
                   w_text=w_text)
