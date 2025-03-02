@@ -188,8 +188,8 @@ async def clbk_get_cert(
     if not await check_user_in_group(clbk):
         logger_user_hand.info(f'Отсутствие в группе:{clbk.from_user.id}'
                               f':{await get_username(clbk)}')
-        await clbk.answer('Вы еще не вступили в нашу дружную группу Лучший по'
-                          ' Python ☺️', show_alert=True)
+        await clbk.answer('Вы еще не вступили в нашу дружную группу'
+                          ' Лучший по Python ☺️', show_alert=True)
         return
 
     value = await clbk.message.edit_text(LexiconRu.text_sent_fullname,
