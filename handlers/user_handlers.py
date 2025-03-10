@@ -212,7 +212,7 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-        name.startswith(('id_1', 'id_2', 'id_3'))]),
+        name.startswith(('id_1', 'id_2'))]),
         StateFilter(FSMQuiz.fill_course))
 async def clbk_select_course(
         clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
@@ -276,10 +276,17 @@ async def clbk_select_course(
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-                                        name.startswith(('id_4', 'id_5',
+                                        name.startswith(('id_3', 'id_4', 'id_5',
                                         'id_6'))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
+    if clbk.data.startswith('id_3'):
+        await clbk.answer('Сертификат в процессе изготовления.', show_alert=True)
+        logger_user_hand.warning(
+            f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
+            f'{await get_username(clbk)}')
+        return
+
     await clbk.answer('Курс находиться в разработке', show_alert=True)
     logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
                              f'{await get_username(clbk)}')
