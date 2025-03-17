@@ -255,7 +255,8 @@ class StepikService:
                 logger_utils.error(f'Неизвестное значение gender: {gender}')
                 raise ValueError(f'Неизвестное значение gender: {gender}')
 
-            if course not in ('Лучший по Python.Часть 1', 'Лучший по Python.Часть 2'):
+            if course not in ('Лучший по Python.Часть 1',
+            'Лучший по Python.Часть 2', 'Лучший по Python.Часть 3'):
                 logger_utils.error(f"Неизвестное значение course: {course}")
                 raise ValueError(f"Неизвестное значение course: {course}")
 
@@ -284,12 +285,16 @@ class StepikService:
                         template_name = '1 часть жен.pdf'
                     case 'Лучший по Python.Часть 2':
                         template_name = '2 часть жен.pdf'
+                    case 'Лучший по Python.Часть 3':
+                        template_name = '3 часть жен.pdf'
             elif gender == 'male':
                 match course:
                     case 'Лучший по Python.Часть 1':
                         template_name = '1 часть муж.pdf'
                     case 'Лучший по Python.Часть 2':
                         template_name = '2 часть муж.pdf'
+                    case 'Лучший по Python.Часть 3':
+                        template_name = '3 часть муж.pdf'
 
             # Проверка, что template_name не равен None
             if template_name is None:
@@ -534,8 +539,7 @@ class StepikService:
                                clbk: CallbackQuery,
                                output_file: str,
                                state: FSMContext,
-                               course_id: str, is_copy=False)\
-            -> None:
+                               course_id: str, is_copy=False) -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
         :param course_id: IG курса на Stepik
