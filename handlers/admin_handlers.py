@@ -7,14 +7,13 @@ from aiogram.types import CallbackQuery, Message
 from arq.connections import RedisSettings
 from redis.asyncio import Redis
 
-from config_data.config import Stepik
 from filters.filters import IsAdmins
 from keyboards import kb_butt_quiz, kb_back_cancel, kb_done_newsletter
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
 from states.states import FSMAdminPanel
-from utils import MessageProcessor, get_username, get_data_users, StepikService
+from utils import MessageProcessor, get_username, get_data_users
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
