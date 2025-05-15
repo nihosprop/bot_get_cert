@@ -126,8 +126,7 @@ async def run_arq_worker(redis_que: RedisSettings, bot: Bot):
     async def startup(ctx):
         ctx['bot'] = bot  # Передаем бота в контекст
 
-    worker = Worker(functions=[safe_send_message, on_mailing_completed],
-                    redis_settings=redis_que, on_startup=startup,
-                    max_jobs=5, handle_signals=False,
-                    health_check_interval=15)
+    worker = Worker(functions=[safe_send_message,   on_mailing_completed],
+                    redis_settings=redis_que, on_startup=startup, max_jobs=5,
+                    handle_signals=False, health_check_interval=15)
     await worker.async_run()
