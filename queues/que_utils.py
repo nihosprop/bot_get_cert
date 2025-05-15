@@ -33,7 +33,7 @@ async def safe_send_message(ctx: dict,
         except TelegramRetryAfter as e:
             wait_time = e.retry_after
             queue_logger.warning(f"Ограничение лимита для {user_id}. "
-                           f"Повтор {attempt}/{retries}. Ожидание "
+                                 f"Повтор {attempt}/{retries}. Ожидание "
                                  f"{wait_time}s", exc_info=True)
             await asyncio.sleep(wait_time)
 
