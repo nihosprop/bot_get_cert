@@ -73,6 +73,10 @@ class ThrottlingMiddleware(BaseMiddleware):
             # Если это групповой чат, пропускаем тротлинг
             return await handler(event, data)
 
+        admins_id = data.get('admins').split()
+        if str(event.from_user.id) in admins_id:
+            return await handler(event, data)
+
         state: FSMContext = data.get('state')
         msg_processor = MessageProcessor(event, state)
 
