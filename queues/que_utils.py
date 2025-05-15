@@ -84,12 +84,9 @@ async def mass_mailing(redis_que: RedisSettings, user_ids: set[int],
         await asyncio.sleep(delay)
 
     # Ожидание выполнения всех задач
-    results = []
     for task in tasks:
         try:
-            # Получаем результат задачи
             result = await task.result()
-            # Если результат True, увеличиваем счетчик успешных отправок
             if result:
                 successful += 1
         except Exception as e:
