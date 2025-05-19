@@ -37,7 +37,7 @@ async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
     logger_user_hand.info(f'Сказал Спасибо!:{await get_username(msg)}')
     await msg.delete()
     answer_thnks = await msg.answer(f'{await get_username(msg)}!'
-                                    f'Спасибо Вам за приятные слова!\n'
+                                    f' Спасибо Вам за приятные слова!\n'
                                     'Мы это ценим!😇')
     await msg_processor.deletes_msg_a_delay(answer_thnks,
                                             delay=15,
