@@ -1,7 +1,6 @@
 import logging
 
 from aiogram import F, Router
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
@@ -18,13 +17,12 @@ from keyboards import (BUTT_COURSES,
                        kb_create_promo,
                        kb_end_quiz,
                        kb_select_gender)
-from lexicon.lexicon_ru import LexiconRu, Links
+from lexicon.lexicon_ru import LexiconRu
 from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
 from utils import (StepikService,
                    check_user_in_group,
-                   get_username,
-                   shifts_the_date_forward)
+                   get_username)
 from utils.utils import MessageProcessor
 
 user_router = Router()
