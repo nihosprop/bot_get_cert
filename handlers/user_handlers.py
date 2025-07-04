@@ -305,8 +305,9 @@ async def delete_unexpected_messages(
     нажатия на кнопку.
     """
     logger_user_hand.warning(f"Перехвачено сообщение:{msg.content_type}:"
-                             f"{msg.text}:"
-                             f"{msg.from_user.id}:{await get_username(msg)}")
+                             f"[{msg.text}]:"
+                             f"TG_ID[{msg.from_user.id}]"
+                             f":{await get_username(msg)}")
     await msg.delete()
     reminder = await msg.answer(
             f'{await get_username(msg)} пожалуйста, используйте кнопки для '
