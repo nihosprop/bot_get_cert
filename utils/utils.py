@@ -121,7 +121,7 @@ class StepikService:
         url = 'https://stepik.org/oauth2/token/'
 
         if cached_token:
-            logger_utils.debug('Используется кэшированный токен из Redis.')
+            logger_utils.info('Используется кэшированный токен из Redis.')
             return cached_token
 
         data = {
@@ -148,7 +148,7 @@ class StepikService:
                     # Сохраняем токен в Redis с TTL
                     await self.redis_client.set('stepik_token', access_token,
                                                 ex=35000)
-                    logger_utils.debug(
+                    logger_utils.info(
                         'Токен успешно получен и сохранён в Redis.')
                     return access_token
 
