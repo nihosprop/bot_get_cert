@@ -147,7 +147,7 @@ class StepikService:
                         raise RuntimeError('Токен не найден в ответе API.')
                     # Сохраняем токен в Redis с TTL
                     await self.redis_client.set('stepik_token', access_token,
-                                                ex=3600)
+                                                ex=35000)
                     logger_utils.debug(
                         'Токен успешно получен и сохранён в Redis.')
                     return access_token
