@@ -653,8 +653,7 @@ class MessageProcessor:
                                 chat_id=chat_id, message_id=msg_id)
                     except Exception as err:
                         logger_utils.warning(
-                                f'Failed to delete message:{msg_id=}: '
-                                f'{err=}')
+                                f'Failed to delete message ID:{msg_id}:{err}')
                 await self._state.update_data({key: []})
 
         logger_utils.debug('Exit')
