@@ -29,18 +29,37 @@
 ```bash
 
 # Клонирование репозитория
-git clone https://github.com/yourname/CertiStepikBot.git
+git clone https://github.com/nihosprop/bot_get_cert.git
 ```
 Структура проекта
 ```
 your_name_bot_dir
+├── data
+│  ├── 1 часть жен.pdf
+│  ├── 1 часть муж.pdf
+│  └── Bitter-Regular.ttf
 ├── docker-compose.yml
+├── logs
+│  └── logging_setting
+│    └── log_config.yml
+└── redis.conf
 ├── .env
 ```
 
-Деплой
+Деплой через docker-composePROD
 
-```bash
-# 1. Настроить .env по образцу .env.example
-# 2. Запустить сервисы:
-docker-compose up -d
+```code
+1. Прописать docker-compose.yml заменив данные на свои.
+
+2. Прописать .env по аналогии .env.example, заменив данные на свои
+
+2. Прописать redis.conf под свои нужды..
+
+! Задать пароль для Redis в .env и redis.conf
+! Redis пароли должны совпадать в .env и redis.conf
+```
+
+Находясь в корне проекта(бота) исполнить:
+```code
+docker compose up -d
+```
