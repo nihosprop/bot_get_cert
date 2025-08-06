@@ -65,7 +65,9 @@ your_name_bot_dir
 Деплой через docker-composePROD
 
 ```code
-1. Прописать docker-compose.yml заменив данные на свои.
+0. Добавить в папку data(static в локаьлной версии) .pdf шаблоны сертификатов 
+
+1. Прописать docker-compose.yml заменив данные на свои
 
 2. Прописать .env по аналогии .env.example, заменив данные на свои
 
