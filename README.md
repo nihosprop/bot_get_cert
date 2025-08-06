@@ -1,19 +1,46 @@
-# Certificate Factory Bot
+## BotGetCert
+✨ Возможности
 
-[![Version](https://img.shields.io/badge/version-_v2.3-blue)](https://github.com/nihosprop/bot_home_budget/releases/latest)
-[![Python Version](https://img.shields.io/badge/Python-3.13.1%2B-green)](https://www.python.org/downloads/release/python-3128/)
-[![Aiogram Version](https://img.shields.io/badge/Aiogram-3.15.0-green)](https://pypi.org/project/aiogram/3.15.0/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20iOS%20%7C%20Android%20%7C%20Linux-lightgrey%20%7C%20)](https://github.com/nihosprop/bot_home_budget.svg)
-![GitHub stars](https://img.shields.io/github/stars/nihosprop/bot_home_budget.svg)
-![GitHub forks](https://img.shields.io/github/forks/nihosprop/bot_home_budget.svg)
-![GitHub issues](https://img.shields.io/github/issues/nihosprop/bot_home_budget.svg)
-[![Redis Version](https://img.shields.io/badge/Redis-6.2.11-red)](https://redis.io/download)
-[![Docker Version](https://img.shields.io/badge/Docker-19.03.13-blue)](https://hub.docker.com/_/docker)
+- **Автоматическая генерация** сертификатов PDF/PNG
+- **Интеграция с Stepik API**:
+  - Проверка завершения курса
+  - Получение данных студента
+- **Персонализация**:
+  - Подпись преподавателя
+- **Управление через Telegram**:
+  - Запрос сертификата
+  - История выданных документов
 
-## Поддерживаемые технологии
-Этот проект использует Redis для хранения данных и Docker для контейнеризации приложения.
-### Redis
-Мы используем Redis в качестве базы данных для хранения временных данных и кеша.
-### Docker
-Проект упакован в Docker-контейнер для удобства развертывания и масштабируемости.
+## 🛠 Технологический стек
+
+| Компонент          | Назначение                                                                      |
+|--------------------|---------------------------------------------------------------------------------|
+| **Python 3.13+**   | Основной язык разработки                                                        |
+| **Aiogram**        | Telegram Bot Framework                                                          |
+| **PostgreSQL**     | Хранение данных сертификатов и пользователей                                    |
+| **ReportLab**      | Генерация PDF-сертификатов                                                      |
+| **Pillow**         | Создание графических сертификатов (PNG)                                         |
+| **Docker**         | Контейнеризация                                                                 |
+| **Stepik API**     | Интеграция с образовательной платформой                                         |
+| **GitHub Actions** | CI/CD: автотесты и деплой на DockerHub                                          |
+
+## 🚀 Быстрый старт
+
+```bash
+# Клонирование репозитория
+git clone https://github.com/yourname/CertiStepikBot.git
+```
+Структура проекта
+```
+certi_stepik_bot
+├── docker-compose.yml
+├── .env
+├── configs/
+│   └── certificate_templates/
+└── postgres/
+    └── init.sql
+Деплой
+bash
+# 1. Настроить .env по образцу .env.example
+# 2. Запустить сервисы:
+docker-compose up -d
