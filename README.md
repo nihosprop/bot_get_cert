@@ -27,20 +27,20 @@
 ## 🚀 Быстрый старт
 
 ```bash
+
 # Клонирование репозитория
 git clone https://github.com/yourname/CertiStepikBot.git
 ```
 Структура проекта
 ```
-certi_stepik_bot
+your_name_bot_dir
 ├── docker-compose.yml
 ├── .env
-├── configs/
-│   └── certificate_templates/
-└── postgres/
-    └── init.sql
+```
+
 Деплой
-bash
+
+```bash
 # 1. Настроить .env по образцу .env.example
 # 2. Запустить сервисы:
 docker-compose up -d
