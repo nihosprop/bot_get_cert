@@ -1,6 +1,14 @@
 ## BotGetCert
 [![BotGetCert](https://img.shields.io/badge/%F0%9F%94%B5_Bot_Get_Cert-0088CC?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/certificates7_bot)
 
+<div align="center">
+  <a href="https://t.me/certificates7_bot">
+    <img src="https://img.icons8.com/clouds/100/000000/telegram-app.png" width="100"/>
+    <br>
+    <strong>🚀 Протестировать бота BotGetCert</strong>
+  </a>
+</div>
+
 ✨ Возможности
 
 - **Автоматическая генерация** сертификатов PDF/PNG
