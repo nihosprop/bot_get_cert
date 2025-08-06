@@ -1,4 +1,10 @@
 ## BotGetCert
+[![Version](https://img.shields.io/badge/version-v2.5-blue)](https://github.com/yourname/BotStepikGuard/releases)
+[![Python](https://img.shields.io/badge/Python-3.13.1-green)](https://www.python.org/)
+[![Aiogram](https://img.shields.io/badge/Aiogram-3.21-brightgreen)](https://docs.aiogram.dev/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Redis](https://img.shields.io/badge/Redis-7-red)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-20.10%2B-blue)](https://www.docker.com/)
 <div align="center">
   <a href="https://t.me/certificates7_bot">
     <img src="https://img.icons8.com/clouds/100/000000/telegram-app.png" 
