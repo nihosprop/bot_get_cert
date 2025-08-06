@@ -1,4 +1,6 @@
 ## BotGetCert
+[![BotGetCert](https://img.shields.io/badge/%F0%9F%94%B5_Bot_Get_Cert-0088CC?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/certificates7_bot)
+
 ✨ Возможности
 
 - **Автоматическая генерация** сертификатов PDF/PNG
@@ -6,7 +8,7 @@
   - Проверка завершения курса
   - Получение данных студента
 - **Персонализация**:
-  - Подпись преподавателя
+  - Подпись преподавателяЛЛ
 - **Управление через Telegram**:
   - Запрос сертификата
   - История выданных документов
