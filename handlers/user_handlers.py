@@ -290,7 +290,11 @@ async def clbk_select_course(
                                         'id_6'))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
+    
+    if clbk.data.startswith('id_4'):
+        await clbk.answer('Сертификат находится в разработке', show_alert=True)
     await clbk.answer('Курс находиться в разработке', show_alert=True)
+    
     logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
                              f'{await get_username(clbk)}')
 
