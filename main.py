@@ -14,7 +14,8 @@ from keyboards.set_menu import set_main_menu
 from handlers import admin_handlers, user_handlers
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
-                               ThrottlingMiddleware)
+                               ThrottlingMiddleware,
+                               StrictMaintenanceMiddleware)
 from queues.que_utils import run_arq_worker
 
 logger_main = logging.getLogger(__name__)
@@ -68,17 +69,23 @@ async def main():
     await set_main_menu(bot)
 
     try:
-        # routers
-        dp.include_router(admin_handlers.admin_router)
-        dp.include_router(user_handlers.user_router)
-
-        # middlewares
+        # middlewares (register first to wrap entire pipeline)
+        maintenance_middleware = StrictMaintenanceMiddleware(
+            redis=redis_data, enabled=False,
+            # По умолчанию выключено, можно включать через Redis
+            message="⚙️ Бот временно недоступен из-за технических работ. Приносим извинения за неудобства!")
+        dp.update.outer_middleware(maintenance_middleware)
         dp.update.middleware(RedisMiddleware(redis=redis_data))
+
         dp.update.middleware(MsgProcMiddleware())
         dp.message.outer_middleware(
                 ThrottlingMiddleware(storage=storage_throttling, ttl=700))
         dp.callback_query.outer_middleware(
                 ThrottlingMiddleware(storage=storage_throttling, ttl=500))
+
+        # routers
+        dp.include_router(admin_handlers.admin_router)
+        dp.include_router(user_handlers.user_router)
 
         await bot.delete_webhook(drop_pending_updates=True)
         logger_main.info('Start bot')
