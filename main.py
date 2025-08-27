@@ -70,11 +70,11 @@ async def main():
 
     try:
         # middlewares (register first to wrap entire pipeline)
-        maintenance_middleware = StrictMaintenanceMiddleware(
-            redis=redis_data, enabled=False,
+        # maintenance_middleware = StrictMaintenanceMiddleware(
+        #     redis=redis_data, enabled=True,
             # По умолчанию выключено, можно включать через Redis
-            message="⚙️ Бот временно недоступен из-за технических работ. Приносим извинения за неудобства!")
-        dp.update.outer_middleware(maintenance_middleware)
+            # message="⚙️ Бот временно недоступен из-за технических работ. Приносим извинения за неудобства!")
+        # dp.update.outer_middleware(maintenance_middleware)
         dp.update.middleware(RedisMiddleware(redis=redis_data))
 
         dp.update.middleware(MsgProcMiddleware())
