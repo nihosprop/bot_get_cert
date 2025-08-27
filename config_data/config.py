@@ -27,7 +27,7 @@ class Config:
 def load_config(path: str | None = None) -> Config:
     env = Env()
     env.read_env(path)
-    redis_host = env.str("REDIS_HOST", "localhost")  # По умолчанию "localhost"
+    redis_host = env.str("REDIS_HOST", "localhost")
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_cecret = env('STEPIK_CLIENT_CECRET')
     level_log = env('LOG_LEVEL', 'INFO')
