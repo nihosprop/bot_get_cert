@@ -370,17 +370,19 @@ async def clbk_done(
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
     access_token = await stepik_service.get_stepik_access_token()
-    certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
-                                                             course_id,
-                                                             access_token)
-    if certificates == 'PRIVATE':
-        value = await clbk.message.edit_text(f'{await get_username(clbk)},'
-                                             f'{LexiconRu.text_privacy_instructions}')
-        await state.clear()
-        await msg_processor.save_msg_id(value, msgs_for_del=True)
-        await clbk.answer()
-        return
-
+    # TODO: временно откл проверку серт, включить после устранения неполадок
+    # certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
+    #                                                          course_id,
+    #                                                          access_token)
+    # if certificates == 'PRIVATE':
+    #     value = await clbk.message.edit_text(f'{await get_username(clbk)},'
+    #                                          f'{LexiconRu.text_privacy_instructions}')
+    #     await state.clear()
+    #     await msg_processor.save_msg_id(value, msgs_for_del=True)
+    #     await clbk.answer()
+    #     return
+    # TODO: удалить строку ниже
+    certificates = True
     if certificates:
         try:
             number = await redis_data.incr('end_number')
