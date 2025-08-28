@@ -371,7 +371,6 @@ async def clbk_done(
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
     
-    certificates = None
     try:
         access_token = await stepik_service.get_stepik_access_token()
         certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
