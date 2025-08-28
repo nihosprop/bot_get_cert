@@ -382,7 +382,7 @@ async def clbk_done(
             f'{clbk.from_user.id}, '
             f'username: {await get_username(clbk)}, '
             f'stepik_user_id: {stepik_user_id}, course_id: {course_id},'
-            f'из-за ошибки передачи данных! Сертификат выдан без проверки!', {e})
+            f'из-за ошибки передачи данных! Сертификат выдан без проверки!, {e}')
         certificates = True
     
     if certificates == 'PRIVATE':
