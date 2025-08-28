@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message
+from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Stepik
@@ -369,10 +370,22 @@ async def clbk_done(
 
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
-    access_token = await stepik_service.get_stepik_access_token()
-    certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
+    
+    certificates = None
+    try:
+        access_token = await stepik_service.get_stepik_access_token()
+        certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
                                                              course_id,
                                                              access_token)
+    except ConnectionTimeoutError as e:
+        logger_user_hand.warning(
+            f'Не удалось проверить сертификат на Stepik для user_id:'
+            f'{clbk.from_user.id}, '
+            f'username: {await get_username(clbk)}, '
+            f'stepik_user_id: {stepik_user_id}, course_id: {course_id},'
+            f'из-за ошибки передачи данных! Сертификат выдан без проверки!', {e})
+        certificates = True
+    
     if certificates == 'PRIVATE':
         value = await clbk.message.edit_text(f'{await get_username(clbk)},'
                                              f'{LexiconRu.text_privacy_instructions}')
