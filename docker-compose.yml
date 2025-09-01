@@ -1,22 +1,60 @@
+#services:
+#  main:
+#    image: niwibonihs/bot_get_cert:v2.5
+#    container_name: Bot_Get_Cert
+#    restart: "unless-stopped"
+#    env_file: .env
+#    depends_on:
+#      - "redis_fsm"
+#    networks:
+#      - my-network
+#
+#  redis_fsm:
+#    image: "redis:7"
+#    ports:
+#      - "6379:6379"  # Добавьте эту строку
+#    command: redis-server --bind 0.0.0.0
+#    container_name: RedisFSM
+#    restart: "unless-stopped"
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "ping" ]
+#    networks:
+#      - my-network
+#
+#networks:
+#  my-network:
 services:
   main:
-    image: niwibonihs/bot_get_cert:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: Bot_Get_Cert
-    restart: "unless-stopped"
+    restart: unless-stopped
     env_file: .env
     depends_on:
-      - "redis_fsm"
+      redis_fsm:
+        condition: service_healthy
     networks:
       - my-network
+    # Опционально: монтируйте код для горячих правок (если Dockerfile работает из /app)
+    volumes:
+      - ./:/app
 
   redis_fsm:
-    image: "redis:7"
+    image: redis:7
     container_name: RedisFSM
-    restart: "unless-stopped"
+    restart: unless-stopped
+    command: ["redis-server", "--bind", "0.0.0.0"]
+    ports:
+      - "6379:6379"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
       - my-network
 
 networks:
   my-network:
+    driver: bridge

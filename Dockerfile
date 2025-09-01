@@ -1,12 +1,38 @@
-# Stage 0: Build dependencies
-FROM python:3.13.1-slim-bullseye AS base
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache -r requirements.txt
+# === Builder stage ===
+FROM ghcr.io/astral-sh/uv:python3.13-alpine AS builder
 
-# Stage 1: Add application code
-FROM base
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy
+
+RUN apk update \
+  && apk add --no-cache gcc musl-dev
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv pip install --system --no-cache-dir . \
+  && apk del gcc musl-dev \
+  && rm -rf /var/cache/apk/*
+
+# === Runtime stage ===
+FROM python:3.13-alpine AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY --from=builder /usr/local/lib/python3.13/site-packages \
+                    /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
 COPY . /app
+
+RUN adduser -D appuser \
+  && chown -R appuser:appuser /app
+
+USER appuser
+
 CMD ["python", "main.py"]
