@@ -14,6 +14,7 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv pip install --system --no-cache-dir . \
   && apk del gcc musl-dev \
+  && rm -f $(which uv) \
   && rm -rf /var/cache/apk/*
 
 # === Runtime stage ===
@@ -26,11 +27,16 @@ WORKDIR /app
 
 COPY --from=builder /usr/local/lib/python3.13/site-packages \
                     /usr/local/lib/python3.13/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY . /app
 
-RUN adduser -D appuser \
+RUN rm -rf $(which pip) $(which pip3) \
+    /usr/local/lib/python3.13/site-packages/pip* \
+    /usr/local/lib/python3.13/site-packages/setuptools* \
+    /usr/local/lib/python3.13/site-packages/pkg_resources* \
+    /usr/local/bin/idle* \
+    /usr/local/bin/pydoc* \
+  && adduser -D appuser \
   && chown -R appuser:appuser /app
 
 USER appuser
