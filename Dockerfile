@@ -14,8 +14,8 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv pip install --system --no-cache-dir . \
   && apk del gcc musl-dev \
-  && rm -f $(which uv) \
-  && rm -rf /var/cache/apk/*
+  && rm -rf $(which uv) \
+    /var/cache/apk/*
 
 # === Runtime stage ===
 FROM python:3.13-alpine AS runtime
