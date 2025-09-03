@@ -15,13 +15,13 @@ formatters:
 
 filters:
   error_critical_filter:
-    (): logs.logging_setting.log_filters.ErrorCriticalLogFilter
+    (): logging_setting.log_filters.ErrorCriticalLogFilter
 
   info_warning_err_filter:
-    (): logs.logging_setting.log_filters.InfoWarningLogFilter
+    (): logging_setting.log_filters.InfoWarningLogFilter
 
   debug_filter:
-    (): logs.logging_setting.log_filters.DebugLogFilter
+    (): logging_setting.log_filters.DebugLogFilter
 
 handlers:
   default:

@@ -39,6 +39,7 @@ services:
     # Опционально: монтируйте код для горячих правок (если Dockerfile работает из /app)
     volumes:
       - ./:/app
+#      - .logs:/app/logs
 
   redis_fsm:
     image: redis:7
@@ -58,3 +59,7 @@ services:
 networks:
   my-network:
     driver: bridge
+
+volumes:
+  logs:
+    name: Logs_Bot_Get_Cert
