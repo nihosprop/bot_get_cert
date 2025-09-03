@@ -26,7 +26,7 @@ handlers:
 
   stdout:
     class: logging.StreamHandler
-    formatter: formatter_1
+    formatter: formatter
     stream: ext://sys.stdout
 
   warning_file:
