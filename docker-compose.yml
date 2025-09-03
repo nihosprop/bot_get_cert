@@ -31,6 +31,12 @@ services:
     container_name: Bot_Get_Cert
     restart: unless-stopped
     env_file: .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "7m"
+        max-file: "3"
+        rotate: "true"
     depends_on:
       redis_fsm:
         condition: service_healthy
@@ -39,7 +45,6 @@ services:
     # Опционально: монтируйте код для горячих правок (если Dockerfile работает из /app)
     volumes:
       - ./:/app
-#      - .logs:/app/logs
 
   redis_fsm:
     image: redis:7

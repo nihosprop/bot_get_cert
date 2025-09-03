@@ -30,15 +30,12 @@ COPY --from=builder /usr/local/lib/python3.13/site-packages \
 
 COPY . /app
 
-RUN mkdir -p /app/logs \
- && rm -rf $(which pip) $(which pip3) \
+RUN rm -rf $(which pip) $(which pip3) \
     /usr/local/lib/python3.13/site-packages/pip* \
     /usr/local/lib/python3.13/site-packages/setuptools* \
     /usr/local/lib/python3.13/site-packages/pkg_resources* \
     /usr/local/bin/idle* \
-    /usr/local/bin/pydoc* \
- && adduser -D appuser \
- && chown -R appuser:appuser /app
+    /usr/local/bin/pydoc*
 
 USER appuser
 

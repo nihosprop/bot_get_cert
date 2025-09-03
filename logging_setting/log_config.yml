@@ -7,119 +7,11 @@ formatters:
     datefmt: '%Y.%m.%d %H:%M:%S'
     style: '{'
 
-
-filters:
-  error_critical_filter:
-    (): logging_setting.log_filters.ErrorCriticalLogFilter
-
-  info_warning_err_filter:
-    (): logging_setting.log_filters.InfoWarningLogFilter
-
-  debug_filter:
-    (): logging_setting.log_filters.DebugLogFilter
-
 handlers:
-  default:
-    class: logging.StreamHandler
-    level: ${LOG_LEVEL}
-    formatter: formatter
-
   stdout:
     class: logging.StreamHandler
     formatter: formatter
     stream: ext://sys.stdout
-
-  warning_file:
-    class: logging.handlers.RotatingFileHandler
-    filename: logs/warning.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 3
-    encoding: utf-8
-    mode: w
-    formatter: formatter
-    filters: [info_warning_err_filter]
-
-  critical_file:
-    class: logging.handlers.RotatingFileHandler
-    filename: logs/critical.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 3
-    encoding: utf-8
-    mode: w
-    formatter: formatter
-    filters: [error_critical_filter]
-
-loggers:
-  queues.que_utils:
-    level: ${LOG_LEVEL}
-    handlers: [ stdout, warning_file, critical_file ]
-    propagate: no
-
-  handlers.admin_handlers:
-    level: ${LOG_LEVEL}
-    handlers: [ stdout, warning_file, critical_file ]
-    propagate: no
-
-  middlewares.outer:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  handlers.user_handlers:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  handlers.other_handlers:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  config_data.config:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  filters.filters:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  keyboards.keyboard_utils:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  keyboards.keyboards:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  keyboards.set_menu:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  lexicon.lexicon_ru:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  states.states:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-  utils.utils:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
-
-
-  __main__:
-    level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
-    propagate: no
 
 root:
   level: ${LOG_LEVEL}
