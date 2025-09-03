@@ -16,7 +16,7 @@ handlers:
 loggers:
   __main__:
     level: ${LOG_LEVEL}
-    handlers: [stdout, warning_file, critical_file]
+    handlers: [stdout]
     propagate: no
 
 root:
