@@ -76,7 +76,6 @@ async def main():
             # message="⚙️ Бот временно недоступен из-за технических работ. Приносим извинения за неудобства!")
         # dp.update.outer_middleware(maintenance_middleware)
         dp.update.middleware(RedisMiddleware(redis=redis_data))
-
         dp.update.middleware(MsgProcMiddleware())
         dp.message.outer_middleware(
                 ThrottlingMiddleware(storage=storage_throttling, ttl=700))
