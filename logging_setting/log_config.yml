@@ -128,4 +128,4 @@ loggers:
 
 root:
   level: ${LOG_LEVEL}
-  handlers: [default]
+  handlers: [stdout]
