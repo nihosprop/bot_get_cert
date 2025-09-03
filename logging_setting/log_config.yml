@@ -2,12 +2,7 @@ version: 1
 disable_existing_loggers: True
 
 formatters:
-  simple:
-    format: '[{asctime}] - {message}'
-    datefmt: '%Y.%m.%d %H:%M:%S'
-    style: '{'
-
-  formatter_1:
+  formatter:
     format: '[{asctime}] #{levelname:<8} {filename:<17}:{lineno:4} - <{funcName}> - {message}'
     datefmt: '%Y.%m.%d %H:%M:%S'
     style: '{'
@@ -27,7 +22,7 @@ handlers:
   default:
     class: logging.StreamHandler
     level: ${LOG_LEVEL}
-    formatter: formatter_1
+    formatter: formatter
 
   stdout:
     class: logging.StreamHandler
@@ -41,7 +36,7 @@ handlers:
     backupCount: 3
     encoding: utf-8
     mode: w
-    formatter: formatter_1
+    formatter: formatter
     filters: [info_warning_err_filter]
 
   critical_file:
@@ -51,7 +46,7 @@ handlers:
     backupCount: 3
     encoding: utf-8
     mode: w
-    formatter: formatter_1
+    formatter: formatter
     filters: [error_critical_filter]
 
 loggers:
