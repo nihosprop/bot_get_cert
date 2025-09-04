@@ -54,7 +54,7 @@ your_name_bot_dir
 │  ├── 1 часть жен.pdf
 │  ├── 1 часть муж.pdf
 │  └── Bitter-Regular.ttf
-├── docker-compose.yml
+├── docker-compose.PRODyml
 ├── logs
 │  └── app.log
 └── redis.conf
