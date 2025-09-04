@@ -14,7 +14,7 @@ handlers:
     stream: ext://sys.stdout
 
   file:
-    class: logging.FileHandler
+    class: logging.RotatingFileHandler
     formatter: formatter
     filename: /app/logs/app.log
     maxBytes: 1048576
