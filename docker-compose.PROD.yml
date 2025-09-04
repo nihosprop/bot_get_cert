@@ -48,7 +48,6 @@ services:
 volumes:
   redis_data:
   data:
-  logs:
 
 networks:
   Your-Network-Name:
