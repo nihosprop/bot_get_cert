@@ -17,6 +17,8 @@ handlers:
     class: logging.FileHandler
     formatter: formatter
     filename: /app/logs/app.log
+    maxBytes: 1048576
+    backupCount: 3
     mode: a
 
 loggers:
