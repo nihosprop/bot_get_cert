@@ -36,7 +36,6 @@ services:
       options:
         max-size: "7m"
         max-file: "3"
-        rotate: "true"
     depends_on:
       redis_fsm:
         condition: service_healthy
