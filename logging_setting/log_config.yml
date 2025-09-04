@@ -14,12 +14,12 @@ handlers:
     stream: ext://sys.stdout
 
   file:
-    class: logging.RotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     formatter: formatter
     filename: /app/logs/app.log
     maxBytes: 1048576
     backupCount: 3
-    mode: a
+    mode: 'a'
 
 loggers:
 
