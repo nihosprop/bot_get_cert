@@ -21,7 +21,7 @@ width="100"/>
   - Проверка завершения курса
   - Получение данных студента
 - **Персонализация**:
-  - Подпись преподавателяЛЛ
+  - Подпись преподавателя
 - **Управление через Telegram**:
   - Запрос сертификата
   - История выданных документов
@@ -56,28 +56,34 @@ your_name_bot_dir
 │  └── Bitter-Regular.ttf
 ├── docker-compose.yml
 ├── logs
-│  └── logging_setting
-│    └── log_config.yml
+│  └── app.log
 └── redis.conf
 ├── .env
 ```
 
-Деплой через docker-composePROD
+**Деплой через docker-composePROD**
 
-```code
-0. Добавить в папку data(static в локаьлной версии) .pdf шаблоны сертификатов 
 
-1. Прописать docker-compose.yml заменив данные на свои
+1. Добавить в папку data(static в локальной версии) .pdf шаблоны сертификатов. 
 
-2. Прописать .env по аналогии .env.example, заменив данные на свои
+2. Прописать docker-compose.yml заменив данные на свои
 
-2. Прописать redis.conf под свои нужды..
+3. Прописать .env по аналогии .env.example, заменив данные на свои
+
+4. Выдать права контейнеру на запись logs/app.log:
+```bash
+   # из корня проекта
+   sudo chown -R 1000:1000 logs
+```
+5. Прописать redis.conf под свои нужды.
 
 ! Задать пароль для Redis в .env и redis.conf
+
 ! Redis пароли должны совпадать в .env и redis.conf
-```
+
 
 Находясь в корне проекта(бота) исполнить:
-```code
-docker compose up -d
+```bash
+
+docker compose down && docker compose pull && docker compose up -d
 ```
