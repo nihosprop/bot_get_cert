@@ -2,53 +2,53 @@
 services:
   main:
     image: niwibonihs/bot_get_cert:v3.2
-    container_name: Your-Container-Name
-    user: "1000:1000" # Дать UID/GID контейнеру для прав на нужные директории на хосте при монтировании
+    container_name: BotGetCert
+    user: "1000:1000"
     restart: "unless-stopped"
     env_file: .env
     depends_on:
-      - "test_redis_fsm"
+      - "redis_fsm"
     logging:
       driver: json-file
       options:
         max-size: "7m"
         max-file: "3"
     volumes:
-      - data:/app/data  # Монтируем папку для обмена файлами
+      - ./data:/app/data  # Монтируем папку для обмена файлами
       - ./logs:/app/logs # Монтируем папку для логов
     networks:
-      - Your-Network-Name
+      - my-network
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
 
-  test_redis_fsm:
+  redis_fsm:
     image: "redis:7"
-    container_name: YourRedisFSM
+    container_name: RedisFSM
     restart: "unless-stopped"
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf  # Монтируем конфигурационный файл
       - redis_data:/data  # Volume для данных Redis
     command: redis-server /usr/local/etc/redis/redis.conf  # Используем конфигурационный файл
     ports:
-      - 127.0.0.1:6382:6379
+      - 127.0.0.1:6381:6379
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 3
     networks:
-      - Your-Network-Name
+      - my-network
     deploy:
       resources:
         limits:
-          memory: 16M
+          memory: 32M
+
 
 volumes:
   redis_data:
-  data:
 
 networks:
   Your-Network-Name:
