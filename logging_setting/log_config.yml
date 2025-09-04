@@ -14,6 +14,71 @@ handlers:
     stream: ext://sys.stdout
 
 loggers:
+
+  queues.que_utils:
+    level: ${LOG_LEVEL}
+    handlers: [ stdout ]
+    propagate: no
+
+  handlers.admin_handlers:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  middlewares.outer:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  handlers.user_handlers:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  handlers.other_handlers:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  config_data.config:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  filters.filters:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  keyboards.keyboard_utils:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  keyboards.keyboards:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  keyboards.set_menu:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  lexicon.lexicon_ru:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  states.states:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
+
+  utils.utils:
+      level: ${LOG_LEVEL}
+      handlers: [ stdout ]
+      propagate: no
   __main__:
     level: ${LOG_LEVEL}
     handlers: [stdout]
