@@ -14,6 +14,7 @@ services:
         max-file: "3"
     volumes:
       - data:/app/data  # Монтируем папку для обмена файлами
+      - ./logs:/app/logs # Монтируем папку для логов
     networks:
       - Your-Network-Name
     deploy:
