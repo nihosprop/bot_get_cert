@@ -23,6 +23,7 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+
   test_redis_fsm:
     image: "redis:7"
     container_name: YourRedisFSM
