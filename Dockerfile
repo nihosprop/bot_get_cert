@@ -37,7 +37,7 @@ RUN rm -rf $(which pip) $(which pip3) \
     /usr/local/bin/idle* \
     /usr/local/bin/pydoc* \
  && addgroup -S appuser \
- && adduser -S appuser -G appuser \
+ && adduser -S appuser -G appuser \ && mkdir -p /app/logs
  && chown -R appuser:appuser /app
 
 USER appuser
