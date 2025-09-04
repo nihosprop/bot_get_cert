@@ -3,6 +3,7 @@ services:
   main:
     image: niwibonihs/bot_get_cert:v3.2
     container_name: Your-Container-Name
+    user: "1000:1000" # Дать UID/GID контейнеру для прав на нужные директории на хосте при монтировании
     restart: "unless-stopped"
     env_file: .env
     depends_on:
