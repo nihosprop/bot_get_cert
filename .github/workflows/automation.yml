@@ -31,4 +31,3 @@ jobs:
           # С каким тегом будет загружен образ
           # Переменные тоже поддерживаются
           tags: niwibonihs/bot_get_cert:v3.2
-          # tags: niwibonihs/bot_get_cert:latest
