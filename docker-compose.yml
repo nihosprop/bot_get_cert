@@ -46,7 +46,7 @@ services:
       - ./:/app
       - ./logs:/app/logs
   redis_fsm:
-    image: redis:7
+    image: redis:8.2-alpine
     container_name: RedisFSM
     restart: unless-stopped
     command: ["redis-server", "--bind", "0.0.0.0"]
