@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram.enums import ContentType
 from aiogram.filters import BaseFilter
@@ -152,11 +152,21 @@ class IsCorrectData(BaseFilter):
                                                         indication=True)
                 raise ValueError
 
-            if date_obj.date() > datetime.now().date():
+            today = datetime.now().date()
+            if date_obj.date() > (today + timedelta(days=1)):
                 await msg.bot.delete_message(chat_id=msg.chat.id,
                                              message_id=msg.message_id)
-                value = await msg.answer(f'{username}, ваша дата из будущего😄\n'
-                                         f'Повнимательнее пожалуйста.')
+                value = await msg.answer(f'{username}, ваша дата слишком далеко в будущем😄\n'
+                                         f'Принимаются только вчерашняя, сегодняшняя и завтрашняя даты.')
+                await msg_processor.deletes_msg_a_delay(value, delay=6,
+                                                        indication=True)
+                raise ValueError
+                
+            if date_obj.date() < (today - timedelta(days=1)):
+                await msg.bot.delete_message(chat_id=msg.chat.id,
+                                             message_id=msg.message_id)
+                value = await msg.answer(f'{username}, ваша дата слишком давно прошла😄\n'
+                                         f'Принимаются только вчерашняя, сегодняшняя и завтрашняя даты.')
                 await msg_processor.deletes_msg_a_delay(value, delay=6,
                                                         indication=True)
                 raise ValueError

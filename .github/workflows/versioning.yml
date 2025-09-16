@@ -1,0 +1,53 @@
+name: Version Management
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'pyproject.toml'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      should_tag: ${{ steps.check.outputs.should_tag }}
+      new_version: ${{ steps.check.outputs.new_version }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get current version
+      id: current_version
+      run: |
+        version=$(grep '^version =' pyproject.toml | cut -d '"' -f2)
+        echo "current_version=$version" >> $GITHUB_OUTPUT
+
+    - name: Check if version changed
+      id: check
+      run: |
+        # Получаем предыдущий коммит
+        git fetch --tags
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag: $latest_tag"
+        
+        current_version="${{ steps.current_version.outputs.current_version }}"
+        echo "Current version: $current_version"
+        
+        # Сравниваем с текущей версией в pyproject.toml
+        if [ "v$current_version" != "$latest_tag" ]; then
+          echo "should_tag=true" >> $GITHUB_OUTPUT
+          echo "new_version=$current_version" >> $GITHUB_OUTPUT
+        else
+          echo "should_tag=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create tag if version changed
+      if: outputs.should_tag == 'true'
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag -a "v${{ steps.check.outputs.new_version }}" -m "Release version ${{ steps.check.outputs.new_version }}"
+        git push origin "v${{ steps.check.outputs.new_version }}"
