@@ -781,17 +781,25 @@ class MessageProcessor:
         # Сохраняем оригинальный текст сообщения
         original_text = value.text
         try:
-            # Обратный отсчет от delay до 1
-            for remaining in range(delay, 0, -1):
-                # Обновляем текст сообщения с оставшимся временем
-                await value.edit_text(
-                    f"{original_text}\n\nУдалится через: {remaining} сек...")
-                await asyncio.sleep(1)
+            if indication:
+                # Обратный отсчет от delay до 1
+                for remaining in range(delay, 0, -1):
+                    try:
+                        # Обновляем текст сообщения с оставшимся временем
+                        await value.edit_text(
+                            f"{original_text}\n\nУдалится через: {remaining} сек...")
+                    except Exception as e:
+                        logger_utils.warning(
+                            f"Не удалось отредактировать сообщение: {e}")
+                    await asyncio.sleep(1)
         except Exception as e:
-            logger_utils.error(f"Ошибка при обновлении сообщения: {e}",
+            logger_utils.error(f"Ошибка в deletes_msg_a_delay: {e}",
                                exc_info=True)
         finally:
-            await value.delete()
+            try:
+                await value.delete()
+            except Exception as e:
+                logger_utils.warning(f"Не удалось удалить сообщение: {e}")
 
     async def send_message_with_delay(
             self, chat_id: int, text: str, delay: int, preview_link: str) -> Message:
