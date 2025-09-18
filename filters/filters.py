@@ -117,74 +117,62 @@ class IsFullName(BaseFilter):
 
 
 class IsCorrectData(BaseFilter):
-    async def __call__(self, msg: Message, state: FSMContext,
-                       msg_processor: MessageProcessor) -> bool | dict[
-                                                                str, str]:
+    async def __call__(self,
+                       msg: Message,
+                       state: FSMContext,
+                       msg_processor: MessageProcessor) -> bool | dict[str, str]:
         logger_filters.debug(f'Entry {__class__.__name__}')
-        # msg_processor = MessageProcessor(msg, state)
         username = await get_username(msg)
-
+        
         if msg.content_type != ContentType.TEXT:
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                         message_id=msg.message_id)
-
+            await msg.bot.delete_message(
+                chat_id=msg.chat.id,
+                message_id=msg.message_id)
+            return False
+        
         if not msg.text:
             logger_filters.debug(f'Exit False {__class__.__name__}')
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                         message_id=msg.message_id)
+            await msg.bot.delete_message(
+                chat_id=msg.chat.id,
+                message_id=msg.message_id)
             return False
-
+        
         start_kurse = datetime.strptime('01.03.2024', "%d.%m.%Y")
-        date_str = msg.text
+        date_str = msg.text.strip()
         logger_filters.debug(f'{date_str=}')
+        
         try:
             date_obj = datetime.strptime(date_str, "%d.%m.%Y")
-
+            
+            # Проверяем только что дата не раньше начала курса
             if date_obj.date() < start_kurse.date():
-                await msg.bot.delete_message(chat_id=msg.chat.id,
-                                             message_id=msg.message_id)
-                value = await msg.answer(f'{username}, '
-                                         f'вы прислали '
-                                         f'дату, когда курс еще не '
-                                         f'существовал🙃\n'
-                                         f'Повнимательнее пожалуйста.')
-                await msg_processor.deletes_msg_a_delay(value, delay=6,
-                                                        indication=True)
-                raise ValueError
-
-            today = datetime.now().date()
-            if date_obj.date() > (today + timedelta(days=1)):
-                await msg.bot.delete_message(chat_id=msg.chat.id,
-                                             message_id=msg.message_id)
-                value = await msg.answer(f'{username}, ваша дата слишком далеко в будущем😄\n'
-                                         f'Принимаются только вчерашняя, сегодняшняя и завтрашняя даты.')
-                await msg_processor.deletes_msg_a_delay(value, delay=6,
-                                                        indication=True)
-                raise ValueError
-                
-            if date_obj.date() < (today - timedelta(days=1)):
-                await msg.bot.delete_message(chat_id=msg.chat.id,
-                                             message_id=msg.message_id)
-                value = await msg.answer(f'{username}, ваша дата слишком давно прошла😄\n'
-                                         f'Принимаются только вчерашняя, сегодняшняя и завтрашняя даты.')
-                await msg_processor.deletes_msg_a_delay(value, delay=6,
-                                                        indication=True)
-                raise ValueError
-
+                await msg.bot.delete_message(
+                    chat_id=msg.chat.id,
+                    message_id=msg.message_id)
+                value = await msg.answer(
+                    f'{username}, вы прислали дату, когда курс еще не существовал🙃\n'
+                    f'Повнимательнее пожалуйста.')
+                await msg_processor.deletes_msg_a_delay(
+                    value,
+                    delay=6,
+                    indication=True)
+                return False
+            
             logger_filters.debug(f'Exit Done {__class__.__name__}')
             return {'date': date_str}
-
+        
         except ValueError:
-            logger_filters.warning(f'Некорректная дата:{username}:'
-                                   f'{msg.from_user.id}:[{date_str}]')
+            logger_filters.warning(
+                f'Некорректная дата:{username}:'
+                f'{msg.from_user.id}:[{date_str}]')
             logger_filters.debug(f'Exit False {__class__.__name__}')
-            await msg.bot.delete_message(chat_id=msg.chat.id,
-                                         message_id=msg.message_id)
-            value = await msg.answer('Дата не корректна.\n'
-                                     'Будьте внимательны при вводе🧐')
+            await msg.bot.delete_message(
+                chat_id=msg.chat.id,
+                message_id=msg.message_id)
+            value = await msg.answer(
+                'Неверный формат даты. Пожалуйста, введите дату в формате ДД.ММ.ГГГГ')
             await msg_processor.deletes_msg_a_delay(value, 5, indication=True)
             return False
-
 
 class IsCorrectEmail(BaseFilter):
     async def __call__(self, msg: Message) -> bool:
