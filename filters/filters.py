@@ -143,15 +143,25 @@ class IsCorrectData(BaseFilter):
         
         try:
             date_obj = datetime.strptime(date_str, "%d.%m.%Y")
-            
-            # Проверяем только что дата не раньше начала курса
             if date_obj.date() < start_kurse.date():
                 await msg.bot.delete_message(
-                    chat_id=msg.chat.id,
-                    message_id=msg.message_id)
+                    chat_id=msg.chat.id, message_id=msg.message_id)
                 value = await msg.answer(
-                    f'{username}, вы прислали дату, когда курс еще не существовал🙃\n'
-                    f'Повнимательнее пожалуйста.')
+                    f'{username}, вы указали дату, когда курс еще не был '
+                    f'создан)')
+                await msg_processor.deletes_msg_a_delay(
+                    value,
+                    delay=6,
+                    indication=True)
+                return False
+            
+            server_date = datetime.now().date()
+            if date_obj.date() > (server_date + timedelta(days=1)):
+                await msg.bot.delete_message(
+                    chat_id=msg.chat.id, message_id=msg.message_id)
+                value = await msg.answer(
+                    f'{username}, вы указали дату из будущего.\n'
+                    f'Пожалуйста, повторите.')
                 await msg_processor.deletes_msg_a_delay(
                     value,
                     delay=6,
