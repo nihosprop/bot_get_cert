@@ -70,17 +70,20 @@ class ThrottlingMiddleware(BaseMiddleware):
         if hasattr(event, 'chat') and event.chat.type in [
                 ChatType.GROUP,
                 ChatType.SUPERGROUP]:
+            logger_middl_outer.debug(f'Exit')
             # Если это групповой чат, пропускаем тротлинг
             return await handler(event, data)
 
         admins_id = data.get('admins').split()
         if str(event.from_user.id) in admins_id:
+            logger_middl_outer.debug(f'Exit')
             return await handler(event, data)
 
         state: FSMContext = data.get('state')
         msg_processor = MessageProcessor(event, state)
 
         if self.ttl is None:
+            logger_middl_outer.debug(f'Exit')
             return await handler(event, data)
 
         user: User = data.get('event_from_user')
@@ -107,6 +110,7 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         elif check_user and int(check_user.decode()) == 2:
             asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 5))
+            logger_middl_outer.debug(f'Exit')
             return
 
         if not check_user:
@@ -114,6 +118,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                                          px=self.ttl)
 
         logger_middl_outer.debug(f'Exit {__class__.__name__}')
+        
         return await handler(event, data)
 
 
