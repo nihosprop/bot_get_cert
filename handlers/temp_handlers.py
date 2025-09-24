@@ -1,0 +1,29 @@
+import logging
+
+from aiogram import Router, F
+from aiogram.filters import or_f
+from aiogram.types import Message
+from filters.filters import IsPrivateChat
+from utils import get_username
+
+temp_router = Router()
+temp_router.message.filter(or_f(F.new_chat_members, F.left_chat_member))
+
+logger = logging.getLogger(__name__)
+
+
+@temp_router.message(F.new_chat_members)
+async def delete_join_message(msg: Message):
+    logger.info(f'{await get_username(msg)} joined the chat!')
+    try:
+        await msg.delete()
+    except Exception as e:
+        logger.error(f"Не удалось удалить сообщение: {e}")
+
+@temp_router.message(F.left_chat_member)
+async def delete_exit_message(msg: Message):
+    logger.info(f'{await get_username(msg)} exit the chat!')
+    try:
+        await msg.delete()
+    except Exception as e:
+        logger.error(f"Не удалось удалить сообщение: {e}")

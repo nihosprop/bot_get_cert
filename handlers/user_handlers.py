@@ -9,7 +9,10 @@ from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Stepik
-from filters.filters import (IsCorrectData, IsFullName, IsValidProfileLink)
+from filters.filters import (IsCorrectData,
+                             IsFullName,
+                             IsValidProfileLink,
+                             IsPrivateChat)
 from keyboards import (BUTT_COURSES,
                        BUTT_GENDER,
                        kb_back_cancel,
@@ -27,27 +30,9 @@ from utils import (StepikService,
 from utils.utils import MessageProcessor
 
 user_router = Router()
+user_router.message.filter(IsPrivateChat())
 logger = logging.getLogger()
 logger_user_hand = logging.getLogger(__name__)
-
-# TODO: удалить после переноса в спец бота
-@user_router.message(F.new_chat_members)
-async def delete_join_message(msg: Message):
-    logger.info(f'{await get_username(msg)} joined the chat!')
-    try:
-        await msg.delete()
-    except Exception as e:
-        logger.error(f"Не удалось удалить сообщение: {e}")
-
-# TODO: удалить после переноса в спец бота
-@user_router.message(F.left_chat_member)
-async def delete_exit_message(msg: Message):
-    logger.info(f'{await get_username(msg)} exit the chat!')
-    try:
-        await msg.delete()
-    except Exception as e:
-        logger.error(f"Не удалось удалить сообщение: {e}")
-
 
 @user_router.message(F.text.lower().find('спасибо') == 0)
 async def msg_thanks(msg: Message, msg_processor: MessageProcessor):

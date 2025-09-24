@@ -28,6 +28,11 @@ loggers:
     handlers: [ stdout, file ]
     propagate: no
 
+  handlers.temp_handlers:
+    level: ${LOG_LEVEL}
+    handlers: [ stdout, file ]
+    propagate: no
+
   handlers.admin_handlers:
       level: ${LOG_LEVEL}
       handlers: [ stdout, file ]
