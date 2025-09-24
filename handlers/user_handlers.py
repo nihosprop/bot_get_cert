@@ -41,7 +41,7 @@ async def delete_join_message(msg: Message):
 
 # TODO: удалить после переноса в спец бота
 @user_router.message(F.left_chat_member)
-async def delete_join_message(msg: Message):
+async def delete_exit_message(msg: Message):
     logger.info(f'{await get_username(msg)} exit the chat!')
     try:
         await msg.delete()
