@@ -12,6 +12,12 @@ from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
 
+class IsPrivateChat(BaseFilter):
+    """
+    Проверяет, является ли чат личным.
+    """
+    async def __call__(self, message: Message) -> bool:
+        return message.chat.type == ChatType.PRIVATE
 
 class IsValidProfileLink(BaseFilter):
     """
