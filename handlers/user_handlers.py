@@ -30,6 +30,25 @@ user_router = Router()
 logger = logging.getLogger()
 logger_user_hand = logging.getLogger(__name__)
 
+# TODO: удалить после переноса в спец бота
+@user_router.message(F.new_chat_members)
+async def delete_join_message(msg: Message):
+    logger.info(f'{await get_username(msg)} joined the chat!')
+    try:
+        await msg.delete()
+    except Exception as e:
+        logger.error(f"Не удалось удалить сообщение: {e}")
+
+# TODO: удалить после переноса в спец бота
+@user_router.message(F.left_chat_member)
+async def delete_join_message(msg: Message):
+    logger.info(f'{await get_username(msg)} exit the chat!')
+    try:
+        await msg.delete()
+    except Exception as e:
+        logger.error(f"Не удалось удалить сообщение: {e}")
+
+
 @user_router.message(F.text.lower().find('спасибо') == 0)
 async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
