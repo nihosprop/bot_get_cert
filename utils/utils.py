@@ -278,7 +278,6 @@ class StepikService:
             base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
 
             template_name = None
-
             if gender == 'female':
                 match course:
                     case 'Лучший по Python.Часть 1':
@@ -287,6 +286,8 @@ class StepikService:
                         template_name = '2 часть жен.pdf'
                     case 'Лучший по Python.Часть 3':
                         template_name = '3 часть жен.pdf'
+                    case 'Лучший по Python.Часть 4':
+                        template_name = '4 часть жен.pdf'
             elif gender == 'male':
                 match course:
                     case 'Лучший по Python.Часть 1':
@@ -295,6 +296,8 @@ class StepikService:
                         template_name = '2 часть муж.pdf'
                     case 'Лучший по Python.Часть 3':
                         template_name = '3 часть муж.pdf'
+                    case 'Лучший по Python.Часть 4':
+                        template_name = '4 часть муж.pdf'
 
             # Проверка, что template_name не равен None
             if template_name is None:
