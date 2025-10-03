@@ -27,5 +27,7 @@ BUTT_COURSES: dict[str, str] = {
     'id_6': '🔜 Лучший по Python.ООП'}
 
 BUTTS_URL_PROMO: dict[str, str] = {
-        'Лучший по Python.Часть 3':
-            'https://stepik.org/a/227627/pay?promo=1efcc4ae783b90a0'}
+    'Лучший по Python.Часть 3':
+        'https://stepik.org/a/227627/pay?promo=90e83ebae76d239a',
+    'Лучший по Python. Часть 4':
+        'https://stepik.org/a/241971/pay?promo=c9af0a0dae2667f9'}
