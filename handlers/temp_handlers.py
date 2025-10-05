@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @temp_router.message(F.new_chat_members)
 async def delete_join_message(msg: Message):
-    logger.info(f'{await get_username(msg)} joined the chat!')
+    logger.info(f'{await get_username(msg)}:{msg.from_user.id} joined the chat!')
     try:
         await msg.delete()
     except Exception as e:
