@@ -22,7 +22,7 @@ async def delete_join_message(msg: Message):
 
 @temp_router.message(F.left_chat_member)
 async def delete_exit_message(msg: Message):
-    logger.info(f'{await get_username(msg)} exit the chat!')
+    logger.info(f'{await get_username(msg)}:{msg.from_user.id} exit the chat!')
     try:
         await msg.delete()
     except Exception as e:
