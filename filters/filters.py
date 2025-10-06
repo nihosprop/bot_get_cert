@@ -82,6 +82,12 @@ class IsFullName(BaseFilter):
             return False
 
         text = msg.text.strip()
+        if len(text) > 30:
+            await self._delete_and_notify(
+                msg,
+                msg_processor,
+                message="Длинна ФИО больше 30-ти символов 😮")
+            return False
         words = text.split()
 
         # Проверяем количество слов (минимум 2)
