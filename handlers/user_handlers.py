@@ -329,7 +329,7 @@ async def msg_full_name(
         msg: Message, state: FSMContext, full_name,
         msg_processor: MessageProcessor):
     logger_user_hand.info(f'Корректное ФИО:{msg.from_user.id}'
-                          f':{await get_username(msg)}')
+                          f':{await get_username(msg)}:{full_name}')
     await msg.delete()
     logger_user_hand.debug(f'{await state.get_state()=}')
     await state.update_data(full_name=full_name)
