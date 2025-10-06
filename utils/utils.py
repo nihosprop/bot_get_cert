@@ -841,7 +841,7 @@ async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
         user_ids.extend([key for key in keys if re.match(r'^\d{9,10}$', key)])
     logger_utils.debug(f'{user_ids=}')
 
-    courses: dict = {'214271': 1, '221885': 2, '227627': 3}
+    courses: dict = {'214271': 1, '221885': 2, '227627': 3, '241971': 4}
     data_users: dict[int, list] = {}
     for user in user_ids:
         chat_data = await clbk.bot.get_chat(int(user))
