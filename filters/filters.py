@@ -41,13 +41,13 @@ class IsValidProfileLink(BaseFilter):
             stepik_user_id = match.group(1)
             return {'stepik_user_id': stepik_user_id}
 
-        await msg.delete()
+        await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
         logger_filters.warning(f'Ссылка не корректна:{msg.from_user.id}'
-                              f':{await get_username(msg)}:{msg.text}')
+                              f':{await get_username(msg)}:[{msg.text}]')
         value = await msg.answer(
                 f'{await get_username(msg)}, ваша ссылка на профиль не корректна, '
                 f'попробуйте еще раз.')
-        await msg_processor.deletes_msg_a_delay(value, delay=6, indication=True)
+        await msg_processor.deletes_msg_a_delay(value, delay=7, indication=True)
         return False
 
 
