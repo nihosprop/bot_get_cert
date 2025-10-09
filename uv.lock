@@ -127,7 +127,7 @@ wheels = [
 
 [[package]]
 name = "bot-get-cert"
-version = "0.1.0"
+version = "3.3.2"
 source = { virtual = "." }
 dependencies = [
     { name = "aiofiles" },

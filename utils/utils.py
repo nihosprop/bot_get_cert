@@ -4,8 +4,8 @@ import os
 import re
 from dataclasses import dataclass
 import io
-
 from datetime import datetime, timedelta
+
 from PyPDF2 import PdfReader, PdfWriter
 from aiogram.client.session import aiohttp
 from reportlab.pdfbase.ttfonts import TTFont
@@ -16,11 +16,11 @@ from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import (CallbackQuery,
+                           ChatFullInfo,
                            FSInputFile,
-                           Message,
                            LinkPreviewOptions,
-                           Update,
-                           ChatFullInfo)
+                           Message,
+                           Update)
 from redis.asyncio import Redis
 
 from keyboards import BUTT_COURSES
@@ -256,7 +256,8 @@ class StepikService:
                 raise ValueError(f'Неизвестное значение gender: {gender}')
 
             if course not in ('Лучший по Python.Часть 1',
-            'Лучший по Python.Часть 2', 'Лучший по Python.Часть 3'):
+            'Лучший по Python.Часть 2', 'Лучший по Python.Часть 3',
+                'Лучший по Python.Часть 4'):
                 logger_utils.error(f"Неизвестное значение course: {course}")
                 raise ValueError(f"Неизвестное значение course: {course}")
 
