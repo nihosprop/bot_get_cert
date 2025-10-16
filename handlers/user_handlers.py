@@ -470,7 +470,7 @@ async def clbk_done(
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz,
                                           disable_web_page_preview=True)
-        await msg_processor.deletes_msg_a_delay(value1, delay=5, indication=True)
+        await msg_processor.deletes_msg_a_delay(value1, delay=5)
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await state.clear()
         await clbk.answer()
