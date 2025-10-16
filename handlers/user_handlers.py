@@ -399,6 +399,7 @@ async def clbk_done(
             number_str = str(number).zfill(6)
             await state.update_data(end_number=number_str)
             await redis_data.set('end_number', number)
+        
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла не предвиденная ошибка,'
