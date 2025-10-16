@@ -92,6 +92,7 @@ loggers:
       level: ${LOG_LEVEL}
       handlers: [ stdout, file ]
       propagate: no
+
   __main__:
     level: ${LOG_LEVEL}
     handlers: [stdout, file]
