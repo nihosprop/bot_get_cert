@@ -23,11 +23,11 @@ class Config:
     level_log: str
     w_text: bool
     log_tg_cert_enabled: bool
-    log_tg_cert_chat_id: int
-    log_tg_cert_thread_id: int
+    log_tg_cert_chat_id: int | None
+    log_tg_cert_thread_id: int | None
     log_error_tg_enabled: bool
-    log_error_tg_chat_id: int
-    log_error_tg_thread_id: int
+    log_error_tg_chat_id: int | None
+    log_error_tg_thread_id: int | None
 
 
 def load_config(path: str | None = None) -> Config:
