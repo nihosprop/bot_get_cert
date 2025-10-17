@@ -36,7 +36,7 @@ def load_config(path: str | None = None) -> Config:
     redis_host = env.str("REDIS_HOST", "localhost")
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_cecret = env('STEPIK_CLIENT_CECRET')
-    level_log = env('LOG_LEVEL', 'INFO')
+    level_log = env.str('LOG_LEVEL', 'INFO')
     w_text = env.bool('W_TEXT_ENABLED', False)
     return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
                                id_admins=env('ID_ADMIN')),
