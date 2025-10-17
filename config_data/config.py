@@ -31,7 +31,7 @@ def load_config(path: str | None = None) -> Config:
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_cecret = env('STEPIK_CLIENT_CECRET')
     level_log = env('LOG_LEVEL', 'INFO')
-    w_text = env('W_TEXT_ENABLED', False)
+    w_text = env.bool('W_TEXT_ENABLED', False)
     return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
                                id_admins=env('ID_ADMIN')),
                   stepik=Stepik(client_id=stepik_client_id,
