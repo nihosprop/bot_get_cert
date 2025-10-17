@@ -25,7 +25,11 @@ async def setup_logging(config):
     with open('logging_setting/log_config.yml', 'rt') as file:
         config_str = file.read()
     # вставляем(заменяем шаблоны на) переменные окружения
-    config_str = config_str.replace('${LOG_LEVEL}', config.level_log)
+    config_str = config_str.replace(
+        '${LOG_LEVEL}', config.level_log).replace(
+        '${BOT_TOKEN}', config.tg_bot.token).replace(
+        '${LOG_TG_CHAT_ID}', config.tg_bot.chat_id).replace(
+        '${LOG_TG_THREAD_ID}', config.tg_bot.thread_id)
     log_config = yaml.safe_load(config_str)
     dictConfig(log_config)
     logger_main.info('Loading logging & config success')
