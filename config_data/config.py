@@ -35,7 +35,7 @@ def load_config(path: str | None = None) -> Config:
     env.read_env(path)
     redis_host = env.str("REDIS_HOST", "localhost")
     stepik_client_id = env('STEPIK_CLIENT_ID')
-    stepik_client_cecret = env('STEPIK_CLIENT_CECRET')
+    stepik_client_secret = env('STEPIK_CLIENT_CECRET')
     level_log = env.str('LOG_LEVEL', 'INFO')
     w_text = env.bool('W_TEXT_ENABLED', False)
     log_tg_cert_enabled = env.bool('LOG_TG_CERT_ENABLED', False)
