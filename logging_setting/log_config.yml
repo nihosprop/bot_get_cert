@@ -7,6 +7,10 @@ formatters:
     datefmt: '%Y.%m.%d %H:%M:%S'
     style: '{'
 
+filters:
+  get_cert_filter:
+    (): logging_setting.filters.GetCertFilter
+
 handlers:
   stdout:
     class: logging.StreamHandler
@@ -20,6 +24,16 @@ handlers:
     maxBytes: 10485760
     backupCount: 3
     mode: 'a'
+
+  telegram:
+    class: logging_setting.handlers.TelegramAsyncHandler
+    formatter: formatter
+    level: ${LOG_LEVEL}
+    bot_token: ${BOT_TOKEN}
+    chat_id: ${LOG_TG_CHAT_ID}
+    thread_id: ${LOG_TG_THREAD_ID}
+    filters: [get_cert_filter]
+
 
 loggers:
 
@@ -89,9 +103,14 @@ loggers:
     propagate: no
 
   utils.utils:
-      level: ${LOG_LEVEL}
-      handlers: [ stdout, file ]
-      propagate: no
+    level: ${LOG_LEVEL}
+    handlers: [ stdout, file, telegram ]
+    propagate: no
+
+  logging_setting.handlers:
+    level: ${LOG_LEVEL}
+    handlers: [ stdout, file ]
+    propagate: no
 
   __main__:
     level: ${LOG_LEVEL}
