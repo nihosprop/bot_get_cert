@@ -32,7 +32,9 @@ logger_utils = logging.getLogger(__name__)
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     logger_utils.debug('Entry')
-    target_chat = '-1002417411486'
+    
+    # TODO: Перенести target_chat в .env
+    target_chat = '-1002575997076'
     user_id = _type_update.from_user.id
     logger_utils.debug(f'{user_id=}')
     try:
