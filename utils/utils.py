@@ -32,7 +32,7 @@ logger_utils = logging.getLogger(__name__)
 
 async def check_user_in_group(_type_update: Message | CallbackQuery) -> bool:
     logger_utils.debug('Entry')
-    target_chat = '@best_python1'
+    target_chat = '@pitosha1'
     user_id = _type_update.from_user.id
     logger_utils.debug(f'{user_id=}')
     try:
