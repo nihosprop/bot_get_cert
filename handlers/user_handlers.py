@@ -201,9 +201,9 @@ async def clbk_get_cert(
     logger_user_hand.info(f'Запрос сертификата:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
     if not await check_user_in_group(clbk):
-        logger_user_hand.info(f'Отсутствие в группе:{clbk.from_user.id}'
+        logger_user_hand.info(f'Отсутствие в паблике:{clbk.from_user.id}'
                               f':{await get_username(clbk)}')
-        await clbk.answer('Вы еще не вступили в нашу дружную группу'
+        await clbk.answer('Вы еще не подписались на наш крутой паблик'
                           ' Лучший по Python ☺️', show_alert=True)
         return
 
