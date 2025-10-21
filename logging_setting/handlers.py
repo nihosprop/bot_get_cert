@@ -7,6 +7,16 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 
 class TelegramAsyncHandler(logging.Handler):
+    """
+    A class for sending logs to Telegram.
+    Args:
+        bot_token: Token of the Telegram bot.
+        chat_id: ID of the chat where the logs will be sent.
+        thread_id: ID of the thread where the logs will be sent.
+        loop: Event loop.
+    Returns:
+        None
+    """
     def __init__(self, bot_token: str, chat_id: str, thread_id: str,
                  loop=None):
         
