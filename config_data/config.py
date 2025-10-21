@@ -31,6 +31,12 @@ class Config:
 
 
 def load_config(path: str | None = None) -> Config:
+    """
+    Load configuration from environment variables.
+    
+    Args: path (str | None, optional): Path to the environment file.
+    Returns: Config: Configuration object.
+    """
     env = Env()
     env.read_env(path)
     redis_host = env.str("REDIS_HOST", "localhost")
