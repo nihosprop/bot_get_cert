@@ -7,6 +7,12 @@ formatters:
     datefmt: '%Y.%m.%d %H:%M:%S'
     style: '{'
 
+  tg_compact:
+    (): logging_setting.formatters.TelegramCompactFormatter
+    max_tb_lines: 5
+    max_len: 1500
+    datefmt: '%Y.%m.%d %H:%M:%S'
+
 filters:
   get_cert_filter:
     (): logging_setting.filters.GetCertFilter
@@ -36,7 +42,7 @@ handlers:
 
   telegram_error:
     class: logging_setting.handlers.TelegramAsyncHandler
-    formatter: formatter
+    formatter: tg_compact
     level: ERROR
     bot_token: ''
     chat_id: 0
