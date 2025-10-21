@@ -34,7 +34,6 @@ async def check_user_in_group(_type_update: Message | CallbackQuery,
                               tg_target_channel: int) -> bool:
     logger_utils.debug('Entry')
     
-    # TODO: Перенести target_chat в .env
     target_chat = tg_target_channel
     user_id = _type_update.from_user.id
     logger_utils.debug(f'{user_id=}')
