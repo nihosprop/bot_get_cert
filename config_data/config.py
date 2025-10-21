@@ -43,7 +43,9 @@ def load_config(path: str | None = None) -> Config:
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_secret = env('STEPIK_CLIENT_CECRET')
     level_log = env.str('LOG_LEVEL', 'INFO')
+    
     w_text = env.bool('W_TEXT_ENABLED', False)
+    
     log_tg_cert_enabled = env.bool('LOG_TG_CERT_ENABLED', False)
     log_tg_cert_chat_id = env.int('LOG_TG_CERT_CHAT_ID', None)
     log_tg_cert_thread_id = env.int('LOG_TG_CERT_THREAD_ID', None)
