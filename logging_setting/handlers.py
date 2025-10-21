@@ -12,8 +12,6 @@ class TelegramAsyncHandler(logging.Handler):
         
         super().__init__()
         
-        load_dotenv()
-        
         self.api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         self.chat_id = int(chat_id)
         self.thread_id = int(thread_id)
