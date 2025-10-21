@@ -25,7 +25,7 @@ handlers:
     backupCount: 3
     mode: 'a'
 
-  telegram:
+  telegram_cert:
     class: logging_setting.handlers.TelegramAsyncHandler
     formatter: formatter
     level: INFO
@@ -104,7 +104,7 @@ loggers:
 
   utils.utils:
     level: INFO
-    handlers: [ stdout, file, telegram ]
+    handlers: [ stdout, file, telegram_cert ]
     propagate: no
 
   logging_setting.handlers:
