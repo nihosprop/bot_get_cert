@@ -197,10 +197,13 @@ async def clbk_cancel_in_state(
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
 async def clbk_get_cert(
-        clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
+        clbk: CallbackQuery,
+        state: FSMContext,
+        tg_target_channel,
+        msg_processor: MessageProcessor):
     logger_user_hand.info(f'Запрос сертификата:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
-    if not await check_user_in_group(clbk):
+    if not await check_user_in_group(clbk, tg_target_channel=tg_target_channel):
         logger_user_hand.info(f'Отсутствие в паблике:{clbk.from_user.id}'
                               f':{await get_username(clbk)}')
         await clbk.answer('Вы еще не подписались на наш крутой паблик'

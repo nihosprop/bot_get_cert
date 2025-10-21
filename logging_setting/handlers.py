@@ -32,16 +32,20 @@ class TelegramAsyncHandler(logging.Handler):
     async def _send(self, text: str):
         try:
             await self._ensure_session()
-            async with self.session.post(
-                self.api_url,
-                data={
-                    "chat_id": self.chat_id,
-                    "message_thread_id": self.thread_id,
-                    "text": text}) as resp:
+            request_data = {
+                "chat_id": self.chat_id,
+                "message_thread_id": self.thread_id,
+                "text": text}
+            logger.debug(f"Отправка запроса в Telegram API: {self.api_url}")
+            logger.debug(f"Данные запроса: {request_data}")
+            
+            async with self.session.post(self.api_url,
+                                         data=request_data) as resp:
                 response = await resp.text()
+                logger.debug(f"Ответ от Telegram API: {resp.status} - {response}")
                 if resp.status != 200:
                     logger.error(f"Ошибка при отправке: {resp.status}"
-                                 f":{response}")
+                               f":{response}")
         except Exception as e:
             print(f"Ошибка отправки лога в Telegram: {e}")
     

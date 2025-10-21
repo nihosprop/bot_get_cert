@@ -130,7 +130,9 @@ async def main():
                                               admins=config.tg_bot.id_admins,
                                               stepik=config.stepik,
                                               w_text=config.w_text,
-                                              redis_que=redis_que),
+                                              redis_que=redis_que,
+                                              tg_target_channel=config.tg_target_channel,
+                                              ),
                              run_arq_worker(redis_que, bot=bot))
     
     except Exception as err:
