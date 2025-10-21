@@ -34,6 +34,13 @@ handlers:
     thread_id: 0
     filters: [get_cert_filter]
 
+  telegram_error:
+    class: logging_setting.handlers.TelegramAsyncHandler
+    formatter: formatter
+    level: ERROR
+    bot_token: ''
+    chat_id: 0
+    thread_id: 0
 
 loggers:
 
