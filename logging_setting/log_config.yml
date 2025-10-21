@@ -46,82 +46,82 @@ loggers:
 
   queues.que_utils:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   handlers.temp_handlers:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   handlers.admin_handlers:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   middlewares.outer:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   handlers.user_handlers:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   handlers.other_handlers:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   config_data.config:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   filters.filters:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   keyboards.keyboard_utils:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   keyboards.keyboards:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   keyboards.set_menu:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   lexicon.lexicon_ru:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   states.states:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   utils.utils:
     level: INFO
-    handlers: [ stdout, file, telegram_cert ]
+    handlers: [ stdout, file, telegram_cert, telegram_error ]
     propagate: no
 
   logging_setting.handlers:
     level: INFO
-    handlers: [ stdout, file ]
+    handlers: [ stdout, file, telegram_error ]
     propagate: no
 
   __main__:
     level: INFO
-    handlers: [stdout, file]
+    handlers: [stdout, file, telegram_error]
     propagate: no
 
 root:
