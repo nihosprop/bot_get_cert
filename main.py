@@ -65,7 +65,7 @@ async def setup_logging(config):
 
 
 async def setup_redis(config: Config) -> tuple[
-    Redis, RedisStorage, Redis, RedisSettings]:
+        Redis, RedisStorage, Redis, RedisSettings]:
     """Настройка Redis для FSM, throttling и данных пользователей."""
     redis_fsm = Redis(host=config.redis_host,
                       port=6379,
