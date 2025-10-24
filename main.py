@@ -14,8 +14,7 @@ from keyboards.set_menu import set_main_menu
 from handlers import admin_handlers, user_handlers, temp_handlers
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
-                               ThrottlingMiddleware,
-                               StrictMaintenanceMiddleware)
+                               ThrottlingMiddleware)
 from queues.que_utils import run_arq_worker
 
 logger_main = logging.getLogger(__name__)
