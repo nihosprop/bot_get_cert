@@ -19,7 +19,7 @@ from queues.que_utils import run_arq_worker
 
 logger_main = logging.getLogger(__name__)
 
-async def setup_logging(config):
+async def setup_logging(config: Config):
     with open('logging_setting/log_config.yml', 'rt') as file:
         log_config = yaml.safe_load(file)
     
