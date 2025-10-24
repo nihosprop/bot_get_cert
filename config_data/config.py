@@ -42,7 +42,7 @@ def load_config(path: str | None = None) -> Config:
     env.read_env(path)
     redis_host = env.str("REDIS_HOST", "localhost")
     stepik_client_id = env('STEPIK_CLIENT_ID')
-    stepik_client_secret = env('STEPIK_CLIENT_CECRET')
+    stepik_client_secret = env('STEPIK_CLIENT_SECRET')
     level_log = env.str('LOG_LEVEL', 'INFO')
     
     w_text = env.bool('W_TEXT_ENABLED', False)
