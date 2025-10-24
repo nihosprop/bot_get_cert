@@ -1,8 +1,6 @@
 import logging
 import asyncio
-import os
 import aiohttp
-from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +20,8 @@ class TelegramAsyncHandler(logging.Handler):
         
         super().__init__()
         
+        # TODO: transfer var 'admins' to .env
+        self.admins = ['@Shinobiwin']
         self.api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         self.chat_id = int(chat_id)
         self.thread_id = int(thread_id)
@@ -33,17 +33,26 @@ class TelegramAsyncHandler(logging.Handler):
             self.session = aiohttp.ClientSession()
     
     def emit(self, record):
+        log_level = record.levelno
         log_entry = self.format(record)
+        admins = self.admins if (
+                self.admins and log_level >= logging.ERROR) else ''
+        
         self.loop.call_soon_threadsafe(asyncio.create_task,
-                                  self._send(text=log_entry))
+                                  self._send(text=log_entry,
+                                             admins=admins))
     
-    async def _send(self, text: str):
+    async def _send(self, text: str, admins: list[str] = None):
         try:
             await self._ensure_session()
+            
+            admins = '🚨' + ','.join(admins) + '\n\n' if admins else ''
+            
             request_data = {
                 "chat_id": self.chat_id,
                 "message_thread_id": self.thread_id,
-                "text": text}
+                "text": f'{admins}{text}'}
+            
             logger.debug(f"Отправка запроса в Telegram API: {self.api_url}")
             logger.debug(f"Данные запроса: {request_data}")
             
