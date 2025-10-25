@@ -1,5 +1,7 @@
 import logging
 import asyncio
+import re
+
 import aiohttp
 
 logger = logging.getLogger(__name__)
@@ -33,13 +35,21 @@ class TelegramAsyncHandler(logging.Handler):
             self.session = aiohttp.ClientSession()
     
     def emit(self, record):
+
         log_level = record.levelno
-        log_entry = self.format(record)
+        temp_data = re.sub(r'[\[\]]', '', record.message)
+        end_data = re.split(r'[:-]', temp_data)
+        text, tg_id, tg_username, num_cert, name_cert, course_data = end_data
+        num_course, *_ = course_data.split()
+
+        text_result = (f'{text.rstrip(' TG_ID')}:{tg_username}\n'
+               f'N-{num_cert}({num_course} курс)\n{name_cert}')
+
         admins = self.admins if (
                 self.admins and log_level >= logging.ERROR) else ''
         
         self.loop.call_soon_threadsafe(asyncio.create_task,
-                                  self._send(text=log_entry,
+                                  self._send(text=text_result,
                                              admins=admins))
     
     async def _send(self, text: str, admins: list[str] = None):
