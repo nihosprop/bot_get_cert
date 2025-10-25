@@ -44,23 +44,23 @@ def load_config(path: str | None = None) -> Config:
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_secret = env('STEPIK_CLIENT_SECRET')
     level_log = env.str('LOG_LEVEL', 'INFO')
-    
+
     w_text = env.bool('W_TEXT_ENABLED', False)
-    
+
     tg_target_channel = env.int('TG_TARGET_CHANNEL', None)
-    
+
     log_tg_cert_enabled = env.bool('LOG_TG_CERT_ENABLED', False)
     log_tg_cert_chat_id = env.int('LOG_TG_CERT_CHAT_ID', None)
     log_tg_cert_thread_id = env.int('LOG_TG_CERT_THREAD_ID', None)
-    
+
     log_error_tg_enabled = env.bool('LOG_ERROR_TG_ENABLED', False)
     log_error_tg_chat_id = env.int('LOG_ERROR_TG_CHAT_ID', None)
     log_error_tg_thread_id = env.int('LOG_ERROR_TG_THREAD_ID', None)
-    
+
     tg_bot = TgBot(
         token=env('BOT_TOKEN'),
         id_admins=env('ID_ADMIN'))
-    
+
     return Config(
         tg_bot=tg_bot,
         stepik=Stepik(
