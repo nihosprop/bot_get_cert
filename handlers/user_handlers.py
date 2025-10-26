@@ -380,7 +380,7 @@ async def clbk_done(
                                                              course_id,
                                                              access_token)
     except ConnectionTimeoutError as e:
-        logger_user_hand.warning(
+        logger_user_hand.error(
             f'Не удалось проверить сертификат на Stepik для user_id:'
             f'{clbk.from_user.id}, '
             f'username: {await get_username(clbk)}, '
