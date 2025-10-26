@@ -470,7 +470,13 @@ async def clbk_done(
                               f':{clbk.from_user.id}'
                               f':{await get_username(clbk)}')
         value = await clbk.message.answer(f'{await get_username(clbk)}, у вас '
-                                          f'пока нет сертификата этого курса🙁')
+                                          f'пока нет сертификата этого курса '
+                                          f'на Stepik🙁\n'
+                                          f'Наберите нужное для сертификата '
+                                          f'количество баллов, ролучите '
+                                          f'сертификат на платформе и приходите '
+                                          f'снова, за экземпляром от команды '
+                                          f'курса😉')
         await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
         value = await clbk.message.answer(LexiconRu.text_survey,
                                           reply_markup=kb_butt_quiz,
