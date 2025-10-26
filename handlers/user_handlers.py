@@ -373,7 +373,7 @@ async def clbk_done(
 
     stepik_user_id = await state.get_value('stepik_user_id')
     course_id = str(await state.get_value('course')).split('_')[-1]
-    
+
     try:
         access_token = await stepik_service.get_stepik_access_token()
         certificates = await stepik_service.check_cert_in_stepik(stepik_user_id,
@@ -387,7 +387,7 @@ async def clbk_done(
             f'stepik_user_id: {stepik_user_id}, course_id: {course_id},'
             f'из-за ошибки передачи данных! Сертификат выдан без проверки!, {e}')
         certificates = True
-    
+
     if certificates == 'PRIVATE':
         value = await clbk.message.edit_text(f'{await get_username(clbk)},'
                                              f'{LexiconRu.text_privacy_instructions}')
@@ -402,7 +402,7 @@ async def clbk_done(
             number_str = str(number).zfill(6)
             await state.update_data(end_number=number_str)
             await redis_data.set('end_number', number)
-        
+
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
             value = await clbk.message.answer('Произошла не предвиденная ошибка,'
