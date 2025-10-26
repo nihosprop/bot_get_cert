@@ -172,6 +172,9 @@ class StepikService:
         :param tg_user_id: ID пользователя.
         :return: True и номер сертификата, если найден, иначе False.
         """
+        data = await self.redis_client.hgetall(name=tg_user_id)
+        logger_utils.debug(f'{data=}')
+
         certificate = await self.redis_client.hget(f'{tg_user_id}',
                                                    f'{course_id}')
         return certificate if certificate else False

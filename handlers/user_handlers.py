@@ -240,6 +240,37 @@ async def clbk_select_course(
     course_id = str(clbk.data).split('_')[-1]
     logger_user_hand.info(f'Проверка наличия серт:{clbk.from_user.id}'
                           f':{await get_username(clbk)}:{clbk.data}')
+    tg_id = str(clbk.from_user.id)
+    stepik_user_id = await redis_data.hget(tg_id, 'stepik_user_id')
+    if stepik_user_id:
+        owner_tg = await redis_data.get(f'tg_by_stepik:{stepik_user_id}')
+        if owner_tg and owner_tg != tg_id:
+            # PRIVACY/SECURITY STOP
+            await clbk.answer(
+                'Этот Stepik-аккаунт уже привязан к другому Telegram. Выдача невозможна.',
+                show_alert=True)
+            return
+
+        # Если уже выдавался этот курс – отдать копию
+        cert = await stepik_service.check_cert_in_user(tg_id, course_id)
+        if cert:
+            value = await clbk.message.edit_text(
+                'У вас есть сертификат этого курса 🤓\nВысылаем 📜☺️\n')
+            path = await stepik_service.generate_certificate(
+                state,
+                clbk,
+                w_text=w_text,
+                exist_cert=True)
+            await stepik_service.send_certificate(
+                clbk,
+                path,
+                state,
+                is_copy=True,
+                course_id=course_id)
+            await msg_processor.deletes_msg_a_delay(value, delay=5)
+            await state.clear()
+            return
+
     cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
                                                    course_id)
     if cert:
@@ -372,6 +403,26 @@ async def clbk_done(
                                           'Ожидайте выдачи сертификата📜\n')
 
     stepik_user_id = await state.get_value('stepik_user_id')
+    await redis_data.hset(
+        name=str(clbk.from_user.id),
+        key='stepik_user_id',
+        value=stepik_user_id)
+
+    all_user_hashes = await redis_data.keys('*')
+    for user_key in all_user_hashes:
+        if user_key.isdigit() and user_key != str(clbk.from_user.id):
+            existing_stepik_id = await redis_data.hget(
+                user_key,
+                'stepik_user_id')
+            if existing_stepik_id == stepik_user_id:
+                await clbk.message.edit_text(
+                    'Этот Stepik-аккаунт уже привязан к другому '
+                    'Telegram-аккаунту\n'
+                    'Обратитесь к одному из администраторов:\n'
+                    '@Shinobiwin')
+                await state.clear()
+                return
+
     course_id = str(await state.get_value('course')).split('_')[-1]
 
     try:
@@ -488,6 +539,8 @@ async def clbk_done(
     logger_user_hand.debug(f'Exit')
 
 
+# TODO: FIX - relate id_stepik & id_telegram
+# TODO: check the link to telegrams
 @user_router.message(StateFilter(FSMQuiz.fill_link_cert), IsValidProfileLink())
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,

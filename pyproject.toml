@@ -1,6 +1,6 @@
 [project]
 name = "Bot-Get-Cert"
-version = "3.3.5"
+version = "3.3.6"
 description = "Add your description here"
 readme = "README.md"
 requires-python = "==3.13.*"
