@@ -29,7 +29,8 @@ class IsValidProfileLink(BaseFilter):
        - https://stepik.org/users/USER_ID/profile
        - https://stepik.org/users/USER_ID/
     """
-    async def __call__(self, msg: Message, state: FSMContext) -> bool | dict[str, str]:
+    async def __call__(self, msg: Message,
+                       state: FSMContext) -> bool | dict[str, str]:
         msg_processor = MessageProcessor(msg, state)
         text = msg.text.strip()
 
