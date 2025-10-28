@@ -390,7 +390,8 @@ async def clbk_done(
                     'На этот Stepik-аккаунт уже выдан сертификат данного курса\n')
                 logger_user_hand.warning(
                     f'Попытка {await get_username(clbk)}:{clbk.from_user.id}'
-                    f' получить сертификат на чужой Stepik аккаунт')
+                    f' получить сертификат на чужой Stepik аккаунт:'
+                    f'[https://stepik.org/users/{stepik_user_id}/profile]')
                 await state.clear()
                 return
 
