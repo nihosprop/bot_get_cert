@@ -299,6 +299,7 @@ async def clbk_select_course(
 async def clbk_select_empty_course(clbk: CallbackQuery):
     # if clbk.data.startswith('id_5'):
     #     await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
+    #       return
     await clbk.answer('Курс в разработке 🛠️', show_alert=True)
     logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
                              f'{await get_username(clbk)}')
