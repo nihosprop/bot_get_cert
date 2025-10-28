@@ -237,13 +237,12 @@ async def clbk_select_course(
         redis_data: Redis, w_text: bool, msg_processor: MessageProcessor):
     stepik_service = StepikService(stepik.client_id, stepik.client_secret,
                                    redis_data)
-    course_id = str(clbk.data).split('_')[-1]
-    logger_user_hand.info(f'Проверка наличия серт:{clbk.from_user.id}'
-                          f':{await get_username(clbk)}:{clbk.data}')
     tg_id = str(clbk.from_user.id)
+    course_id = str(clbk.data).split('_')[-1]
+    logger_user_hand.info(f'Проверка наличия серт:{tg_id}'
+                          f':{await get_username(clbk)}:{clbk.data}')
 
-    cert = await stepik_service.check_cert_in_user(str(clbk.from_user.id),
-                                                   course_id)
+    cert = await stepik_service.check_cert_in_user(tg_id, course_id)
     if cert:
         value = await clbk.message.edit_text('У вас есть сертификат этого '
                                              'курса 🤓\nВысылаем 📜☺️\n')
@@ -284,7 +283,7 @@ async def clbk_select_course(
         #     logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
         logger_user_hand.debug(f'Exit')
         return
-    logger_user_hand.info(f'Серт на руках не обнаружен:{clbk.from_user.id}'
+    logger_user_hand.info(f'Серт на руках не обнаружен:{tg_id}'
                           f':{await get_username(clbk)}:{clbk.data}')
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
