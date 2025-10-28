@@ -416,10 +416,7 @@ async def clbk_done(
                 'stepik_user_id')
             if existing_stepik_id == stepik_user_id:
                 await clbk.message.edit_text(
-                    'Этот Stepik-аккаунт уже привязан к другому '
-                    'Telegram-аккаунту\n'
-                    'Обратитесь к одному из администраторов:\n'
-                    '@Shinobiwin')
+                    'На этот Stepik-аккаунт уже выдан сертификат данного курса\n')
                 await state.clear()
                 return
 
