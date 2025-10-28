@@ -417,6 +417,9 @@ async def clbk_done(
             if existing_stepik_id == stepik_user_id:
                 await clbk.message.edit_text(
                     'На этот Stepik-аккаунт уже выдан сертификат данного курса\n')
+                logger_user_hand.warning(
+                    f'Попытка {await get_username(clbk)}:{clbk.from_user.id}'
+                    f' получить сертификат на чужой Stepik аккаунт')
                 await state.clear()
                 return
 
