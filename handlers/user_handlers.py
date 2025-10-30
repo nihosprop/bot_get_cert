@@ -1,7 +1,7 @@
 import logging
 
 from aiogram import F, Router
-from aiogram.filters import StateFilter
+from aiogram.filters import StateFilter, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message
@@ -47,11 +47,18 @@ async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
                                             indication=True)
     logger_user_hand.debug('Exit')
 
+
+
 @user_router.message(F.text == '/start')
+# @user_router.message(CommandStart())
 async def cmd_start(
         msg: Message, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.info(f'cmd_start:{msg.from_user.id}'
                           f':{await get_username(msg)}')
+    logger_user_hand.debug(msg.model_dump_json(indent=4,
+                                               exclude_none=True))
+    logger_user_hand.debug(f'{msg.text}')
+
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
     value = await msg.answer(LexiconRu.text_survey, reply_markup=kb_butt_quiz,
