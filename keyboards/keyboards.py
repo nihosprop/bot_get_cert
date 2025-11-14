@@ -1,8 +1,14 @@
 import logging
 
 from keyboards.kb_utils import create_inline_kb
-from keyboards.buttons import (ADMIN_PANEL_BUTT, BUTT_GENDER, BUTT_COURSES,
-    BUTT_DONE, BUTT_START, BUTTS_URL_PROMO, BUTTS_PROMO_OTHER_AUTHOR)
+from keyboards.buttons import (ADMIN_PANEL_BUTT,
+    BUTT_GENDER,
+    BUTT_COURSES,
+    BUTT_DONE,
+    BUTT_START,
+    BUTTS_URL_PROMO,
+    BUTTS_PROMO_OTHER_AUTHOR,
+    BUTTS_URL_DZERANOV_PROMOCODES, BUTT_WANT_PROMOCODE_DZERANOV)
 
 logger_keyboards = logging.getLogger(__name__)
 
