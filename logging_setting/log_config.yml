@@ -75,7 +75,7 @@ loggers:
     handlers: [ stdout, file, telegram_error ]
     propagate: no
 
-  handlers.other_handlers:
+  handlers.dzeranov_handlers:
     level: INFO
     handlers: [ stdout, file, telegram_error ]
     propagate: no
