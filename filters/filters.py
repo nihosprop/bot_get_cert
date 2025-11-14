@@ -5,12 +5,19 @@ from datetime import datetime, timedelta
 from aiogram.enums import ContentType, ChatType
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from utils import get_username
 from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
+
+class CallBackFilter(BaseFilter):
+    def __init__(self, clbk_data: str):
+        self.clbk_data = clbk_data
+
+    async def __call__(self, clbk: CallbackQuery) -> bool:
+        return clbk.data == self.clbk_data
 
 class IsPrivateChat(BaseFilter):
     """
