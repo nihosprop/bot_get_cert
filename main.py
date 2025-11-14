@@ -119,6 +119,7 @@ async def main():
         
         # routers
         dp.include_router(temp_handlers.temp_router)
+        dp.include_router(dzeranov_handlers.router)
         dp.include_router(admin_handlers.admin_router)
         dp.include_router(user_handlers.user_router)
         
