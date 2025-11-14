@@ -31,3 +31,7 @@ BUTTS_URL_PROMO: dict[str, str] = {
         'https://stepik.org/a/227627/pay?promo=90e83ebae76d239a',
     'Лучший по Python. Часть 4':
         'https://stepik.org/a/241971/pay?promo=c9af0a0dae2667f9'}
+BUTTS_PROMO_OTHER_AUTHOR: dict[str, str] = {
+    'courses_joseph_dzeranov': 'Курсы Иосифа Дзеранова',
+    'courses_pragmatic_programmer': 'Курсы Pragmatic Programmer'
+    }
