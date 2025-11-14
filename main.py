@@ -11,7 +11,10 @@ from arq.connections import RedisSettings
 
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
-from handlers import admin_handlers, user_handlers, temp_handlers
+from handlers import (admin_handlers,
+    user_handlers,
+    temp_handlers,
+    dzeranov_handlers)
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
                                ThrottlingMiddleware)
