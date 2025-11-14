@@ -14,21 +14,32 @@ def create_inline_kb(
         cancel_butt=True,
         back=False,
         reverse_size_text=False,
+        links_first=True,
         url_buttons: dict = None,
         **kwargs) -> InlineKeyboardMarkup:
     """
     Генерация инлайн-клавиатур на лету.
     Параметры:
         width (int): Количество кнопок в строке для маленьких кнопок.
+
         *args: Аргументы для кнопок с callback_data.
+
         cancel_butt (bool): Добавлять ли кнопку "Отмена".
+
         back (bool): Добавлять ли кнопку "Назад".
+
         webapp (bool): Добавлять ли кнопку с WebApp (не реализовано в этом
         примере).
+
         reverse_size_text (bool): Обратный порядок добавления больших и
         маленьких кнопок.
+
+        links_first (bool): Если True, кнопки со ссылками будут отображаться
+        первыми. По умолчанию True.
+
         url_buttons (dict): Словарь с текстом кнопок и ссылками (например,
         {"Текст": "URL"}).
+
         **kwargs: Именованные аргументы для кнопок с callback_data.
     Возвращает:
         InlineKeyboardMarkup: Объект клавиатуры.
@@ -70,6 +81,27 @@ def create_inline_kb(
         url_buttons_list = [InlineKeyboardButton(text=text, url=url) for
                             text, url in url_buttons.items()]
         kb_builder.row(*url_buttons_list, width=1)
+
+    if links_first and url_buttons:
+        # Получаем текущее состояние кнопок
+        keyboard = kb_builder.export()
+
+        url_rows = []
+        regular_rows = []
+        for row in keyboard:
+            # Проверяем, есть ли в строке URL-кнопки
+            if any(btn.url for btn in row):
+                url_rows.append(*row)
+            else:
+                regular_rows.append(*row)
+        # Собираем обратно, если нужно URL-кнопки первыми
+        if links_first:
+            keyboard = url_rows + regular_rows
+            print(f'{keyboard=}')
+        # Очищаем билдер и добавляем кнопки в новом порядке
+        kb_builder = InlineKeyboardBuilder()
+
+        kb_builder.row(*(url_rows + regular_rows), width=1)
 
     if cancel_butt:
         kb_builder.row(
