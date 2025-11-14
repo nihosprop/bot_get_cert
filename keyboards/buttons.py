@@ -34,5 +34,21 @@ BUTTS_URL_PROMO: dict[str, str] = {
         'https://stepik.org/a/241971/pay?promo=c9af0a0dae2667f9'}
 BUTTS_PROMO_OTHER_AUTHOR: dict[str, str] = {
     'courses_joseph_dzeranov': 'Курсы Иосифа Дзеранова',
-    'courses_pragmatic_programmer': 'Курсы Pragmatic Programmer'
+    'courses_pragmatic_programmer': 'Курсы Pragmatic Programmer'}
+
+BUTT_WANT_PROMOCODE_DZERANOV: dict[str, str] = {
+    'want_promocode_dzeranov': 'Хочу промокод на другой курс Иосифа'}
+BUTTS_URL_DZERANOV_PROMOCODES: dict[str, str] = {
+    'Основы программирования':
+        'https://stepik.org/a/5482/pay?promo=1edbb8dbd308b025',
+    'Для продвинутых':
+        'https://stepik.org/a/84983/pay?promo=8a521ae326d8d861',
+    'База':
+        'https://stepik.org/a/107779/pay?promo=071d0011effc70fc',
+    'Алгоритмы и структуры данных':
+        'https://stepik.org/a/120862/pay?promo=47ac21e1ed03f8a9',
+    'Профессия Backend разработчик':
+        'https://stepik.org/a/170073/pay?promo=2cbd97b40850a6b8',
+    'Профессия Разработчик Telegram ботов':
+        'https://stepik.org/a/210117/pay?promo=ddd841822fd96625',
     }
