@@ -9,8 +9,13 @@ logger_kb_utils = logging.getLogger(__name__)
 
 
 def create_inline_kb(
-        width: int = 1, *args, cancel_butt=True, back=False,
-        reverse_size_text=False, url_buttons: dict = None, **kwargs) -> (
+        width: int = 1,
+        *args,
+        cancel_butt=True,
+        back=False,
+        reverse_size_text=False,
+        url_buttons: dict = None,
+        **kwargs) -> (
         InlineKeyboardMarkup):
     """
     Генерация инлайн-клавиатур на лету.
