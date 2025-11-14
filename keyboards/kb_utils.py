@@ -13,6 +13,7 @@ def create_inline_kb(
         *args,
         cancel_butt=True,
         back=False,
+        exit=False,
         reverse_size_text=False,
         links_first=True,
         url_buttons: dict = None,
@@ -27,6 +28,8 @@ def create_inline_kb(
         cancel_butt (bool): Добавлять ли кнопку "Отмена".
 
         back (bool): Добавлять ли кнопку "Назад".
+
+        exit (bool): Добавлять ли кнопку "Выход".
 
         webapp (bool): Добавлять ли кнопку с WebApp (не реализовано в этом
         примере).
@@ -47,14 +50,15 @@ def create_inline_kb(
     kb_builder = InlineKeyboardBuilder()
     big_text: list[InlineKeyboardButton] = []
     small_text: list[InlineKeyboardButton] = []
+    url_buttons_list: list[InlineKeyboardButton] = []
 
     if args:
         for button in args:
             if len(button) > 16:
+                # TODO: изменить подачу аргументов в параметры InlineKeyboardButton
                 big_text.append(
                     InlineKeyboardButton(
-                        text=BUTT_CANCEL[button] if BUTT_CANCEL.get(
-                            button) else button, callback_data=button))
+                        text=button, callback_data=button))
             else:
                 small_text.append(
                     InlineKeyboardButton(
@@ -69,6 +73,15 @@ def create_inline_kb(
             else:
                 small_text.append(
                     InlineKeyboardButton(text=text, callback_data=button))
+
+    # Добавляет ссылки в кнопки(если они есть)
+    if url_buttons:
+        url_buttons_list = [InlineKeyboardButton(text=text, url=url) for
+                                text, url in url_buttons.items()]
+    # Сначала кнопки-ссылки, если links_first=True
+    if links_first and url_buttons_list:
+        kb_builder.row(*url_buttons_list, width=1)
+
     if not reverse_size_text:
         kb_builder.row(*big_text, width=1)
         kb_builder.row(*small_text, width=width)
@@ -76,32 +89,9 @@ def create_inline_kb(
         kb_builder.row(*small_text, width=width)
         kb_builder.row(*big_text, width=1)
 
-    # Добавляет ссылки в кнопки(если они есть)
-    if url_buttons:
-        url_buttons_list = [InlineKeyboardButton(text=text, url=url) for
-                            text, url in url_buttons.items()]
+    # Кнопки-ссылки в конце, если links_first=False
+    if not links_first and url_buttons_list:
         kb_builder.row(*url_buttons_list, width=1)
-
-    if links_first and url_buttons:
-        # Получаем текущее состояние кнопок
-        keyboard = kb_builder.export()
-
-        url_rows = []
-        regular_rows = []
-        for row in keyboard:
-            # Проверяем, есть ли в строке URL-кнопки
-            if any(btn.url for btn in row):
-                url_rows.append(*row)
-            else:
-                regular_rows.append(*row)
-        # Собираем обратно, если нужно URL-кнопки первыми
-        if links_first:
-            keyboard = url_rows + regular_rows
-            print(f'{keyboard=}')
-        # Очищаем билдер и добавляем кнопки в новом порядке
-        kb_builder = InlineKeyboardBuilder()
-
-        kb_builder.row(*(url_rows + regular_rows), width=1)
 
     if cancel_butt:
         kb_builder.row(
@@ -111,5 +101,7 @@ def create_inline_kb(
     if back:
         kb_builder.row(
             InlineKeyboardButton(text=BUTT_BACK['back'], callback_data='back'))
+    if exit:
+        kb_builder.row(InlineKeyboardButton(text='Выход', callback_data='exit'))
 
     return kb_builder.as_markup()
