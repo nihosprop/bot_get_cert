@@ -301,7 +301,7 @@ async def clbk_select_course(
 
 
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
-                                        name.startswith(('id_5', 'id_6'))]),
+                                        name.startswith(('id_5',))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
     # if clbk.data.startswith('id_5'):
