@@ -3,7 +3,6 @@ import logging
 from aiogram import Router, F
 from aiogram.filters import or_f
 from aiogram.types import Message
-from filters.filters import IsPrivateChat
 from utils import get_username
 
 temp_router = Router()
