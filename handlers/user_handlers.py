@@ -31,7 +31,6 @@ from utils.utils import MessageProcessor
 
 user_router = Router()
 user_router.message.filter(IsPrivateChat())
-logger = logging.getLogger()
 logger_user_hand = logging.getLogger(__name__)
 
 @user_router.message(F.text.lower().find('спасибо') == 0)
