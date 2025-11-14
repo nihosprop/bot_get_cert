@@ -16,3 +16,7 @@ class FSMQuiz(StatesGroup):
     fill_date_of_revocation = State()
     fill_link_cert = State()
     end = State()
+
+class FSMDzeranov(StatesGroup):
+    choice_promocodes = State()
+    want_promocode_dzeranov = State()
