@@ -15,8 +15,7 @@ def create_inline_kb(
         back=False,
         reverse_size_text=False,
         url_buttons: dict = None,
-        **kwargs) -> (
-        InlineKeyboardMarkup):
+        **kwargs) -> InlineKeyboardMarkup:
     """
     Генерация инлайн-клавиатур на лету.
     Параметры:
@@ -41,22 +40,24 @@ def create_inline_kb(
     if args:
         for button in args:
             if len(button) > 16:
-                big_text.append(InlineKeyboardButton(
+                big_text.append(
+                    InlineKeyboardButton(
                         text=BUTT_CANCEL[button] if BUTT_CANCEL.get(
-                                button) else button, callback_data=button))
+                            button) else button, callback_data=button))
             else:
-                small_text.append(InlineKeyboardButton(
+                small_text.append(
+                    InlineKeyboardButton(
                         text=BUTT_CANCEL[button] if BUTT_CANCEL.get(
-                                button) else button, callback_data=button))
+                            button) else button, callback_data=button))
 
     if kwargs:
         for button, text in kwargs.items():
             if len(text) > 16:
                 big_text.append(
-                        InlineKeyboardButton(text=text, callback_data=button))
+                    InlineKeyboardButton(text=text, callback_data=button))
             else:
                 small_text.append(
-                        InlineKeyboardButton(text=text, callback_data=button))
+                    InlineKeyboardButton(text=text, callback_data=button))
     if not reverse_size_text:
         kb_builder.row(*big_text, width=1)
         kb_builder.row(*small_text, width=width)
@@ -67,12 +68,14 @@ def create_inline_kb(
     # Добавляет ссылки в кнопки(если они есть)
     if url_buttons:
         url_buttons_list = [InlineKeyboardButton(text=text, url=url) for
-                text, url in url_buttons.items()]
+                            text, url in url_buttons.items()]
         kb_builder.row(*url_buttons_list, width=1)
 
     if cancel_butt:
-        kb_builder.row(InlineKeyboardButton(text=BUTT_CANCEL['cancel'],
-                                            callback_data='/cancel'))
+        kb_builder.row(
+            InlineKeyboardButton(
+                text=BUTT_CANCEL['cancel'],
+                callback_data='/cancel'))
     if back:
         kb_builder.row(
             InlineKeyboardButton(text=BUTT_BACK['back'], callback_data='back'))
