@@ -55,7 +55,6 @@ def create_inline_kb(
     if args:
         for button in args:
             if len(button) > 16:
-                # TODO: изменить подачу аргументов в параметры InlineKeyboardButton
                 big_text.append(
                     InlineKeyboardButton(
                         text=button, callback_data=button))
