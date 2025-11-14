@@ -15,6 +15,11 @@ kb_create_promo = create_inline_kb(
     width=1, url_buttons=BUTTS_URL_PROMO, cancel_butt=True,
     **BUTTS_PROMO_OTHER_AUTHOR)
 
+kb_dzeranov_promocodes = create_inline_kb(url_buttons=BUTTS_URL_DZERANOV_PROMOCODES,
+                                          cancel_butt=True,
+                                          back=True,
+                                          **BUTT_WANT_PROMOCODE_DZERANOV)
+
 kb_butt_quiz = create_inline_kb(
     1, **BUTT_START,
     cancel_butt=False)
