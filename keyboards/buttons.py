@@ -53,7 +53,6 @@ BUTTS_URL_DZERANOV_PROMOCODES: dict[str, str] = {
         'https://stepik.org/a/210117/pay?promo=ddd841822fd96625',
     }
 
-
 BUTTS_URL_PRAGMATIC_PROGER: dict[str, str] = {
     'Пакет курсов. Базы данных и SQL с нуля до профи':
         'https://stepik.org/a/212383/pay?promo=daafd6aae3c80832',
