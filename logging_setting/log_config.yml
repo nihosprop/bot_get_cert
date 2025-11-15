@@ -80,6 +80,11 @@ loggers:
     handlers: [ stdout, file, telegram_error ]
     propagate: no
 
+  handlers.pragmatic_proger_handlers:
+    level: INFO
+    handlers: [ stdout, file, telegram_error ]
+    propagate: no
+
   config_data.config:
     level: INFO
     handlers: [ stdout, file, telegram_error ]
