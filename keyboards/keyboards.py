@@ -26,6 +26,11 @@ kb_dzeranov_promocodes = create_inline_kb(url_buttons=BUTTS_URL_DZERANOV_PROMOCO
                                           back=True,
                                           cancel_butt=False,
                                           **BUTT_WANT_PROMOCODE_DZERANOV)
+kb_pragmatic_proger_promocodes = create_inline_kb(
+    url_buttons=BUTTS_URL_PRAGMATIC_PROGER,
+    exit=True,
+    back=True,
+    cancel_butt=False)
 
 kb_butt_quiz = create_inline_kb(
     1, **BUTT_START,
