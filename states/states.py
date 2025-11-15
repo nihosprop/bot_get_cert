@@ -20,3 +20,6 @@ class FSMQuiz(StatesGroup):
 class FSMDzeranov(StatesGroup):
     choice_promocodes = State()
     want_promocode_dzeranov = State()
+
+class FSMPragmaticProger(StatesGroup):
+    choice_promocodes = State()
