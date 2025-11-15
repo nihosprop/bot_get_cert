@@ -52,3 +52,15 @@ BUTTS_URL_DZERANOV_PROMOCODES: dict[str, str] = {
     'Профессия Разработчик Telegram ботов':
         'https://stepik.org/a/210117/pay?promo=ddd841822fd96625',
     }
+
+
+BUTTS_URL_PRAGMATIC_PROGER: dict[str, str] = {
+    'Пакет курсов. Базы данных и SQL с нуля до профи':
+        'https://stepik.org/a/212383/pay?promo=daafd6aae3c80832',
+    'Программа. Linux: с нуля до сертификата':
+        'https://stepik.org/a/198983/pay?promo=3a1ad92510369e8e',
+    'IT база SQL + Linux + Git':
+        'https://stepik.org/a/253025/pay?promo=f941b669d9b68e5f',
+    'Git + GitHub. Полный курс':
+        'https://stepik.org/a/214865/pay?promo=092acaeeece1d6d9'
+    }
