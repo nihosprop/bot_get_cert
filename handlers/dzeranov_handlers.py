@@ -66,7 +66,7 @@ async def clbk_want_promocode_dzeranov(
         state: FSMContext):
     logger.debug('Entry')
 
-    text = (f'Если хотите получить скидку на любой другой kb_exit_back Иосифа,'
+    text = (f'Если хотите получить скидку на любой другой Иосифа, '
             f'то напишите <a href="https://t.me/somevanya">Ване</a> в личку'
             f'Он всё организует 😊')
     await state.set_state(FSMDzeranov.want_promocode_dzeranov)
