@@ -241,7 +241,8 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
 async def clbk_select_course(
         clbk: CallbackQuery, state: FSMContext, stepik: Stepik,
         redis_data: Redis, w_text: bool, msg_processor: MessageProcessor):
-    stepik_service = StepikService(stepik.client_id, stepik.client_secret,
+    stepik_service = StepikService(stepik.client_id,
+                                   stepik.client_secret,
                                    redis_data)
     tg_id = str(clbk.from_user.id)
     course_id = str(clbk.data).split('_')[-1]
