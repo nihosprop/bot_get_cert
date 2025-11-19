@@ -258,7 +258,9 @@ async def clbk_select_course(
                                                              w_text=w_text,
                                                              exist_cert=True)
             # отправка сертификата
-            await stepik_service.send_certificate(clbk, path, state,
+            await stepik_service.send_certificate(clbk,
+                                                  path,
+                                                  state,
                                                   is_copy=True,
                                                   course_id=course_id)
         except Exception as err:
