@@ -264,7 +264,8 @@ async def clbk_select_course(
                                                   is_copy=True,
                                                   course_id=course_id)
         except Exception as err:
-            logger_user_hand.debug(f'{err.__class__.__name__=}', exc_info=True)
+            logger_user_hand.debug(f'{err.__class__.__name__=}',
+                                   exc_info=True)
 
         await msg_processor.deletes_msg_a_delay(value, delay=5)
         await state.clear()
