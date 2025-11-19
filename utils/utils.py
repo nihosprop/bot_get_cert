@@ -164,8 +164,9 @@ class StepikService:
                                exc_info=True)
             raise RuntimeError(f'Неожиданная ошибка: {err}')
 
-    async def check_cert_in_user(self, tg_user_id: str, course_id: str) \
-            -> bool | str:
+    async def check_cert_in_user(self,
+                                 tg_user_id: str,
+                                 course_id: str) -> bool | str:
         """
         Проверяет, есть ли номер сертификата у пользователя.
         :param course_id:
