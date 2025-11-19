@@ -479,7 +479,10 @@ class StepikService:
         return output_file
 
     async def generate_certificate(
-            self, state_data: FSMContext, type_update, w_text: bool = False,
+            self,
+            state_data: FSMContext,
+            type_update,
+            w_text: bool = False,
             exist_cert=False):
         """
         Асинхронная обёртка для генерации сертификата.
