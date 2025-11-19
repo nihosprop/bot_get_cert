@@ -68,7 +68,7 @@ async def clbk_want_promocode_dzeranov(
 
     text = (f'Если хотите получить скидку на любой другой курс Иосифа, '
             f'то напишите <a href="https://t.me/somevanya">Ване</a> в личку'
-            f'Он всё организует 😊')
+            f' Он всё организует 😊')
     await state.set_state(FSMDzeranov.want_promocode_dzeranov)
     await clbk.message.edit_text(text=text, reply_markup=kb_exit_back)
     await clbk.answer()
