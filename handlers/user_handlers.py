@@ -308,6 +308,7 @@ async def clbk_select_course(
                                         name.startswith(('id_5',))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
+    logger_user_hand.debug('Entry')
     # if clbk.data.startswith('id_5'):
     #     await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
     #     logger_user_hand.warning(
@@ -317,7 +318,7 @@ async def clbk_select_empty_course(clbk: CallbackQuery):
     await clbk.answer('Курс в разработке 🛠️', show_alert=True)
     logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
                              f'{await get_username(clbk)}')
-
+    logger_user_hand.debug('Exit')
 
 @user_router.message(
         StateFilter(FSMQuiz.fill_gender, FSMQuiz.fill_course, FSMQuiz.end),
