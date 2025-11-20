@@ -25,7 +25,7 @@ BUTT_COURSES: dict[str, str] = {
     'id_2_221885': 'Лучший по Python.Часть 2',
     'id_3_227627': 'Лучший по Python.Часть 3',
     'id_4_241971': 'Лучший по Python.Часть 4',
-    'id_252829': 'Основы Git и GitHub'}
+    'idc_252829': 'Основы Git и GitHub'}
 
 BUTTS_URL_PROMO: dict[str, str] = {
     'Лучший по Python.Часть 3':
