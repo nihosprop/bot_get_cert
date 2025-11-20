@@ -197,11 +197,12 @@ class StepikService:
     async def check_cert_in_stepik(self, stepik_user_id: str, course_id: str,
                                    access_token: str) -> bool | str:
         """
-        Проверяет наличие сертификата у пользователя на Stepik.
+         Проверяет наличие сертификата у пользователя на Stepik.
         :param stepik_user_id: ID пользователя на Stepik.
         :param course_id: ID курса.
         :param access_token: Токен доступа Stepik API.
-        :return: True, если сертификат найден, иначе False.
+        :return: 'PRIVATE' если аккаунт ученика на Stepik приватный;
+                  True, если сертификат найден, иначе False.
         """
         if await self.is_private_account(stepik_user_id):
             return 'PRIVATE'
