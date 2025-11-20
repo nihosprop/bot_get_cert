@@ -222,6 +222,7 @@ class StepikService:
                             await asyncio.sleep(10)
                         response.raise_for_status()
                         data = await response.json()
+                        # logger_utils.debug(f'{data['certificates']}')
 
                         # Проверяем сертификаты на текущей странице
                         for certificate in data['certificates']:
