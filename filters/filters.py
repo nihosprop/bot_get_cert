@@ -35,8 +35,8 @@ class IsPrivateChat(BaseFilter):
     """
     Проверяет, является ли чат личным.
     """
-    async def __call__(self, message: Message) -> bool:
-        return message.chat.type == ChatType.PRIVATE
+    async def __call__(self, msg: Message) -> bool:
+        return msg.chat.type == ChatType.PRIVATE
 
 class IsValidProfileLink(BaseFilter):
     """
