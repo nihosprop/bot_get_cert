@@ -213,8 +213,9 @@ class StepikService:
                 api_url = (f'https://stepik.org/api/certificates?user='
                            f'{stepik_user_id}&page={page_number}')
                 async with aiohttp.ClientSession() as session:
-                    async with session.get(api_url, headers={
-                            'Authorization': 'Bearer ' + access_token}) as response:
+                    async with session.get(
+                            api_url,
+                            headers={'Authorization': 'Bearer ' + access_token}) as response:
                         if response.status == 429:
                             logger_utils.warning(
                                 'Превышен лимит запросов. Ожидание… 10c')
