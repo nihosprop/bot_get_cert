@@ -131,14 +131,14 @@ async def main():
         
         await bot.delete_webhook(drop_pending_updates=True)
         logger_main.info('Start bot')
-        
+
         await asyncio.gather(dp.start_polling(bot,
                                               admins=config.tg_bot.id_admins,
                                               stepik=config.stepik,
                                               w_text=config.w_text,
                                               redis_que=redis_que,
                                               tg_target_channel=config.tg_target_channel,
-                                              ),
+                                              pragmatic_courses=config.pragmatic_courses),
                              run_arq_worker(redis_que, bot=bot))
     
     except Exception as err:

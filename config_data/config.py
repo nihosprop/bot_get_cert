@@ -29,7 +29,7 @@ class Config:
     log_error_tg_enabled: bool
     log_error_tg_chat_id: int | None
     log_error_tg_thread_id: int | None
-
+    pragmatic_courses: str | None
 
 def load_config(path: str | None = None) -> Config:
     """
@@ -57,6 +57,8 @@ def load_config(path: str | None = None) -> Config:
     log_error_tg_chat_id = env.int('LOG_ERROR_TG_CHAT_ID', None)
     log_error_tg_thread_id = env.int('LOG_ERROR_TG_THREAD_ID', None)
 
+    pragmatic_courses = env.str('PRAGMATIC_COURSES', None)
+
     tg_bot = TgBot(
         token=env('BOT_TOKEN'),
         id_admins=env('ID_ADMIN'))
@@ -75,4 +77,5 @@ def load_config(path: str | None = None) -> Config:
         log_tg_cert_thread_id=log_tg_cert_thread_id,
         log_error_tg_enabled=log_error_tg_enabled,
         log_error_tg_chat_id=log_error_tg_chat_id,
-        log_error_tg_thread_id=log_error_tg_thread_id)
+        log_error_tg_thread_id=log_error_tg_thread_id,
+        pragmatic_courses=pragmatic_courses)
