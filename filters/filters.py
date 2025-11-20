@@ -12,6 +12,18 @@ from utils.utils import MessageProcessor
 
 logger_filters = logging.getLogger(__name__)
 
+class IsPragmaticCoursesFilter(BaseFilter):
+    """
+    Проверяет, callback_data присутствует ли в списке курсов.
+    """
+    async def __call__(self,
+                       clbk: CallbackQuery,
+                       state: FSMContext,
+                       pragmatic_courses: str):
+        courses: list[str] = pragmatic_courses.split()
+        return clbk.data in courses
+
+
 class CallBackFilter(BaseFilter):
     def __init__(self, clbk_data: str):
         self.clbk_data = clbk_data
