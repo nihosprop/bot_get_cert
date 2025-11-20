@@ -15,7 +15,7 @@ from handlers import (admin_handlers,
     user_handlers,
     temp_handlers,
     dzeranov_handlers,
-    pragmatic_proger_handlers)
+    pragmatic_promo_handlers)
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
                                ThrottlingMiddleware)
@@ -124,7 +124,7 @@ async def main():
         # routers
         dp.include_router(temp_handlers.temp_router)
         dp.include_router(dzeranov_handlers.router)
-        dp.include_router(pragmatic_proger_handlers.router)
+        dp.include_router(pragmatic_promo_handlers.router)
         dp.include_router(admin_handlers.admin_router)
         dp.include_router(user_handlers.user_router)
         
