@@ -210,7 +210,8 @@ class StepikService:
         page_number = 1
         while True:
             try:
-                api_url = f'https://stepik.org/api/certificates?user={stepik_user_id}&page={page_number}'
+                api_url = (f'https://stepik.org/api/certificates?user='
+                           f'{stepik_user_id}&page={page_number}')
                 async with aiohttp.ClientSession() as session:
                     async with session.get(api_url, headers={
                             'Authorization': 'Bearer ' + access_token}) as response:
