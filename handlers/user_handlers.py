@@ -303,17 +303,17 @@ async def clbk_select_course(
     await clbk.answer()
 
 
+# TODO: убрать или заменить хэндлер на более гибкий
 @user_router.callback_query(F.data.in_([name for name in BUTT_COURSES if
                                         name.startswith(('id_5',))]),
                             StateFilter(FSMQuiz.fill_course))
 async def clbk_select_empty_course(clbk: CallbackQuery):
-    if clbk.data.startswith('id_5'):
-        await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
-        logger_user_hand.warning(
-            f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
-            f'{await get_username(clbk)}')
-        return
-
+    # if clbk.data.startswith('id_5'):
+    #     await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
+    #     logger_user_hand.warning(
+    #         f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
+    #         f'{await get_username(clbk)}')
+    #     return
     await clbk.answer('Курс в разработке 🛠️', show_alert=True)
     logger_user_hand.warning(f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
                              f'{await get_username(clbk)}')
@@ -525,8 +525,6 @@ async def clbk_done(
     logger_user_hand.debug(f'Exit')
 
 
-# TODO: FIX - relate id_stepik & id_telegram
-# TODO: check the link to telegrams
 @user_router.message(StateFilter(FSMQuiz.fill_link_cert), IsValidProfileLink())
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
