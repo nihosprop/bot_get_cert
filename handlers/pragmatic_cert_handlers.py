@@ -14,9 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 @router.callback_query(IsPragmaticCoursesFilter())
-async def clbk_pragmatic_courses(clbk: CallbackQuery,
-                                 state: FSMContext):
+async def clbk_pragmatic_courses(clbk: CallbackQuery):
+    logger.debug('Entry')
+
     await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
     logger.warning(
         f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
         f'{await get_username(clbk)}')
+
+    logger.debug('Exit')
