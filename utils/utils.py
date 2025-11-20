@@ -199,7 +199,8 @@ class StepikService:
         """
          Проверяет наличие сертификата у пользователя на Stepik.
         :param stepik_user_id: ID пользователя на Stepik.
-        :param course_id: ID курса.
+        :param course_id: ID курса, сертификат которого надо проверить на
+        наличие у ученика.
         :param access_token: Токен доступа Stepik API.
         :return: 'PRIVATE' если аккаунт ученика на Stepik приватный;
                   True, если сертификат найден, иначе False.
