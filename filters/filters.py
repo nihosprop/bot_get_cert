@@ -18,7 +18,6 @@ class IsPragmaticCoursesFilter(BaseFilter):
     """
     async def __call__(self,
                        clbk: CallbackQuery,
-                       state: FSMContext,
                        pragmatic_courses: str):
         courses: list[str] = pragmatic_courses.split()
         return clbk.data in courses
