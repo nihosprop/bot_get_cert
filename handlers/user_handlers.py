@@ -249,7 +249,7 @@ async def clbk_select_course(
     logger_user_hand.info(f'Проверка наличия серт:{tg_id}'
                           f':{await get_username(clbk)}:{clbk.data}')
 
-    cert = await stepik_service.check_cert_in_user(tg_id, course_id)
+    cert: str | bool = await stepik_service.check_cert_in_user(tg_id, course_id)
     if cert:
         value = await clbk.message.edit_text('У вас есть сертификат этого '
                                              'курса 🤓\nВысылаем 📜☺️\n')
