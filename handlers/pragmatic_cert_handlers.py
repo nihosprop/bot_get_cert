@@ -108,11 +108,23 @@ async def clbk_back_on_fill_course(clbk: CallbackQuery,
                 IsCorrectData())
 async def msg_fill_date_revocation(msg: Message,
                                    state: FSMContext,
-                                   stepik: Stepik,
-                                   redis_data: Redis,
+                                   date: str,
                                    msg_processor: MessageProcessor):
     logger.debug('Entry')
 
+    await msg.delete()
+    await msg_processor.deletes_messages(msgs_for_del=True)
+    await state.update_data(date=date)
+
+    logger.info(f'Дата {date} записана для TG_ID:{msg.from_user.id}'
+                f':{await get_username(msg)}')
+
+    value = await msg.answer(
+        LexiconRu.text_data_done,
+        reply_markup=kb_back_cancel,
+        disable_web_page_preview=True)
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
+    await state.set_state(FSMPragmaticGetCertSG.fill_link_to_stepik_profile)
 
     logger.debug('Exit')
 
