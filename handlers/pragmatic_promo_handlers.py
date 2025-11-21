@@ -8,13 +8,13 @@ from aiogram.types import CallbackQuery
 from filters.filters import CallBackFilter
 from keyboards import kb_create_promo, kb_pragmatic_proger_promocodes
 from lexicon.lexicon_ru import LexiconRu
-from states.states import FSMPragmaticProger
+from states.states import FSMPragmaticPromoSG
 from utils import get_username
 
 router = Router()
 router.callback_query.filter(
     or_f(
-        StateFilter(FSMPragmaticProger),
+        StateFilter(FSMPragmaticPromoSG),
         CallBackFilter(
             clbk_data='courses_pragmatic_programmer')))
 logger = logging.getLogger(__name__)
@@ -34,13 +34,13 @@ async def clbk_courses_pragmatic_programmer(
         reply_markup=kb_pragmatic_proger_promocodes,
         disable_web_page_preview=True)
 
-    await state.set_state(FSMPragmaticProger.choice_promocodes)
+    await state.set_state(FSMPragmaticPromoSG.choice_promocodes)
     await clbk.answer()
     logger.debug('Exit')
 
 @router.callback_query(
     F.data == 'back',
-    StateFilter(FSMPragmaticProger.choice_promocodes))
+    StateFilter(FSMPragmaticPromoSG.choice_promocodes))
 async def clbk_back(
         clbk: CallbackQuery,
         state: FSMContext):
