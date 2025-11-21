@@ -37,8 +37,6 @@ async def get_pragmatic_certificates(
         client_secret=stepik.client_secret,
         redis_client=redis_data)
     logger.warning(
-        f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
-        f'{await get_username(clbk)}')
         f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:{tg_username}')
 
     tg_id = str(clbk.from_user.id)
@@ -92,4 +90,38 @@ async def get_pragmatic_certificates(
     logger.info(f'State of {tg_username}:{await state.get_state()}')
     logger.debug('Exit')
 
+@router.callback_query(F.data == 'back',
+                       StateFilter(
+                           FSMPragmaticGetCertSG.fill_date_of_revocation))
+async def clbk_back_on_fill_course(clbk: CallbackQuery,
+                                   state: FSMContext):
+    logger.debug('Entry')
+
+    await clbk.message.edit_text(LexiconRu.text_select_course,
+                                     reply_markup=kb_courses)
+    await state.set_state(FSMQuiz.fill_course)
+    await clbk.answer()
+
     logger.debug('Exit')
+
+@router.message(StateFilter(FSMPragmaticGetCertSG.fill_date_of_revocation),
+                IsCorrectData())
+async def msg_fill_date_revocation(msg: Message,
+                                   state: FSMContext,
+                                   stepik: Stepik,
+                                   redis_data: Redis,
+                                   msg_processor: MessageProcessor):
+    logger.debug('Entry')
+
+
+    logger.debug('Exit')
+
+
+
+
+
+
+
+
+
+
