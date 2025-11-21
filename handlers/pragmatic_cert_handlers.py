@@ -1,25 +1,95 @@
 import logging
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
+from redis import Redis
 
-from filters.filters import IsPragmaticCoursesFilter
-from utils import get_username
+from config_data.config import Stepik
+from filters.filters import (IsPragmaticCoursesFilter,
+    CallBackFilter,
+    IsCorrectData)
+from keyboards import kb_back_cancel, kb_courses
+from lexicon import LexiconRu
+from states.states import FSMPragmaticGetCertSG, FSMQuiz
+from utils import get_username, StepikService, MessageProcessor
 
 router = Router()
-router.callback_query.filter(or_f(IsPragmaticCoursesFilter(), ))
+router.callback_query.filter(or_f(IsPragmaticCoursesFilter(),
+                                  CallBackFilter('back')))
 logger = logging.getLogger(__name__)
 
 
 @router.callback_query(IsPragmaticCoursesFilter())
-async def clbk_pragmatic_courses(clbk: CallbackQuery):
+async def get_pragmatic_certificates(
+        clbk: CallbackQuery,
+        state: FSMContext,
+        w_text: bool,
+        stepik: Stepik,
+        redis_data: Redis,
+        msg_processor: MessageProcessor):
     logger.debug('Entry')
 
-    await clbk.answer('Сертификат в разработке 🛠️', show_alert=True)
+    tg_username = await get_username(clbk)
+    stepik_service = StepikService(
+        client_id=stepik.client_id,
+        client_secret=stepik.client_secret,
+        redis_client=redis_data)
     logger.warning(
         f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:'
         f'{await get_username(clbk)}')
+        f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:{tg_username}')
+
+    tg_id = str(clbk.from_user.id)
+    course_id = clbk.data
+    logger.info(
+        f'Проверка наличия серт:TG_ID[{tg_id}]'
+        f':{tg_username}:CourseID[{clbk.data}]')
+
+    cert: str | bool = await stepik_service.check_cert_in_user(tg_id, course_id)
+    logger.debug(f'{cert=}')
+
+    if cert:
+        value = await clbk.message.edit_text(
+            'У вас есть сертификат этого курса 🤓\nВысылаем...📜☺️\n')
+        try:
+            path = await stepik_service.generate_certificate(
+                state_data=state,
+                type_update=clbk,
+                w_text=w_text,
+                exist_cert=True)
+
+            await stepik_service.send_certificate(
+                clbk=clbk,
+                output_file=path,
+                state=state,
+                is_copy=True,
+                course_id=course_id)
+
+        except Exception as err:
+            logger.debug(f'{err.__class__.__name__}', exc_info=True)
+
+        await msg_processor.deletes_msg_a_delay(value, delay=5)
+        await state.clear()
+        logger.debug('Exit')
+        return
+
+    logger.info(f'Сертификат ID:{clbk.data} у TG_ID:{tg_id}'
+                f':{tg_username} на руках не обнаружен')
+
+    await state.update_data(course=clbk.data)
+    logger.debug(f'{await state.get_data()=}')
+
+    value = await clbk.message.edit_text(
+        LexiconRu.text_course_number_done,
+        reply_markup=kb_back_cancel)
+
+    await msg_processor.save_msg_id(value, msgs_for_del=True)
+    await state.set_state(FSMPragmaticGetCertSG.fill_date_of_revocation)
+    await clbk.answer()
+
+    logger.info(f'State of {tg_username}:{await state.get_state()}')
+    logger.debug('Exit')
 
     logger.debug('Exit')
