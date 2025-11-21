@@ -176,13 +176,13 @@ class IsCorrectData(BaseFilter):
                 message_id=msg.message_id)
             return False
         
-        start_kurse = datetime.strptime('01.03.2024', "%d.%m.%Y")
+        start_course = datetime.strptime('01.03.2024', "%d.%m.%Y")
         date_str = msg.text.strip()
         logger_filters.debug(f'{date_str=}')
         
         try:
             date_obj = datetime.strptime(date_str, "%d.%m.%Y")
-            if date_obj.date() < start_kurse.date():
+            if date_obj.date() < start_course.date():
                 await msg.bot.delete_message(
                     chat_id=msg.chat.id, message_id=msg.message_id)
                 value = await msg.answer(
