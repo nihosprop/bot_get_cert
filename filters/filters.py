@@ -24,11 +24,19 @@ class IsPragmaticCoursesFilter(BaseFilter):
 
 
 class CallBackFilter(BaseFilter):
-    def __init__(self, clbk_data: str):
-        self.clbk_data = clbk_data
+    """
+    Проверяет, присутствует ли в разрешенном списке callback_data.
+    """
+    def __init__(self, clbk_data: str, *args):
+        """
+        clbk_data: str - callback_data
+        args: tuple[str] - разрешенные callback_data
+        """
+        self.allowed_data: tuple = (clbk_data, *args)
 
     async def __call__(self, clbk: CallbackQuery) -> bool:
-        return clbk.data == self.clbk_data
+        """Проверяет, есть ли callback.data в списке разрешенных значений"""
+        return clbk.data in self.allowed_data
 
 class IsPrivateChat(BaseFilter):
     """
