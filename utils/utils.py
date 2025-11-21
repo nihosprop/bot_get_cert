@@ -557,7 +557,8 @@ class StepikService:
                                clbk: CallbackQuery,
                                output_file: str,
                                state: FSMContext,
-                               course_id: str, is_copy=False) -> None:
+                               course_id: str,
+                               is_copy=False) -> None:
         """
         Отправляет сертификат пользователю, и удаляет файл после отправки.
         :param course_id: IG курса на Stepik
