@@ -252,7 +252,7 @@ async def clbk_select_course(
     cert: str | bool = await stepik_service.check_cert_in_user(tg_id, course_id)
     if cert:
         value = await clbk.message.edit_text('У вас есть сертификат этого '
-                                             'курса 🤓\nВысылаем 📜☺️\n')
+                                             'курса 🤓\nВысылаем... 📜☺️\n')
         try:
             path = await stepik_service.generate_certificate(state, clbk,
                                                              w_text=w_text,
