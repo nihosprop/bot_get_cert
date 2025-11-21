@@ -296,6 +296,7 @@ async def clbk_select_course(
 
     logger_user_hand.info(f'Сертификат:{clbk.data} у TG_ID[{tg_id}]'
                           f':{await get_username(clbk)} на руках не обнаружен')
+
     await state.update_data(course=clbk.data)
     value = await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                          reply_markup=kb_back_cancel)
