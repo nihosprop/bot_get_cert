@@ -293,6 +293,7 @@ async def clbk_select_course(
         #     logger_user_hand.error(f'{err.__class__.__name__=}', exc_info=True)
         logger_user_hand.debug(f'Exit')
         return
+
     logger_user_hand.info(f'Серт на руках не обнаружен:{tg_id}'
                           f':{await get_username(clbk)}:{clbk.data}')
     await state.update_data(course=clbk.data)
