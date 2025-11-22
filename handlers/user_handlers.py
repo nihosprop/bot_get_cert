@@ -377,7 +377,6 @@ async def msg_sent_date(
 
     logger_user_hand.debug('Exit')
 
-
 @user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.end))
 async def clbk_done(
         clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
