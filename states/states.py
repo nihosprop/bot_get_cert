@@ -17,7 +17,7 @@ class FSMQuiz(StatesGroup):
     fill_link_cert = State()
     end = State()
 
-class FSMDzeranov(StatesGroup):
+class FSMDzeranovPromo(StatesGroup):
     choice_promocodes = State()
     want_promocode_dzeranov = State()
 

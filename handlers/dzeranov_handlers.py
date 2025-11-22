@@ -9,13 +9,13 @@ from filters.filters import CallBackFilter
 from keyboards import (kb_create_promo, kb_dzeranov_promocodes, kb_exit_back,
     kb_butt_quiz)
 from lexicon.lexicon_ru import LexiconRu
-from states.states import FSMDzeranov
+from states.states import FSMDzeranovPromo
 from utils import get_username
 
 router = Router()
 router.callback_query.filter(
     or_f(
-        StateFilter(FSMDzeranov),
+        StateFilter(FSMDzeranovPromo),
         CallBackFilter(
             clbk_data='courses_joseph_dzeranov')))
 logger = logging.getLogger(__name__)
@@ -33,14 +33,14 @@ async def clbk_courses_joseph_dzeranov(
     await clbk.message.edit_text(
         LexiconRu.text_promo_dzeranov, reply_markup=kb_dzeranov_promocodes,
         disable_web_page_preview=True)
-    await state.set_state(FSMDzeranov.choice_promocodes)
+    await state.set_state(FSMDzeranovPromo.choice_promocodes)
     await clbk.answer()
     logger.debug('Exit')
 
 
 @router.callback_query(
     F.data == 'back',
-    StateFilter(FSMDzeranov.choice_promocodes))
+    StateFilter(FSMDzeranovPromo.choice_promocodes))
 async def clbk_back(
         clbk: CallbackQuery,
         state: FSMContext):
@@ -60,7 +60,7 @@ async def clbk_back(
 
 @router.callback_query(
     StateFilter(
-        FSMDzeranov.choice_promocodes), F.data == 'want_promocode_dzeranov')
+        FSMDzeranovPromo.choice_promocodes), F.data == 'want_promocode_dzeranov')
 async def clbk_want_promocode_dzeranov(
         clbk: CallbackQuery,
         state: FSMContext):
@@ -69,7 +69,7 @@ async def clbk_want_promocode_dzeranov(
     text = (f'Если хотите получить скидку на любой другой курс Иосифа, '
             f'то напишите <a href="https://t.me/somevanya">Ване</a> в личку'
             f' Он всё организует 😊')
-    await state.set_state(FSMDzeranov.want_promocode_dzeranov)
+    await state.set_state(FSMDzeranovPromo.want_promocode_dzeranov)
     await clbk.message.edit_text(text=text, reply_markup=kb_exit_back)
     await clbk.answer()
 
@@ -77,7 +77,7 @@ async def clbk_want_promocode_dzeranov(
 
 
 @router.callback_query(
-    StateFilter(FSMDzeranov.want_promocode_dzeranov),
+    StateFilter(FSMDzeranovPromo.want_promocode_dzeranov),
     F.data == 'back')
 async def clbk_back_want_promocode_dzeranov(
         clbk: CallbackQuery,
@@ -87,7 +87,7 @@ async def clbk_back_want_promocode_dzeranov(
     await clbk.message.edit_text(
         LexiconRu.text_promo_dzeranov, reply_markup=kb_dzeranov_promocodes,
         disable_web_page_preview=True)
-    await state.set_state(FSMDzeranov.choice_promocodes)
+    await state.set_state(FSMDzeranovPromo.choice_promocodes)
     await clbk.answer()
 
     logger.debug('Exit')
