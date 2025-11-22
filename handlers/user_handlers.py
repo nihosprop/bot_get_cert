@@ -127,7 +127,7 @@ async def clbk_back_fill_(
 
 
 @user_router.callback_query(F.data == 'back',
-                            StateFilter(FSMQuiz.fill_link_cert))
+                            StateFilter(FSMQuiz.fill_link_to_stepik_profile))
 async def clbk_back_fill_link_cert(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
@@ -154,7 +154,7 @@ async def clbk_back_end(
     value = await clbk.message.edit_text(LexiconRu.text_data_done,
                                          reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
-    await state.set_state(FSMQuiz.fill_link_cert)
+    await state.set_state(FSMQuiz.fill_link_to_stepik_profile)
     await clbk.answer()
     logger_user_hand.debug('Exit')
 
@@ -373,7 +373,7 @@ async def msg_sent_date(
                              reply_markup=kb_back_cancel,
                              disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
-    await state.set_state(FSMQuiz.fill_link_cert)
+    await state.set_state(FSMQuiz.fill_link_to_stepik_profile)
 
     logger_user_hand.debug('Exit')
 
@@ -527,7 +527,7 @@ async def clbk_done(
     logger_user_hand.debug(f'Exit')
 
 
-@user_router.message(StateFilter(FSMQuiz.fill_link_cert), IsValidProfileLink())
+@user_router.message(StateFilter(FSMQuiz.fill_link_to_stepik_profile), IsValidProfileLink())
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
         msg_processor: MessageProcessor):
