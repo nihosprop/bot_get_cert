@@ -420,10 +420,10 @@ async def clbk_done(
                                                              access_token)
     except ConnectionTimeoutError as e:
         logger_user_hand.error(
-            f'Не удалось проверить сертификат на Stepik для user_id:'
-            f'{clbk.from_user.id}, '
-            f'username: {await get_username(clbk)}, '
-            f'stepik_user_id: {stepik_user_id}, course_id: {course_id},'
+            f'Не удалось проверить сертификат на Stepik для'
+            f' TG_ID:{clbk.from_user.id}:{await get_username(clbk)},'
+            f' STEPIK_USER_ID:{stepik_user_id},'
+            f' COURSE_ID:{course_id}, '
             f'из-за ошибки передачи данных! Сертификат выдан без проверки!, {e}')
         certificates = True
 
