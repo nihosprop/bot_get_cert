@@ -84,7 +84,7 @@ class StepikService:
 
     async def is_private_account(self, stepik_user_id: str):
         logger_utils.info(f'Проверка Stepik-аккаунта юзера на приватность:'
-                          f'[Stepik_ID:{stepik_user_id}]')
+                          f'Stepik_ID:{stepik_user_id}')
         url = f'https://stepik.org/api/users/{stepik_user_id}'
         try:
             access_token = await self.get_stepik_access_token()
@@ -104,7 +104,8 @@ class StepikService:
                         else:
                             logger_utils.warning(
                                 f'Данные юзера не найдены для'
-                                f' stepik_id:{stepik_user_id}')
+                                f' stepik_id:{stepik_user_id} из-за '
+                                f'приватности аккаунта.')
                     else:
                         logger_utils.error(
                             f'Неожиданный статус ответа: {response.status}',
