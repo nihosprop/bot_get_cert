@@ -396,6 +396,7 @@ async def clbk_done(
                                           'Ожидайте выдачи сертификата📜\n')
 
     stepik_user_id = await state.get_value('stepik_user_id')
+    tg_username = await get_username(clbk)
 
     await redis_data.hset(
         name=str(clbk.from_user.id),
@@ -430,14 +431,14 @@ async def clbk_done(
     except ConnectionTimeoutError as e:
         logger_user_hand.error(
             f'Не удалось проверить сертификат на Stepik для'
-            f' TG_ID:{clbk.from_user.id}:{await get_username(clbk)},'
+            f' TG_ID:{clbk.from_user.id}:{tg_username},'
             f' STEPIK_USER_ID:{stepik_user_id},'
             f' COURSE_ID:{course_id}, '
             f'из-за ошибки передачи данных! Сертификат выдан без проверки!, {e}')
         certificates = True
 
     if certificates == 'PRIVATE':
-        value = await clbk.message.edit_text(f'{await get_username(clbk)},'
+        value = await clbk.message.edit_text(f'{tg_username},'
                                              f'{LexiconRu.text_privacy_instructions}')
         await state.clear()
         await msg_processor.save_msg_id(value, msgs_for_del=True)
@@ -465,8 +466,7 @@ async def clbk_done(
             await clbk.answer('Идет проверка…')
             # генерация сертификата
             logger_user_hand.info(f'Генерация сертификата для'
-                                  f' :{clbk.from_user.id}'
-                                  f':{await get_username(clbk)}')
+                                  f' :{clbk.from_user.id}:{tg_username}')
             path = await stepik_service.generate_certificate(state,
                                                              type_update=clbk,
                                                              w_text=w_text)
@@ -515,9 +515,8 @@ async def clbk_done(
             await clbk.answer()
     else:
         logger_user_hand.info(f'Отсутствует серт на Stepik'
-                              f':{clbk.from_user.id}'
-                              f':{await get_username(clbk)}')
-        value = await clbk.message.answer(f'{await get_username(clbk)}, у вас '
+                              f':{clbk.from_user.id}:{tg_username}')
+        value = await clbk.message.answer(f'{tg_username}, у вас '
                                           f'пока нет сертификата этого курса '
                                           f'на Stepik🙁\n'
                                           f'Наберите нужное для сертификата '
