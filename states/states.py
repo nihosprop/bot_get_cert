@@ -28,4 +28,3 @@ class FSMPragmaticGetCert(StatesGroup):
     fill_date_of_revocation = State()
     fill_link_to_stepik_profile = State()
     data_confirm = State()
-    end = State()
