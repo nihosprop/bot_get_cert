@@ -12,7 +12,7 @@ from filters.filters import (IsPragmaticCoursesFilter,
     IsCorrectData)
 from keyboards import kb_back_cancel, kb_courses
 from lexicon import LexiconRu
-from states.states import FSMPragmaticGetCertSG, FSMQuiz
+from states.states import FSMPragmaticGetCert, FSMQuiz
 from utils import get_username, StepikService, MessageProcessor
 
 router = Router()
@@ -84,7 +84,7 @@ async def get_pragmatic_certificates(
         reply_markup=kb_back_cancel)
 
     await msg_processor.save_msg_id(value, msgs_for_del=True)
-    await state.set_state(FSMPragmaticGetCertSG.fill_date_of_revocation)
+    await state.set_state(FSMPragmaticGetCert.fill_date_of_revocation)
     await clbk.answer()
 
     logger.info(f'State of {tg_username}:{await state.get_state()}')
@@ -92,7 +92,7 @@ async def get_pragmatic_certificates(
 
 @router.callback_query(F.data == 'back',
                        StateFilter(
-                           FSMPragmaticGetCertSG.fill_date_of_revocation))
+                           FSMPragmaticGetCert.fill_date_of_revocation))
 async def clbk_back_on_fill_course(clbk: CallbackQuery,
                                    state: FSMContext):
     logger.debug('Entry')
@@ -104,7 +104,7 @@ async def clbk_back_on_fill_course(clbk: CallbackQuery,
 
     logger.debug('Exit')
 
-@router.message(StateFilter(FSMPragmaticGetCertSG.fill_date_of_revocation),
+@router.message(StateFilter(FSMPragmaticGetCert.fill_date_of_revocation),
                 IsCorrectData())
 async def msg_fill_date_revocation(msg: Message,
                                    state: FSMContext,
@@ -124,21 +124,21 @@ async def msg_fill_date_revocation(msg: Message,
         reply_markup=kb_back_cancel,
         disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
-    await state.set_state(FSMPragmaticGetCertSG.fill_link_to_stepik_profile)
+    await state.set_state(FSMPragmaticGetCert.fill_link_to_stepik_profile)
 
     logger.debug('Exit')
 
 
 @router.callback_query(F.data == 'back',
                        StateFilter(
-                           FSMPragmaticGetCertSG.fill_link_to_stepik_profile))
+                           FSMPragmaticGetCert.fill_link_to_stepik_profile))
 async def clbk_back_to_fill_date_revocation(clbk: CallbackQuery,
                                             state: FSMContext):
     logger.debug('Entry')
 
     await clbk.message.edit_text(LexiconRu.text_course_number_done,
                                  reply_markup=kb_back_cancel)
-    await state.set_state(FSMPragmaticGetCertSG.fill_date_of_revocation)
+    await state.set_state(FSMPragmaticGetCert.fill_date_of_revocation)
     await clbk.answer()
 
     logger.debug('Exit')

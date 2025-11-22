@@ -21,10 +21,10 @@ class FSMDzeranov(StatesGroup):
     choice_promocodes = State()
     want_promocode_dzeranov = State()
 
-class FSMPragmaticPromoSG(StatesGroup):
+class FSMPragmaticPromo(StatesGroup):
     choice_promocodes = State()
 
-class FSMPragmaticGetCertSG(StatesGroup):
+class FSMPragmaticGetCert(StatesGroup):
     fill_date_of_revocation = State()
     fill_link_to_stepik_profile = State()
     data_confirm = State()
