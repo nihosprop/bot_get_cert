@@ -15,7 +15,7 @@ class FSMQuiz(StatesGroup):
     fill_course = State()
     fill_date_of_revocation = State()
     fill_link_to_stepik_profile = State()
-    end = State()
+    data_confirm = State()
 
 class FSMDzeranovPromo(StatesGroup):
     choice_promocodes = State()

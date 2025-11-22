@@ -141,7 +141,7 @@ async def clbk_back_fill_link_cert(
     logger_user_hand.debug('Exit')
 
 
-@user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.end))
+@user_router.callback_query(F.data == 'back', StateFilter(FSMQuiz.data_confirm))
 async def clbk_back_end(
         clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
@@ -323,7 +323,7 @@ async def clbk_select_empty_course(clbk: CallbackQuery):
     logger_user_hand.debug('Exit')
 
 @user_router.message(
-        StateFilter(FSMQuiz.fill_gender, FSMQuiz.fill_course, FSMQuiz.end),
+        StateFilter(FSMQuiz.fill_gender, FSMQuiz.fill_course, FSMQuiz.data_confirm),
         F.content_type.in_({"text", "sticker", "photo", "video", "document"}))
 async def delete_unexpected_messages(
         msg: Message, msg_processor: MessageProcessor):
@@ -377,7 +377,7 @@ async def msg_sent_date(
 
     logger_user_hand.debug('Exit')
 
-@user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.end))
+@user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.data_confirm))
 async def clbk_done(
         clbk: CallbackQuery,
         state: FSMContext,
@@ -418,7 +418,9 @@ async def clbk_done(
                 await state.clear()
                 return
 
-    course_id = str(await state.get_value('course')).split('_')[-1]
+    course_clbk_data = await state.get_value('course')
+    course_id = (course_clbk_data.split('_')[-1]
+                 if '_' in course_clbk_data else course_clbk_data)
 
     try:
         access_token = await stepik_service.get_stepik_access_token()
@@ -550,7 +552,7 @@ async def msg_sent_stepik_link(
             f'{'Курс:':<7}{BUTT_COURSES[await state.get_value('course')]}\n'
             f'Stepik_ID:   {await state.get_value('stepik_user_id')}\n'
             f'Дата отзыва: {await state.get_value('date')}')
-    await state.set_state(FSMQuiz.end)
+    await state.set_state(FSMQuiz.data_confirm)
     await msg.delete()
     await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
                      f'<code>{text}</code>', reply_markup=kb_end_quiz)
