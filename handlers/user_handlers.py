@@ -396,6 +396,7 @@ async def clbk_done(
                                           'Ожидайте выдачи сертификата📜\n')
 
     stepik_user_id = await state.get_value('stepik_user_id')
+
     await redis_data.hset(
         name=str(clbk.from_user.id),
         key='stepik_user_id',
