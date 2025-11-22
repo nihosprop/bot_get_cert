@@ -4,13 +4,18 @@ from aiogram import Router, F
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Stepik
 from filters.filters import (IsPragmaticCoursesFilter,
     CallBackFilter,
-    IsCorrectData)
-from keyboards import kb_back_cancel, kb_courses
+    IsCorrectData, IsValidProfileLink)
+from keyboards import (kb_back_cancel,
+    kb_courses,
+    kb_end_quiz,
+    BUTT_GENDER,
+    BUTT_COURSES)
 from lexicon import LexiconRu
 from states.states import FSMPragmaticGetCert, FSMQuiz
 from utils import get_username, StepikService, MessageProcessor
@@ -144,6 +149,32 @@ async def clbk_back_to_fill_date_revocation(clbk: CallbackQuery,
     logger.debug('Exit')
 
 
+@router.message(StateFilter(FSMPragmaticGetCert.fill_link_to_stepik_profile),
+                IsValidProfileLink())
+async def msg_sent_stepik_link(
+        msg: Message,
+        state: FSMContext,
+        stepik_user_id: str,
+        msg_processor: MessageProcessor):
+    logger.info(f'Записана ссылка {msg.text} от TG_ID:{msg.from_user.id}'
+                f':{await get_username(msg)}')
+
+    await state.update_data(stepik_user_id=stepik_user_id)
+    await msg_processor.deletes_messages(msgs_for_del=True)
+
+    text = (f'{'Имя:':<7}{await state.get_value('full_name')}\n'
+            f'{'Пол:':<7}{BUTT_GENDER[await state.get_value('gender')]}\n'
+            f'{'Курс:':<7}{BUTT_COURSES[await state.get_value('course')]}\n'
+            f'Stepik_ID:   {await state.get_value('stepik_user_id')}\n'
+            f'Дата отзыва: {await state.get_value('date')}')
+
+    await state.set_state(FSMPragmaticGetCert.data_confirm)
+    await msg.delete()
+    await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
+                     f'<code>{text}</code>', reply_markup=kb_end_quiz)
+
+
+            await state.clear()
 
 
 
