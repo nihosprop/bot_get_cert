@@ -172,11 +172,3 @@ async def msg_sent_stepik_link(
     await msg.delete()
     await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
                      f'<code>{text}</code>', reply_markup=kb_end_quiz)
-
-
-            await state.clear()
-
-
-
-
-
