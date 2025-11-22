@@ -379,9 +379,14 @@ async def msg_sent_date(
 
 @user_router.callback_query(F.data == 'done', StateFilter(FSMQuiz.end))
 async def clbk_done(
-        clbk: CallbackQuery, state: FSMContext, redis_data: Redis,
-        stepik: Stepik, w_text: bool, msg_processor: MessageProcessor):
+        clbk: CallbackQuery,
+        state: FSMContext,
+        redis_data: Redis,
+        stepik: Stepik,
+        w_text: bool,
+        msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
+
     stepik_service = StepikService(stepik.client_id, stepik.client_secret,
                                    redis_data)
     logger_user_hand.info(f'Анкета проверяется:{clbk.from_user.id}'
