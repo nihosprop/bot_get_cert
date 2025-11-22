@@ -527,7 +527,8 @@ async def clbk_done(
     logger_user_hand.debug(f'Exit')
 
 
-@user_router.message(StateFilter(FSMQuiz.fill_link_to_stepik_profile), IsValidProfileLink())
+@user_router.message(StateFilter(FSMQuiz.fill_link_to_stepik_profile),
+                     IsValidProfileLink())
 async def msg_sent_stepik_link(
         msg: Message, state: FSMContext, stepik_user_id: str,
         msg_processor: MessageProcessor):
