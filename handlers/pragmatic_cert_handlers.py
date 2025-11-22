@@ -129,7 +129,19 @@ async def msg_fill_date_revocation(msg: Message,
     logger.debug('Exit')
 
 
+@router.callback_query(F.data == 'back',
+                       StateFilter(
+                           FSMPragmaticGetCertSG.fill_link_to_stepik_profile))
+async def clbk_back_to_fill_date_revocation(clbk: CallbackQuery,
+                                            state: FSMContext):
+    logger.debug('Entry')
 
+    await clbk.message.edit_text(LexiconRu.text_course_number_done,
+                                 reply_markup=kb_back_cancel)
+    await state.set_state(FSMPragmaticGetCertSG.fill_date_of_revocation)
+    await clbk.answer()
+
+    logger.debug('Exit')
 
 
 
