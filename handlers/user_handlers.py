@@ -387,7 +387,8 @@ async def clbk_done(
         msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
 
-    stepik_service = StepikService(stepik.client_id, stepik.client_secret,
+    stepik_service = StepikService(stepik.client_id,
+                                   stepik.client_secret,
                                    redis_data)
     logger_user_hand.info(f'Анкета проверяется:{clbk.from_user.id}'
                           f':{await get_username(clbk)}')
