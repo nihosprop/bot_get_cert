@@ -39,7 +39,7 @@ async def check_user_in_group(_type_update: Message | CallbackQuery,
     logger_utils.debug(f'{user_id=}')
     try:
         chat_member = await _type_update.bot.get_chat_member(target_chat, user_id)
-        logger_utils.debug(f'{chat_member=}')
+        # logger_utils.debug(f'{chat_member=}')
         try:
             status = chat_member.is_member
             logger_utils.debug(f'{status=}')
