@@ -231,6 +231,9 @@ class StepikService:
                         # Проверяем сертификаты на текущей странице
                         for certificate in data['certificates']:
                             if certificate['course'] == int(course_id):
+                                logger_utils.info(
+                                    f'У {stepik_user_id} '
+                                    f'cертификат курса {course_id} имеется на Stepik')
                                 return True  # Сертификат за курс найден
 
                         # Если есть следующая страница, переходим к ней
