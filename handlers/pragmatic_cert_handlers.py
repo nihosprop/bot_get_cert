@@ -82,7 +82,7 @@ async def get_pragmatic_certificates(
                 f':{tg_username} на руках не обнаружен')
 
     await state.update_data(course=clbk.data)
-    logger.debug(f'{await state.get_data()=}')
+    logger.debug(f'Данные анкеты:{await state.get_data()}')
 
     value = await clbk.message.edit_text(
         LexiconRu.text_course_number_done,
