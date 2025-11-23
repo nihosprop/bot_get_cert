@@ -195,7 +195,9 @@ class StepikService:
             logger_utils.error(f'Ошибка при сохранении данных в Redis: {err}',
                                exc_info=True)
 
-    async def check_cert_in_stepik(self, stepik_user_id: str, course_id: str,
+    async def check_cert_in_stepik(self,
+                                   stepik_user_id: str,
+                                   course_id: str,
                                    access_token: str) -> bool | str:
         """
          Проверяет наличие сертификата у пользователя на Stepik.
