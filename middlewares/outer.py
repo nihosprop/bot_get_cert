@@ -57,7 +57,8 @@ class ThrottlingMiddleware(BaseMiddleware):
     async def __call__(
             self,
             handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-            event: Message | CallbackQuery, data: Dict[str, Any]) -> Any:
+            event: Message | CallbackQuery,
+            data: Dict[str, Any]) -> Any:
         """Handles an event and applies the frequency limitation. If rate
         limiting is enabled and the user has exceeded the allowed frequency,
         the event is ignored, and the user receives an appropriate
