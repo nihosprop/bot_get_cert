@@ -590,7 +590,7 @@ class StepikService:
                                                ' обучении!🤓')
             user_data = await self.redis_client.hget(str(
                     clbk.from_user.id), course_id)
-            user_info_data = (f'TG_ID-[{clbk.from_user.id}:'
+            user_info_data = (f'TG_ID:{clbk.from_user.id}:'
                               f'{await get_username(clbk)}]:{user_data}')
             if is_copy:
                 logger_utils.info(f'Выдана копия {user_info_data}')
