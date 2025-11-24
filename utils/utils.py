@@ -396,7 +396,8 @@ class StepikService:
                 writer.write(fh)
 
         except Exception as err:
-            logger_utils.error(f'Ошибка при работе с PDF: {err}', exc_info=True)
+            logger_utils.error(f'Ошибка при работе с PDF: {err}',
+                               exc_info=True)
             return None
 
         # 5. Возврат результата
