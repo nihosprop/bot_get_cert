@@ -592,7 +592,6 @@ class StepikService:
                     clbk.from_user.id), course_id)
             user_info_data = (f'TG_ID-[{clbk.from_user.id}:'
                               f'{await get_username(clbk)}]:{user_data}')
-            # Логируем успешную отправку
             if is_copy:
                 logger_utils.info(f'Выдана копия {user_info_data}')
             else:
