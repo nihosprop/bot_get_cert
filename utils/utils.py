@@ -593,7 +593,7 @@ class StepikService:
             user_info_data = (f'TG_ID:{clbk.from_user.id}:'
                               f'{await get_username(clbk)}]:{user_data}')
             if is_copy:
-                logger_utils.info(f'Выдана копия {user_info_data}')
+                logger_utils.info(f'Выдана копия для {user_info_data}')
             else:
                 logger_utils.info(f'Выдан сертификат {user_info_data}')
 
