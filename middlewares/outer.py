@@ -135,7 +135,8 @@ class MsgProcMiddleware(BaseMiddleware):
     async def __call__(
             self,
             handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-            event: Message | CallbackQuery, data: Dict[str, Any]) -> Any:
+            event: Message | CallbackQuery,
+            data: Dict[str, Any]) -> Any:
         """
         Обрабатывает event(входящее событие).
         Args:
