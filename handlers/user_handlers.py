@@ -10,9 +10,9 @@ from redis import Redis
 
 from config_data.config import Stepik
 from filters.filters import (IsCorrectData,
-                             IsFullName,
-                             IsValidProfileLink,
-                             IsPrivateChat)
+    IsFullName,
+    IsValidProfileLink,
+    IsPrivateChat)
 from keyboards import (BUTT_COURSES,
                        BUTT_GENDER,
                        kb_back_cancel,
