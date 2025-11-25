@@ -267,7 +267,7 @@ class StepikService:
             logger_utils.debug(f'{course=}')
             gender = data.get('gender')
 
-            # Проверка значений gender и course
+            # Проверка значений gender
             if gender not in ('female', 'male'):
                 logger_utils.error(f'Неизвестное значение gender: {gender}')
                 raise ValueError(f'Неизвестное значение gender: {gender}')
