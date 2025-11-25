@@ -320,7 +320,8 @@ class StepikService:
             # Проверка, что template_name не равен None
             if template_name is None:
                 logger_utils.error(
-                    f'Не удалось определить шаблон для gender={gender}, course={course}')
+                    f'Не удалось определить шаблон для gender={gender},'
+                    f' course={course_id}')
                 raise ValueError("Имя шаблона не может быть None")
 
             logger_utils.debug(f'Выбран шаблон: {template_name}')
