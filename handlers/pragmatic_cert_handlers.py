@@ -4,7 +4,6 @@ from aiogram import Router, F
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Stepik
@@ -12,7 +11,6 @@ from filters.filters import (IsPragmaticCoursesFilter,
     CallBackFilter,
     IsCorrectData, IsValidProfileLink)
 from keyboards import (kb_back_cancel,
-    kb_courses,
     kb_end_quiz,
     BUTT_GENDER,
     BUTT_COURSES)
@@ -22,7 +20,8 @@ from utils import get_username, StepikService, MessageProcessor
 
 router = Router()
 router.callback_query.filter(or_f(IsPragmaticCoursesFilter(),
-                                  CallBackFilter('back')))
+                                  CallBackFilter('back'),
+                                  StateFilter(FSMPragmaticGetCert)))
 logger = logging.getLogger(__name__)
 
 
@@ -60,7 +59,7 @@ async def get_pragmatic_certificates(
             path = await stepik_service.generate_certificate(
                 state_data=state,
                 type_update=clbk,
-                w_text=w_text,
+                w_text=config.w_text,
                 exist_cert=True)
 
             await stepik_service.send_certificate(
@@ -156,6 +155,8 @@ async def msg_sent_stepik_link(
         state: FSMContext,
         stepik_user_id: str,
         msg_processor: MessageProcessor):
+
+    logger.debug('Entry')
     logger.info(f'Записана ссылка {msg.text} от TG_ID:{msg.from_user.id}'
                 f':{await get_username(msg)}')
 
@@ -172,6 +173,7 @@ async def msg_sent_stepik_link(
     await msg.delete()
     await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
                      f'<code>{text}</code>', reply_markup=kb_end_quiz)
+    logger.debug('Exit')
 
 @router.callback_query(F.data == 'back',
                        StateFilter(FSMPragmaticGetCert.data_confirm))
