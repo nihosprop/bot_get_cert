@@ -172,3 +172,18 @@ async def msg_sent_stepik_link(
     await msg.delete()
     await msg.answer('Нажмите подтвердить, если все данные верны.\n\n'
                      f'<code>{text}</code>', reply_markup=kb_end_quiz)
+
+@router.callback_query(F.data == 'back',
+                       StateFilter(FSMPragmaticGetCert.data_confirm))
+async def clbk_back_to_sent_stepik_link(clbk: CallbackQuery,
+                                        state: FSMContext):
+    logger.debug('Entry')
+
+    await clbk.message.edit_text(LexiconRu.text_data_done,
+                                 reply_markup=kb_back_cancel)
+    await state.set_state(FSMPragmaticGetCert.fill_link_to_stepik_profile)
+    await clbk.answer()
+
+    logger.debug('Exit')
+
+
