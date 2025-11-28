@@ -22,6 +22,8 @@ router = Router()
 router.callback_query.filter(or_f(IsPragmaticCoursesFilter(),
                                   CallBackFilter('back'),
                                   StateFilter(FSMPragmaticGetCert)))
+router.message.filter(IsPrivateChat())
+
 logger = logging.getLogger(__name__)
 
 
