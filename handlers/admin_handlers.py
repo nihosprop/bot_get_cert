@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, Message
 from arq.connections import RedisSettings
 from redis.asyncio import Redis
 
+from config_data.config import Config
 from filters.filters import IsAdmins
 from keyboards import kb_butt_quiz, kb_back_cancel, kb_done_newsletter
 from keyboards.keyboards import kb_admin
@@ -151,7 +152,7 @@ async def clbk_done_newsletter(clbk: CallbackQuery,
                                redis_data: Redis, redis_que: RedisSettings,
                                state: FSMContext,
                                msg_processor: MessageProcessor,
-                               admins: str):
+                               config: Config):
     logger_admin.debug('Entry')
 
     await msg_processor.delete_message()
@@ -160,7 +161,7 @@ async def clbk_done_newsletter(clbk: CallbackQuery,
     user_ids = set(
             map(int, filter(lambda _id: _id.isdigit(), await redis_data.keys())))
     end_cert = str(await redis_data.get('end_number')).zfill(6)
-    admin_ids: str = admins
+    admin_ids: str = config.tg_bot.id_admins
     try:
         await mass_mailing(redis_que=redis_que, user_ids=user_ids,
                            message=msg_letter, admin_ids=admin_ids,

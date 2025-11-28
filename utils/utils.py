@@ -23,8 +23,6 @@ from aiogram.types import (CallbackQuery,
                            Update)
 from redis.asyncio import Redis
 
-from keyboards import BUTT_COURSES
-
 logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
@@ -81,6 +79,7 @@ class StepikService:
     client_id: str
     client_secret: str
     redis_client: Redis
+    courses: dict
 
     async def is_private_account(self, stepik_user_id: str):
         logger_utils.info(f'Проверка Stepik-аккаунта юзера на приватность:'
@@ -232,8 +231,9 @@ class StepikService:
                         for certificate in data['certificates']:
                             if certificate['course'] == int(course_id):
                                 logger_utils.info(
-                                    f'У {stepik_user_id} '
-                                    f'cертификат курса {course_id} имеется на Stepik')
+                                    f'У TG_ID:{stepik_user_id} '
+                                    f'cертификат курса {course_id} имеется'
+                                    f' на Stepik')
                                 return True  # Сертификат за курс найден
 
                         # Если есть следующая страница, переходим к ней
@@ -248,8 +248,7 @@ class StepikService:
                 raise
         return False  # Сертификат за курс не найден
 
-    @staticmethod
-    def sync_generate_certificate(data: dict[str, str],
+    def sync_generate_certificate(self, data: dict[str, str],
                                   w_text: bool = False) -> tuple[str, str] | None:
         """
         Синхронная функция для генерации сертификата.
@@ -263,8 +262,7 @@ class StepikService:
             # 1. Извлечение данных из state_data
             user_name = data.get('full_name')
             number = data.get('end_number')
-            course = BUTT_COURSES[data.get('course')]
-            logger_utils.debug(f'{course=}')
+            course_id = int(data.get('course'))
             gender = data.get('gender')
 
             # Проверка значений gender
@@ -272,20 +270,9 @@ class StepikService:
                 logger_utils.error(f'Неизвестное значение gender: {gender}')
                 raise ValueError(f'Неизвестное значение gender: {gender}')
 
-            if course not in ('Лучший по Python.Часть 1',
-            'Лучший по Python.Часть 2', 'Лучший по Python.Часть 3',
-                'Лучший по Python.Часть 4'):
-                logger_utils.error(f"Неизвестное значение course: {course}")
-                raise ValueError(f"Неизвестное значение course: {course}")
-
-        except KeyError as err:
+        except (KeyError, TypeError, ValueError) as err:
             logger_utils.error(
                 f'Ошибка при извлечении данных из state_data: {err}',
-                exc_info=True)
-            return None
-        except Exception as err:
-            logger_utils.error(
-                f'Неизвестная ошибка при извлечении данных из state_data: {err}',
                 exc_info=True)
             return None
 
@@ -295,27 +282,15 @@ class StepikService:
                 os.path.join(os.path.dirname(__file__), '..', 'static'))
             base_dir = os.getenv('CERTIFICATE_DATA_DIR', local_path)
 
-            template_name = None
-            if gender == 'female':
-                match course:
-                    case 'Лучший по Python.Часть 1':
-                        template_name = '1 часть жен.pdf'
-                    case 'Лучший по Python.Часть 2':
-                        template_name = '2 часть жен.pdf'
-                    case 'Лучший по Python.Часть 3':
-                        template_name = '3 часть жен.pdf'
-                    case 'Лучший по Python.Часть 4':
-                        template_name = '4 часть жен.pdf'
-            elif gender == 'male':
-                match course:
-                    case 'Лучший по Python.Часть 1':
-                        template_name = '1 часть муж.pdf'
-                    case 'Лучший по Python.Часть 2':
-                        template_name = '2 часть муж.pdf'
-                    case 'Лучший по Python.Часть 3':
-                        template_name = '3 часть муж.pdf'
-                    case 'Лучший по Python.Часть 4':
-                        template_name = '4 часть муж.pdf'
+            course_config = self.courses.get(course_id)
+            if not course_config:
+                logger_utils.error(f'Конфигурация для курса {course_id} не найдена.')
+                raise ValueError(f'Неизвестный ID курса: {course_id}')
+
+            template_name = course_config.templates.get(gender)
+            if not template_name:
+                logger_utils.error(f'Шаблон для курса {course_id} и гендера {gender} не найден.')
+                raise ValueError(f'Шаблон не найден для gender={gender}, course={course_id}')
 
             # Проверка, что template_name не равен None
             if template_name is None:
@@ -328,6 +303,9 @@ class StepikService:
 
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
+
+            # TODO: имя файла задать в соответсвии с названием курса
+            #  НазваниеКурса_{number}.pdf
             output_file = os.path.join(base_dir, f'BestInPython_{number}.pdf')
 
             if not os.path.exists(font_path):

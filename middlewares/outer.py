@@ -12,6 +12,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.types import (CallbackQuery, Message, TelegramObject, User, Update)
 
+from config_data.config import Config
 from utils import get_username
 from utils.utils import MessageProcessor
 from lexicon.lexicon_ru import LexiconRu
@@ -75,7 +76,10 @@ class ThrottlingMiddleware(BaseMiddleware):
             # Если это групповой чат, пропускаем тротлинг
             return await handler(event, data)
 
-        admins_id = data.get('admins').split()
+        config: Config = data.get('config')
+        admins_id = config.tg_bot.id_admins.split()
+        logger_middl_outer.debug(f'{admins_id=}')
+
         if str(event.from_user.id) in admins_id:
             logger_middl_outer.debug(f'Exit')
             return await handler(event, data)

@@ -7,6 +7,8 @@ from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from config_data.config import Config
+from keyboards.buttons import BUTT_COURSES_PRAGMATIC
 from utils import get_username
 from utils.utils import MessageProcessor
 
@@ -17,11 +19,19 @@ class IsPragmaticCoursesFilter(BaseFilter):
     Проверяет, callback_data присутствует ли в списке курсов.
     """
     async def __call__(self,
-                       clbk: CallbackQuery,
-                       pragmatic_courses: str):
-        courses: list[str] = pragmatic_courses.split()
-        return clbk.data in courses
+                       clbk: CallbackQuery):
+        return clbk.data in BUTT_COURSES_PRAGMATIC
 
+class IsBestPythonCoursesFilter(BaseFilter):
+    async def __call__(self,
+                       clbk: CallbackQuery,
+                       config: Config):
+        logger_filters.debug('Entry')
+        logger_filters.debug(f'{clbk.data=}')
+        logger_filters.debug(f'{config.courses_data.best_in_python_courses=}')
+        if not clbk.data.isdigit():
+            return False
+        return int(clbk.data) in config.courses_data.best_in_python_courses
 
 class CallBackFilter(BaseFilter):
     """
@@ -79,11 +89,12 @@ class IsValidProfileLink(BaseFilter):
 
 
 class IsAdmins(BaseFilter):
-    async def __call__(self, msg: Message, admins: str) -> bool:
+    async def __call__(self, msg: Message,
+                       config: Config) -> bool:
         logger_filters.debug('Entry')
 
         user_id = str(msg.from_user.id)
-        admins_id = admins.split()
+        admins_id = config.tg_bot.id_admins
         logger_filters.debug(f'{admins_id=}')
 
         logger_filters.debug('Exit')

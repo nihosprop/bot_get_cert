@@ -11,6 +11,7 @@ from arq.connections import RedisSettings
 
 from config_data.config import Config, load_config
 from keyboards.set_menu import set_main_menu
+from keyboards.buttons import get_courses_buttons
 from handlers import (admin_handlers,
     user_handlers,
     temp_handlers,
@@ -95,7 +96,11 @@ async def setup_redis(config: Config) -> tuple[
 
 async def main():
     config: Config = load_config()
+
+    get_courses_buttons(config)
+
     await setup_logging(config)
+
     bot = Bot(token=config.tg_bot.token,
               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     
@@ -132,13 +137,7 @@ async def main():
         await bot.delete_webhook(drop_pending_updates=True)
         logger_main.info('Start bot')
 
-        await asyncio.gather(dp.start_polling(bot,
-                                              admins=config.tg_bot.id_admins,
-                                              stepik=config.stepik,
-                                              w_text=config.w_text,
-                                              redis_que=redis_que,
-                                              tg_target_channel=config.tg_target_channel,
-                                              pragmatic_courses=config.pragmatic_courses),
+        await asyncio.gather(dp.start_polling(bot, config=config),
                              run_arq_worker(redis_que, bot=bot))
     
     except Exception as err:

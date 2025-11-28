@@ -1,4 +1,5 @@
 import logging
+from config_data.config import Config
 
 logger_buttons = logging.getLogger(__name__)
 
@@ -20,13 +21,17 @@ BUTT_START: dict[str, str] = {
 
 BUTT_GENDER: dict[str, str] = {'male': 'Мужской ♂', 'female': 'Женский ♀'}
 
-# TODO: перенести кнопки BUTT_COURSES в файл настроек
-BUTT_COURSES: dict[str, str] = {
-    'id_1_214271': 'Лучший по Python.Часть 1',
-    'id_2_221885': 'Лучший по Python.Часть 2',
-    'id_3_227627': 'Лучший по Python.Часть 3',
-    'id_4_241971': 'Лучший по Python.Часть 4',
-    '252829': 'Основы Git и GitHub'}
+
+BUTT_COURSES: dict[str, str] = {}
+BUTT_COURSES_PRAGMATIC: dict[str, str] = {}
+
+def get_courses_buttons(config: Config):
+    global BUTT_COURSES, BUTT_COURSES_PRAGMATIC
+
+    for course_id, course_data in config.courses_data.courses.items():
+        BUTT_COURSES[str(course_id)] = course_data.name
+        if 'pragmatic' in course_data.templates.get('male'):
+            BUTT_COURSES_PRAGMATIC[str(course_id)] = course_data.name
 
 BUTTS_URL_PROMO: dict[str, str] = {
     'Лучший по Python.Часть 3':
