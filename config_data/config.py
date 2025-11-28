@@ -43,8 +43,8 @@ class Config:
 
 def load_config(path: str | None = None) -> Config:
     """
-    Load configuration from environment variables.
-    
+    Load configuration from environment variables and yaml file.
+
     Args: path (str | None, optional): Path to the environment file.
     Returns: Config: Configuration object.
     """
