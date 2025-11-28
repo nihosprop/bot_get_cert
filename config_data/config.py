@@ -40,7 +40,7 @@ class Config:
     log_error_tg_chat_id: int | None
     log_error_tg_thread_id: int | None
     pragmatic_courses: str | None
-    courses: CourseData
+    courses_data: CourseData
 
 
 def load_courses_from_yaml(path: str = 'config.yaml') -> CourseData:
@@ -113,4 +113,4 @@ def load_config(path: str | None = None) -> Config:
         log_error_tg_chat_id=log_error_tg_chat_id,
         log_error_tg_thread_id=log_error_tg_thread_id,
         pragmatic_courses=pragmatic_courses,
-        courses=courses_data)
+        courses_data=courses_data)
