@@ -40,6 +40,26 @@ class Config:
     log_error_tg_chat_id: int | None
     log_error_tg_thread_id: int | None
     pragmatic_courses: str | None
+    courses: CourseData
+
+
+def load_courses_from_yaml(path: str = 'config.yaml') -> CourseData:
+    with open(path, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f)
+
+    courses_data = data.get('courses', {})
+    courses = {}
+    for course_id, course_info in courses_data.items():
+        courses[int(course_id)] = Course(
+            name=course_info['name'],
+            templates=course_info['templates']
+            )
+    courses_data = CourseData(
+        courses=courses,
+        best_in_python_courses=data.get('best_in_python_courses', []))
+
+    return courses_data
+
 
 def load_config(path: str | None = None) -> Config:
     """
@@ -67,7 +87,11 @@ def load_config(path: str | None = None) -> Config:
     log_error_tg_chat_id = env.int('LOG_ERROR_TG_CHAT_ID', None)
     log_error_tg_thread_id = env.int('LOG_ERROR_TG_THREAD_ID', None)
 
+    # TODO: transfer to config.yaml
     pragmatic_courses = env.str('PRAGMATIC_COURSES', None)
+
+    courses_data = load_courses_from_yaml()
+
 
     tg_bot = TgBot(
         token=env('BOT_TOKEN'),
@@ -88,4 +112,5 @@ def load_config(path: str | None = None) -> Config:
         log_error_tg_enabled=log_error_tg_enabled,
         log_error_tg_chat_id=log_error_tg_chat_id,
         log_error_tg_thread_id=log_error_tg_thread_id,
-        pragmatic_courses=pragmatic_courses)
+        pragmatic_courses=pragmatic_courses,
+        courses=courses_data)
