@@ -1,6 +1,16 @@
-from dataclasses import dataclass
-
+import yaml
+from dataclasses import dataclass, field
 from environs import Env
+
+@dataclass
+class Course:
+    name: str
+    templates: dict[str, str]
+
+@dataclass
+class CourseData:
+    courses: dict[int, Course]
+    best_in_python_courses: list[int] = field(default_factory=list)
 
 
 @dataclass
