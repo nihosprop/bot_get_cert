@@ -826,7 +826,8 @@ class MessageProcessor:
         message = await self._type_update.bot.send_message(
             chat_id=chat_id,
             text=text,
-            link_preview_options=preview_link_option)
+            link_preview_options=preview_link_option,
+            disable_web_page_preview=True)
 
         logger_utils.debug(f'Exit')
         return message
