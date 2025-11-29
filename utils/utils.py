@@ -809,7 +809,7 @@ class MessageProcessor:
                                       chat_id: int,
                                       text: str,
                                       delay: int,
-                                      preview_link: str) -> Message:
+                                      preview_link: str = None) -> Message:
         """
         Sends a message with a specified delay.
         :param chat_id: The ID of the chat where the message will be sent.
@@ -822,9 +822,11 @@ class MessageProcessor:
         await asyncio.sleep(delay)
 
         # Send the message
+        preview_link_option = LinkPreviewOptions(url=preview_link)
         message = await self._type_update.bot.send_message(
-                chat_id=chat_id, text=text,
-                link_preview_options=LinkPreviewOptions(url=preview_link))
+            chat_id=chat_id,
+            text=text,
+            link_preview_options=preview_link_option)
 
         logger_utils.debug(f'Exit')
         return message
