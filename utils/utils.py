@@ -805,8 +805,11 @@ class MessageProcessor:
             except Exception as e:
                 logger_utils.warning(f"Не удалось удалить сообщение: {e}")
 
-    async def send_message_with_delay(
-            self, chat_id: int, text: str, delay: int, preview_link: str) -> Message:
+    async def send_message_with_delay(self,
+                                      chat_id: int,
+                                      text: str,
+                                      delay: int,
+                                      preview_link: str) -> Message:
         """
         Sends a message with a specified delay.
         :param chat_id: The ID of the chat where the message will be sent.
