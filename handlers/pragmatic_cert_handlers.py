@@ -337,6 +337,18 @@ async def clbk_done(
                 state=state,
                 course_id=course_id)
             await msg_processor.deletes_msg_a_delay(value=value1, delay=1)
+
+            text = ('Хотите получить скидку 45%\n'
+                    'На полную часть курса:\n' 
+                    '<b>Git + GitHub. Полный курс</b>\n\n'
+                    'Для этого нужно быть подписанным на:\n'
+                    '<a href="https://t.me/pragmatic_programmer">'
+                    'Pragmatic Programmer</a>')
+            await msg_processor.send_message_with_delay(
+                chat_id=clbk.message.chat.id,
+                text=text,
+                delay=5,
+                disable_web_page_preview=True)
         except Exception as err:
             logger.error(f'{err=}', exc_info=True)
         finally:
