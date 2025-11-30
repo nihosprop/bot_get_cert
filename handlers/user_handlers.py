@@ -241,8 +241,8 @@ async def clbk_get_cert(
     if not await check_user_in_group(clbk,
                                      tg_target_channel=config.tg_target_channel):
         logger_user_hand.info(
-            f'Отсутствие в паблике:{clbk.from_user.id}'
-            f':{await get_username(clbk)}')
+            f'Юзер {clbk.from_user.id}:{await get_username(clbk)} отсутствует '
+            f'в паблике {config.tg_target_channel}')
         await clbk.answer(
             'Вы еще не подписались на наш крутой паблик'
             ' Лучший по Python ☺️', show_alert=True)
