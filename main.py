@@ -16,7 +16,7 @@ from handlers import (admin_handlers,
     user_handlers,
     temp_handlers,
     dzeranov_handlers,
-    pragmatic_promo_handlers, pragmatic_cert_handlers)
+    pragmatic_promo_handlers, pragmatic_cert_handlers, common)
 from middlewares.outer import (MsgProcMiddleware,
                                RedisMiddleware,
                                ThrottlingMiddleware)
