@@ -132,9 +132,9 @@ async def main():
         dp.include_router(dzeranov_handlers.router)
         dp.include_router(pragmatic_cert_handlers.router)
         dp.include_router(pragmatic_promo_handlers.router)
-        dp.include_router(admin_handlers.admin_router)
         dp.include_router(user_handlers.user_router)
-        
+        dp.include_router(admin_handlers.admin_router)
+
         await bot.delete_webhook(drop_pending_updates=True)
         logger_main.info('Start bot')
 
