@@ -826,7 +826,6 @@ class MessageProcessor:
         logger_utils.debug(f'Entry')
         await asyncio.sleep(delay)
 
-        # Send the message
         preview_link_option = LinkPreviewOptions(url=preview_link)
         message = await self._type_update.bot.send_message(
             chat_id=chat_id,
