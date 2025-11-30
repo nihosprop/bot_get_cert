@@ -12,7 +12,7 @@ from config_data.config import Config
 from filters.filters import (IsCorrectData,
     IsFullName,
     IsValidProfileLink,
-    IsPrivateChat, IsBestPythonCoursesFilter)
+    IsPrivateChat, IsBestPythonCoursesFilter, IsAdmins)
 from keyboards import (BUTT_COURSES,
     BUTT_GENDER,
     kb_back_cancel,
