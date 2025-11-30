@@ -17,10 +17,12 @@ class FSMQuiz(StatesGroup):
     fill_link_to_stepik_profile = State()
     data_confirm = State()
 
+# Dzeranov states
 class FSMDzeranovPromo(StatesGroup):
     choice_promocodes = State()
     want_promocode_dzeranov = State()
 
+# Pragmatic states
 class FSMPragmaticPromo(StatesGroup):
     choice_promocodes = State()
 
