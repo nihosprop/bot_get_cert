@@ -55,6 +55,11 @@ loggers:
     handlers: [ stdout, file, telegram_error ]
     propagate: no
 
+  handlers.common:
+    level: INFO
+    handlers: [ stdout, file, telegram_error ]
+    propagate: no
+
   handlers.temp_handlers:
     level: INFO
     handlers: [ stdout, file, telegram_error ]
