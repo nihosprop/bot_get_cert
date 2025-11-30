@@ -33,6 +33,7 @@ class Config:
     level_log: str
     w_text: bool
     tg_target_channel: int | None
+    pragmatic_target_channel: int | None
     log_tg_cert_enabled: bool
     log_tg_cert_chat_id: int | None
     log_tg_cert_thread_id: int | None
@@ -78,6 +79,7 @@ def load_config(path: str | None = None) -> Config:
     w_text = env.bool('W_TEXT_ENABLED', False)
 
     tg_target_channel = env.int('TG_TARGET_CHANNEL', None)
+    pragmatic_target_channel = env.int('PRAGMATIC_TARGET_CHANNEL', None)
 
     log_tg_cert_enabled = env.bool('LOG_TG_CERT_ENABLED', False)
     log_tg_cert_chat_id = env.int('LOG_TG_CERT_CHAT_ID', None)
@@ -106,6 +108,7 @@ def load_config(path: str | None = None) -> Config:
         level_log=level_log,
         w_text=w_text,
         tg_target_channel=tg_target_channel,
+        pragmatic_target_channel=pragmatic_target_channel,
         log_tg_cert_enabled=log_tg_cert_enabled,
         log_tg_cert_chat_id=log_tg_cert_chat_id,
         log_tg_cert_thread_id=log_tg_cert_thread_id,
