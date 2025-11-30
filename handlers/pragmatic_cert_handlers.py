@@ -433,7 +433,8 @@ async def clbk_done(
                        StateFilter(FSMPragmaticGetCert.fill_get_discount_on_git))
 async def clbk_get_discount_on_git(clbk: CallbackQuery,
                                    state: FSMContext,
-                                   config: Config):
+                                   config: Config,
+                                   msg_processor: MessageProcessor):
     logger.debug('Entry')
 
     is_subscribe = await check_user_in_group(clbk,
@@ -446,7 +447,15 @@ async def clbk_get_discount_on_git(clbk: CallbackQuery,
             ' Pragmatic Programmer ☺️', show_alert=True)
         logger.debug('Exit')
         return
-    await clbk.answer('Кнопка в разработке', show_alert=True)
+
+    text = ('Вот ваш промокод с максимальной скидкой на курс:\n'
+            '<a href='
+            '"https://stepik.org/a/214865/pay?promo=94bc6fb4cf1b9eb1">Ссылка</a>'
+            '\n\nЖдём вас на курсе 😊')
+    await msg_processor.deletes_messages(msgs_for_del=True)
+    await clbk.message.answer(text=text)
+    await state.clear()
+    await clbk.answer()
 
 
 
