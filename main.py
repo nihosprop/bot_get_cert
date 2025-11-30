@@ -127,6 +127,7 @@ async def main():
                                                                 ttl=500))
         
         # routers
+        dp.include_router(common.router)
         dp.include_router(temp_handlers.temp_router)
         dp.include_router(dzeranov_handlers.router)
         dp.include_router(pragmatic_cert_handlers.router)
