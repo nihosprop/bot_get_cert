@@ -180,7 +180,9 @@ async def clbk_back_end(
 
 
 @user_router.message(
-    StateFilter(default_state), ~F.text.in_({'/start'}),
+    StateFilter(default_state),
+    ~IsAdmins(),
+    ~F.text.in_({'/start'},),
     F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, msg_processor: MessageProcessor):
