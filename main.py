@@ -144,7 +144,6 @@ async def main():
     except Exception as err:
         logger_main.exception(err)
         raise
-    
     finally:
         await redis_fsm.aclose()
         await redis_data.aclose()
