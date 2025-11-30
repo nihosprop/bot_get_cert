@@ -20,7 +20,10 @@ from keyboards.keyboards import get_kb_courses, kb_butt_quiz
 from keyboards.buttons import BUTT_COURSES
 from lexicon import LexiconRu
 from states.states import FSMPragmaticGetCert, FSMQuiz
-from utils import get_username, StepikService, MessageProcessor
+from utils import (get_username,
+    StepikService,
+    MessageProcessor,
+    check_user_in_group)
 
 router = Router()
 router.callback_query.filter(or_f(IsPragmaticCoursesFilter(),
