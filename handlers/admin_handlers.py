@@ -18,6 +18,7 @@ from utils import MessageProcessor, get_username, get_data_users
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
+admin_router.callback_query.filter(IsAdmins())
 logger_admin = logging.getLogger(__name__)
 
 
