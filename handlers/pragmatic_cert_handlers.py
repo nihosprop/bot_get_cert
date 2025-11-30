@@ -425,7 +425,24 @@ async def clbk_done(
         await clbk.answer()
     logger.debug(f'Exit')
 
+@router.callback_query(F.data == 'yes',
+                       StateFilter(FSMPragmaticGetCert.fill_get_discount_on_git))
+async def clbk_get_discount_on_git(clbk: CallbackQuery,
+                                   state: FSMContext,
+                                   config: Config):
+    logger.debug('Entry')
 
+    is_subscribe = await check_user_in_group(clbk,
+                              tg_target_channel=config.pragmatic_target_channel)
+    if not is_subscribe:
+        logger.info(f'Юзер {await get_username(clbk)} отсутствует в паблике'
+                    f':{clbk.from_user.id}')
+        await clbk.answer(
+            'Вы еще не подписались на наш крутой паблик'
+            ' Pragmatic Programmer ☺️', show_alert=True)
+        logger.debug('Exit')
+        return
+    await clbk.answer('Кнопка в разработке', show_alert=True)
 
 
 
