@@ -13,7 +13,7 @@ from filters.filters import (IsPragmaticCoursesFilter,
     IsCorrectData, IsValidProfileLink, IsPrivateChat)
 from keyboards import (kb_back_cancel,
     kb_end_quiz,
-    BUTT_GENDER)
+    BUTT_GENDER, create_inline_kb)
 from keyboards.keyboards import get_kb_courses, kb_butt_quiz
 from keyboards.buttons import BUTT_COURSES
 from lexicon import LexiconRu
@@ -344,11 +344,14 @@ async def clbk_done(
                     'Для этого нужно быть подписанным на:\n'
                     '<a href="https://t.me/pragmatic_programmer">'
                     'Pragmatic Programmer</a>')
+            kb_yes = create_inline_kb(yes='Да')
             await msg_processor.send_message_with_delay(
                 chat_id=clbk.message.chat.id,
                 text=text,
+                keyboard=kb_yes,
                 delay=5,
                 disable_web_page_preview=True)
+
         except Exception as err:
             logger.error(f'{err=}', exc_info=True)
         finally:
