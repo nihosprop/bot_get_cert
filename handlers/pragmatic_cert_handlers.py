@@ -373,14 +373,16 @@ async def clbk_done(
                 await redis_data.set(
                     name='pragmatic_photo',
                     value=photo_id_for_course_pragmatic)
+                await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
                 logger.debug('Photo sent by file')
             else:
                 try:
-                    await clbk.bot.send_photo(
+                    msg = await clbk.bot.send_photo(
                         chat_id=clbk.message.chat.id,
                         photo=photo_file_id,
                         caption=text,
                         reply_markup=kb_yes)
+                    await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
                     logger.debug('Photo sent by id')
                 except TelegramBadRequest as e:
                     logger.error(f'Error sending message-photo: {e}')
@@ -394,12 +396,14 @@ async def clbk_done(
                     await redis_data.set(
                         name='pragmatic_photo',
                         value=photo_id_for_course_pragmatic)
+                    await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
                     logger.debug('Photo sent by file (ID refreshed).')
-
+            await state.set_state(
+                state=FSMPragmaticGetCert.fill_get_discount_on_git)
         except Exception as err:
             logger.error(f'{err=}', exc_info=True)
-        finally:
             await state.clear()
+        finally:
             await clbk.answer()
     else:
         logger.info(
