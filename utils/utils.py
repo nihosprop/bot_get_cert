@@ -809,11 +809,13 @@ class MessageProcessor:
                                       chat_id: int,
                                       text: str,
                                       delay: int,
+                                      keyboard=None,
                                       preview_link: str = None,
                                       disable_web_page_preview: bool = None) -> (
             Message):
         """
         Sends a message with a specified delay.
+        :param keyboard:
         :param disable_web_page_preview:
         :param chat_id: The ID of the chat where the message will be sent.
         :param text:
@@ -828,6 +830,7 @@ class MessageProcessor:
         preview_link_option = LinkPreviewOptions(url=preview_link)
         message = await self._type_update.bot.send_message(
             chat_id=chat_id,
+            reply_markup=keyboard,
             text=text,
             link_preview_options=preview_link_option if preview_link else None,
             disable_web_page_preview=disable_web_page_preview)
