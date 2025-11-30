@@ -1,9 +1,11 @@
+import asyncio
 import logging
 
 from aiogram import Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, FSInputFile
 from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
@@ -339,18 +341,57 @@ async def clbk_done(
             await msg_processor.deletes_msg_a_delay(value=value1, delay=1)
 
             text = ('Хотите получить скидку 45%\n'
-                    'На полную часть курса:\n' 
+                    'На полную часть курса:\n'
                     '<b>Git + GitHub. Полный курс</b>\n\n'
                     'Для этого нужно быть подписанным на:\n'
                     '<a href="https://t.me/pragmatic_programmer">'
                     'Pragmatic Programmer</a>')
-            kb_yes = create_inline_kb(yes='Да')
-            await msg_processor.send_message_with_delay(
-                chat_id=clbk.message.chat.id,
-                text=text,
-                keyboard=kb_yes,
-                delay=5,
-                disable_web_page_preview=True)
+            kb_yes = create_inline_kb(yes='Да',
+                                      cancel_butt=False,
+                                      exit=True)
+            await asyncio.sleep(5)
+
+            photo_file_id = await redis_data.get(name='pragmatic_photo')
+            photo_file = FSInputFile("static/pragmatic_git_photo.jpg")
+            if not photo_file_id:
+
+                logger.info(
+                    "Photo ID not found in Redis. "
+                    "Booting from disk to get ID.")
+
+                msg = await clbk.bot.send_photo(
+                    chat_id=clbk.message.chat.id,
+                    photo=photo_file,
+                    caption=text,
+                    reply_markup=kb_yes)
+
+                photo_id_for_course_pragmatic = msg.photo[-1].file_id
+
+                await redis_data.set(
+                    name='pragmatic_photo',
+                    value=photo_id_for_course_pragmatic)
+                logger.debug('Photo sent by file')
+            else:
+                try:
+                    await clbk.bot.send_photo(
+                        chat_id=clbk.message.chat.id,
+                        photo=photo_file_id,
+                        caption=text,
+                        reply_markup=kb_yes)
+                    logger.debug('Photo sent by id')
+                except TelegramBadRequest as e:
+                    logger.error(f'Error sending message-photo: {e}')
+                    msg = await clbk.bot.send_photo(
+                        chat_id=clbk.message.chat.id,
+                        photo=photo_file,
+                        caption=text,
+                        reply_markup=kb_yes)
+
+                    photo_id_for_course_pragmatic = msg.photo[-1].file_id
+                    await redis_data.set(
+                        name='pragmatic_photo',
+                        value=photo_id_for_course_pragmatic)
+                    logger.debug('Photo sent by file (ID refreshed).')
 
         except Exception as err:
             logger.error(f'{err=}', exc_info=True)
