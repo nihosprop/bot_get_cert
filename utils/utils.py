@@ -231,7 +231,8 @@ class StepikService:
                         for certificate in data['certificates']:
                             if certificate['course'] == int(course_id):
                                 logger_utils.info(
-                                    f'У TG_ID:{stepik_user_id} '
+                                    f'У STEPIK_ID:{stepik_user_id},'
+                                    f'TG_USERNAME:{tg_username} '
                                     f'cертификат курса {course_id} имеется'
                                     f' на Stepik')
                                 return True  # Сертификат за курс найден
