@@ -116,7 +116,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         elif check_user and int(check_user.decode()) == 2:
             asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 5))
             logger_middl_outer.debug(f'Exit')
-            return
+            return None
 
         if not check_user:
             await self.storage.redis.set(name=throttl_user_id, value=1,
