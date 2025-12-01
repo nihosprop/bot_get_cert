@@ -456,12 +456,3 @@ async def clbk_get_discount_on_git(clbk: CallbackQuery,
     await clbk.message.answer(text=text)
     await state.clear()
     await clbk.answer()
-
-
-
-
-
-
-
-
-
