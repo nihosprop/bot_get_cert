@@ -18,8 +18,8 @@ from handlers import (admin_handlers,
     dzeranov_handlers,
     pragmatic_promo_handlers, pragmatic_cert_handlers, common)
 from middlewares.outer import (MsgProcMiddleware,
-                               RedisMiddleware,
-                               ThrottlingMiddleware)
+    RedisMiddleware,
+    ThrottlingMiddleware)
 from queues.que_utils import run_arq_worker
 
 logger_main = logging.getLogger(__name__)
