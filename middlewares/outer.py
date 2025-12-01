@@ -111,7 +111,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             logger_middl_outer.warning(
                 f'Throttling:{await get_username(event)}:{throttl_user_id}')
             logger_middl_outer.debug(f'Exit {__class__.__name__}')
-            return
+            return None
 
         elif check_user and int(check_user.decode()) == 2:
             asyncio.create_task(msg_processor.deletes_msg_a_delay(event, 5))
