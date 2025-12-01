@@ -34,7 +34,8 @@ user_router.message.filter(IsPrivateChat())
 logger_user_hand = logging.getLogger(__name__)
 
 @user_router.message(F.text.lower().find('спасибо') == 0)
-async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
+async def msg_thanks(msg: Message,
+                     msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
     logger_user_hand.info(f'Сказал Спасибо!:{await get_username(msg)}')
     await msg.delete()
