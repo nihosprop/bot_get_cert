@@ -197,9 +197,11 @@ class StepikService:
     async def check_cert_in_stepik(self,
                                    stepik_user_id: str,
                                    course_id: str,
-                                   access_token: str) -> bool | str:
+                                   access_token: str,
+                                   tg_username: str) -> bool | str:
         """
          Проверяет наличие сертификата у пользователя на Stepik.
+        :param tg_username:
         :param stepik_user_id: ID пользователя на Stepik.
         :param course_id: ID курса, сертификат которого надо проверить на
                наличие у ученика.
@@ -851,7 +853,7 @@ async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
     cursor = '0'
     user_ids = []
     while cursor:
-        cursor, keys = await redis_data.scan(cursor, match='*')
+        cursor, keys = redis_data.scan(cursor, match='*')
         user_ids.extend([key for key in keys if re.match(r'^\d{9,10}$', key)])
     logger_utils.debug(f'{user_ids=}')
 
