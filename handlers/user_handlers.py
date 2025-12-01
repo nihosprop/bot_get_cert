@@ -52,7 +52,10 @@ async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
 @user_router.message(F.text == '/start')
 # @user_router.message(CommandStart())
 async def cmd_start(
-        msg: Message, state: FSMContext, msg_processor: MessageProcessor):
+        msg: Message,
+        state: FSMContext,
+        msg_processor: MessageProcessor):
+
     logger_user_hand.info(
         f'cmd_start:{msg.from_user.id}'
         f':{await get_username(msg)}')
