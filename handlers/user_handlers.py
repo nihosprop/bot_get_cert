@@ -42,7 +42,8 @@ async def msg_thanks(msg: Message,
     answer_thnks = await msg.answer(
         f'{await get_username(msg)}!'
         f' Спасибо Вам за приятные слова!\n'
-        'Мы это ценим!😇')
+        f'Мы это ценим!😇')
+
     await msg_processor.deletes_msg_a_delay(
         answer_thnks,
         delay=15,
