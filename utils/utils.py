@@ -42,8 +42,9 @@ async def check_user_in_group(_type_update: Message | CallbackQuery,
             status: bool = chat_member.is_member
             logger_utils.debug(f'{status=}')
         except Exception:
-            status = chat_member.status in {'member', 'administrator',
-                    'creator'}
+            status = chat_member.status in {'member',
+                                            'administrator',
+                                            'creator'}
             logger_utils.debug(f'{status=}')
         else:
             logger_utils.debug('Exit')
