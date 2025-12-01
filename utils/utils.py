@@ -259,7 +259,7 @@ class StepikService:
         logger_utils.debug('Entry')
 
         try:
-            # 1. Извлечение данных из state_data
+            # 1. Извлечение данных из data
             user_name = data.get('full_name')
             number = data.get('end_number')
             course_id = int(data.get('course'))
