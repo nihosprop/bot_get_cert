@@ -59,13 +59,12 @@ async def cmd_start(
         msg_processor: MessageProcessor):
 
     logger_user_hand.info(
-        f'cmd_start:{msg.from_user.id}'
-        f':{await get_username(msg)}')
-    logger_user_hand.debug(
-        msg.model_dump_json(
-            indent=4,
-            exclude_none=True))
-    logger_user_hand.debug(f'{msg.text}')
+        f'cmd_start:{msg.from_user.id}:{await get_username(msg)}')
+    # logger_user_hand.debug(
+    #     msg.model_dump_json(
+    #         indent=4,
+    #         exclude_none=True))
+    # logger_user_hand.debug(f'{msg.text}')
 
     await msg_processor.deletes_messages(msgs_for_del=True)
     await state.clear()
