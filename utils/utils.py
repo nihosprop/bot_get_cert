@@ -384,7 +384,8 @@ class StepikService:
         return output_file, template_name
 
     @staticmethod
-    def sync_exists_certificate(data: dict[str, str], w_text: bool = False):
+    def sync_exists_certificate(data: dict[str, str],
+                                w_text: bool = False):
         logger_utils.debug(f'Entry')
         logger_utils.debug(f'{data=}')
 
