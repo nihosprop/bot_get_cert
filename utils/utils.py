@@ -729,7 +729,7 @@ class MessageProcessor:
                         chat_id=chat_id, message_id=msg_id)
             except TelegramBadRequest as err:
                 logger_utils.error(f'{err}', stack_info=True)
-        logger_utils.debug('Keyboard removed')
+            logger_utils.debug(f'Keyboard removed for id:{msg_id}')
         await self._state.update_data({key: []})
 
         logger_utils.debug('Exit')
