@@ -701,7 +701,9 @@ class MessageProcessor:
                 await self._state.update_data({key: data})
         logger_utils.debug('Exit')
 
-    async def removes_inline_kb(self, key='msgs_remove_kb') -> None:
+    async def removes_inline_kb(self,
+                                chat_id,
+                                key='msgs_remove_kb') -> None:
         """
         Removes built-in keyboards from messages.
         This function gets message IDs from the state and removes
@@ -711,22 +713,18 @@ class MessageProcessor:
             — Start the keyboard removal process.
             — Errors when removing the keyboard.
             — Successful completion of the keyboard removal process.
+        :param chat_id:
         :param key: Str
         :return: None
         """
         logger_utils.debug('Entry')
 
         msgs: list = dict(await self._state.get_data()).get(key, [])
-
-        if isinstance(self._type_update, Message):
-            chat_id = self._type_update.chat.id
-        else:
-            chat_id = self._type_update.message.chat.id
-
         for msg_id in set(msgs):
             try:
                 await self._type_update.bot.edit_message_reply_markup(
-                        chat_id=chat_id, message_id=msg_id)
+                    chat_id=chat_id,
+                    message_id=msg_id)
             except TelegramBadRequest as err:
                 logger_utils.error(f'{err}', stack_info=True)
             logger_utils.debug(f'Keyboard removed for id:{msg_id}')
