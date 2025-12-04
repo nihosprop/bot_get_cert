@@ -274,7 +274,8 @@ async def clbk_done(
         certificates = await stepik_service.check_cert_in_stepik(
             stepik_user_id,
             course_id,
-            access_token)
+            access_token,
+            tg_username)
     except ConnectionTimeoutError as e:
         logger.error(
             f'Не удалось проверить сертификат на Stepik для'
@@ -437,8 +438,13 @@ async def clbk_get_discount_on_git(clbk: CallbackQuery,
                                    msg_processor: MessageProcessor):
     logger.debug('Entry')
 
-    is_subscribe = await check_user_in_group(clbk,
+    is_subscribe = None
+    try:
+        is_subscribe = await check_user_in_group(clbk,
                               tg_target_channel=config.pragmatic_target_channel)
+    except Exception as e:
+        logger.error(f'Error checking user in: {e}')
+
     if not is_subscribe:
         logger.info(f'Юзер {await get_username(clbk)} отсутствует в паблике'
                     f':{clbk.from_user.id}')
@@ -452,7 +458,20 @@ async def clbk_get_discount_on_git(clbk: CallbackQuery,
             '<a href='
             '"https://stepik.org/a/214865/pay?promo=94bc6fb4cf1b9eb1">Ссылка</a>'
             '\n\nЖдём вас на курсе 😊')
-    await msg_processor.deletes_messages(msgs_for_del=True)
-    await clbk.message.answer(text=text)
-    await state.clear()
+    kb = create_inline_kb(1, cancel_butt=False, exit='START')
+    try:
+        await msg_processor.deletes_messages(msgs_for_del=True)
+    except Exception as e:
+        logger.error(f'Error deleting messages: {e}')
+
+    try:
+        clbk_msg = await clbk.message.answer(text=text,
+                                             reply_markup=kb,
+                                             disable_web_page_preview=True)
+        await msg_processor.save_msg_id(value=clbk_msg,
+                                        msgs_remove_kb=True)
+    except Exception as e:
+        logger.debug(f'Error saving messages: {e}')
+
+    await state.set_state(state=None)
     await clbk.answer()
