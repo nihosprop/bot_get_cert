@@ -19,7 +19,13 @@ async def clbk_exit(clbk: CallbackQuery,
                    msg_processor: MessageProcessor):
     logger.debug(f'Entry')
 
-    await msg_processor.deletes_messages(msgs_for_del=True)
+    try:
+        await msg_processor.deletes_messages(msgs_remove_kb=True,
+                                             msgs_for_del=True)
+    except Exception as err:
+        logger.error(f'Ошибка при удалении kb {err.__class__.__name__}',
+                     exc_info=True)
+
     try:
         value = await clbk.message.answer(
             LexiconRu.text_survey,
@@ -29,7 +35,6 @@ async def clbk_exit(clbk: CallbackQuery,
         logger.error(f'{err.__class__.__name__}', exc_info=True)
     else:
         await msg_processor.save_msg_id(value, msgs_for_del=True)
-
     await state.set_state(state=None)
     await clbk.answer()
 
