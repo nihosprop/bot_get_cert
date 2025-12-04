@@ -66,7 +66,8 @@ async def cmd_start(
     #         exclude_none=True))
     # logger_user_hand.debug(f'{msg.text}')
 
-    await msg_processor.deletes_messages(msgs_for_del=True)
+    await msg_processor.deletes_messages(msgs_for_del=True,
+                                         msgs_remove_kb=True)
     await state.clear()
     value = await msg.answer(
         LexiconRu.text_survey, reply_markup=kb_butt_quiz,
