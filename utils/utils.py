@@ -653,6 +653,9 @@ class MessageProcessor:
             logger_utils.error(f'{err.__class__.__name__}', exc_info=True)
         logger_utils.debug(f'{keys=}')
 
+        if msgs_remove_kb:
+            await self.removes_inline_kb(chat_id=chat_id)
+
         if keys:
             for key in keys:
                 msgs_ids: list = dict(await self._state.get_data()).get(key, [])
