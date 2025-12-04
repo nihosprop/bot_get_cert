@@ -486,7 +486,8 @@ async def clbk_done(
         certificates = await stepik_service.check_cert_in_stepik(
             stepik_user_id,
             course_id,
-            access_token)
+            access_token,
+            tg_username)
     except ConnectionTimeoutError as e:
         logger_user_hand.error(
             f'Не удалось проверить сертификат на Stepik для'
