@@ -293,8 +293,10 @@ class StepikService:
 
             template_name = course_config.templates.get(gender)
             if not template_name:
-                logger_utils.error(f'Шаблон для курса {course_id} и гендера {gender} не найден.')
-                raise ValueError(f'Шаблон не найден для gender={gender}, course={course_id}')
+                logger_utils.error(f'Шаблон для курса {course_id} и'
+                                   f' гендера {gender} не найден.')
+                raise ValueError(f'Шаблон не найден для gender={gender},'
+                                 f' course={course_id}')
 
             # Проверка, что template_name не равен None
             if template_name is None:
