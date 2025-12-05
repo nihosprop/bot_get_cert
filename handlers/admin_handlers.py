@@ -40,8 +40,9 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
                                redis_data: Redis):
     end_cert = str(await redis_data.get('end_number')).zfill(6)
 
-    await clbk.message.edit_text(LexiconRu.text_adm_panel.format(end_cert=end_cert),
-                             reply_markup=kb_admin)
+    await clbk.message.edit_text(
+        LexiconRu.text_adm_panel.format(end_cert=end_cert),
+        reply_markup=kb_admin)
     await state.set_state(FSMAdminPanel.admin_menu)
     await clbk.answer()
 
