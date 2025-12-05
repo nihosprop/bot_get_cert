@@ -506,7 +506,7 @@ class StepikService:
         user_tg_id = str(type_update.from_user.id)
 
         if exist_cert:
-            course_id = str(type_update.data).split('_')[-1]
+            course_id = str(type_update.data)
             try:
                 user_data = await self.redis_client.hget(user_tg_id, course_id)
                 logger_utils.debug(f'{user_data=}')
@@ -527,7 +527,7 @@ class StepikService:
             logger_utils.debug(f'Exit')
             return output_file
 
-        course_id = data.get('course').split('_')[-1]
+        course_id = data.get('course')
         try:
             # Выполняем синхронную операцию в отдельном потоке
             output_file, template_name = await asyncio.to_thread(
