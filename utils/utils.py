@@ -542,10 +542,6 @@ class StepikService:
             logger_utils.debug(f'Данные сохранены в Redis: '
                 f'user_tg_id={user_tg_id},'
                 f' course_id={course_id}')
-            # await self.redis_client.set(
-            #         f'{user_tg_id}_info_data', f'TG_ID-{user_tg_id}:'
-            #                         f'{await get_username(type_update)}:'
-            #                         f'{cert_number}:{full_name}:{template_name}')
 
             logger_utils.debug(f'Exit')
             return output_file
