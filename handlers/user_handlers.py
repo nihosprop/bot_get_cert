@@ -558,28 +558,6 @@ async def clbk_done(
                 course_id=course_id)
             await msg_processor.deletes_msg_a_delay(value=value1, delay=1)
 
-            # временное отключение promo месаги
-
-            # взятие id_promo сообщения для удаления
-            # msg_promo_id = await redis_data.get(
-            #         f'{clbk.from_user.id}_msg_promo_id')
-            # logger_user_hand.debug(f'Серт не в наличии, id промо мсг для '
-            #                        f'удаления {msg_promo_id=}')
-            # if msg_promo_id:
-            #     logger_user_hand.debug(f'Удаляем {msg_promo_id=}')
-            #     await clbk.bot.delete_message(str(clbk.message.chat.id),
-            #                                   msg_promo_id)
-            # msg_promo = await msg_processor.send_message_with_delay(
-            #         clbk.message.chat.id, text=LexiconRu.text_promo.format(
-            #                 end_date=await shifts_the_date_forward()), delay=15,
-            #         preview_link=Links.link_questions_to_ivan)
-
-            # запись id промо месаги для удаления
-            # await redis_data.set(f'{clbk.from_user.id}_msg_promo_id',
-            #                      str(msg_promo.message_id))
-            # logger_user_hand.debug(f'Запись id промо мсг для удаления '
-            #                        f'{msg_promo.message_id=}')
-
         except Exception as err:
             logger_user_hand.error(f'{err=}', exc_info=True)
         finally:
