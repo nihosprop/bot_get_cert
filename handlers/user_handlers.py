@@ -324,9 +324,9 @@ async def clbk_select_course(
         await state.clear()
         logger_user_hand.debug(f'Exit')
         return
-
+    course_name = stepik_service.courses.get(int(clbk.data)).name
     logger_user_hand.info(
-        f'Сертификат курса:{clbk.data} у TG_ID:{tg_id}:'
+        f'Сертификат курса {course_name}:{clbk.data} у TG_ID:{tg_id}:'
         f':{await get_username(clbk)} на руках не обнаружен')
 
     await state.update_data(course=clbk.data)
