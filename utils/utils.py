@@ -23,6 +23,8 @@ from aiogram.types import (CallbackQuery,
                            Update)
 from redis.asyncio import Redis
 
+from config_data.config import Course
+
 logger_utils = logging.getLogger(__name__)
 
 # Создаем пул потоков для выполнения синхронных операций
@@ -80,7 +82,7 @@ class StepikService:
     client_id: str
     client_secret: str
     redis_client: Redis
-    courses: dict
+    courses: dict[int, Course]
 
     async def is_private_account(self, stepik_user_id: str):
         logger_utils.info(f'Проверка Stepik-аккаунта юзера на приватность:'
@@ -311,9 +313,8 @@ class StepikService:
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
 
-            # TODO: имя файла задать в соответсвии с названием курса
-            #  НазваниеКурса_{number}.pdf
-            output_file = os.path.join(base_dir, f'BestInPython_{number}.pdf')
+            course_name = course_config.name.replace(' ', '_')
+            output_file = os.path.join(base_dir, f'{course_name}_{number}.pdf')
 
             if not os.path.exists(font_path):
                 raise FileNotFoundError(f'Файл шрифта не найден: {font_path}')
@@ -389,8 +390,8 @@ class StepikService:
         # 5. Возврат результата
         return output_file, template_name
 
-    @staticmethod
-    def sync_exists_certificate(data: dict[str, str],
+    def sync_exists_certificate(self,
+                                data: dict[str, str],
                                 w_text: bool = False):
         logger_utils.debug(f'Entry')
         logger_utils.debug(f'{data=}')
@@ -406,7 +407,10 @@ class StepikService:
 
             font_path = os.path.join(base_dir, 'Bitter-Regular.ttf')
             template_file = os.path.join(base_dir, template_name)
-            output_file = os.path.join(base_dir, f'BestInPython_{cert_number}.pdf')
+            course_id = int(data.get('course'))
+            course_data = self.courses.get(course_id)
+            course_name = course_data.name.replace(' ', '_')
+            output_file = os.path.join(base_dir, f'{course_name}_{cert_number}.pdf')
 
             if not os.path.exists(font_path):
                 raise FileNotFoundError(f'Файл шрифта не найден: {font_path}')
