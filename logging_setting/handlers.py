@@ -17,7 +17,10 @@ class TelegramAsyncHandler(logging.Handler):
     Returns:
         None
     """
-    def __init__(self, bot_token: str, chat_id: str, thread_id: str,
+    def __init__(self,
+                 bot_token: str,
+                 chat_id: str,
+                 thread_id: str,
                  loop=None):
         
         super().__init__()
