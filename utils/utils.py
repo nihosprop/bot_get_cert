@@ -514,7 +514,9 @@ class StepikService:
                 cert_number, full_name, template = user_data.split(':')
                 logger_utils.debug(f'{cert_number}-{full_name}-{template}')
                 data.update({'template_name': template,
-                             'cert_number': cert_number, 'full_name': full_name})
+                             'cert_number': cert_number,
+                             'full_name': full_name,
+                             'course': course_id})
 
             except Exception:
                 logger_utils.error(f'Не удалось получить данные пользователя '
