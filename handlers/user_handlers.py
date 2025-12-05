@@ -507,6 +507,7 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await clbk.answer()
         return
+
     if certificates:
         try:
             if int(course_id) in config.courses_data.best_in_python_courses:
