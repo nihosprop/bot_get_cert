@@ -252,7 +252,8 @@ class StepikService:
                 raise
         return False  # Сертификат за курс не найден
 
-    def sync_generate_certificate(self, data: dict[str, str],
+    def sync_generate_certificate(self,
+                                  data: dict[str, str],
                                   w_text: bool = False) -> tuple[str, str] | None:
         """
         Синхронная функция для генерации сертификата.
