@@ -577,7 +577,7 @@ async def clbk_done(
             f'сертификат на платформе и приходите '
             f'снова, за экземпляром от команды '
             f'курса😉')
-        await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
+        await msg_processor.deletes_msg_a_delay(value, delay=15, indication=True)
         value = await clbk.message.answer(
             LexiconRu.text_survey,
             reply_markup=kb_butt_quiz,
