@@ -48,8 +48,13 @@ async def get_pragmatic_certificates(
         client_secret=config.stepik.client_secret,
         redis_client=redis_data,
         courses=config.courses_data.courses)
+
+    # TODO: временная заглушка в ожидании сертификата для static
     logger.warning(
-        f'Нажатие на курс {clbk.data}:{clbk.from_user.id}:{tg_username}')
+        f'{clbk.from_user.id}:{tg_username} нажал на курс: {clbk.data}')
+    await clbk.answer('Сертификат в разработке 🛠️',
+                      show_alert=True)
+    return
 
     tg_id = str(clbk.from_user.id)
     course_id = clbk.data
