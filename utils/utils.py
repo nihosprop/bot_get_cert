@@ -567,6 +567,12 @@ class StepikService:
         """
         msg_processor = MessageProcessor(clbk, state)
         try:
+            if not output_file:
+                logger_utils.error(f"Получен пустой путь к файлу сертификата.")
+                await clbk.message.answer('Проблем при отправке сертификата.\n'
+                                          'Обратитесь к администратору.')
+                return
+
             # Проверяем, существует ли файл
             if not os.path.exists(output_file):
                 logger_utils.error(f"Файл {output_file} не найден.")
