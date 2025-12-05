@@ -45,19 +45,6 @@ async def clbk_back_newsletter(clbk: CallbackQuery, state: FSMContext,
     await state.set_state(FSMAdminPanel.admin_menu)
     await clbk.answer()
 
-
-# @admin_router.message(~F.text.in_({'/admin', '/start'}), F.content_type.in_(
-#         {"text", "sticker", "photo", "video", "document"}),
-#             ~F.state.in_(FSMQuiz.__states__))
-# async def msg_other(msg: Message):
-#     logger_admin.debug('Entry')
-#     await msg.delete()
-#     logger_admin.warning(f'Работа с кнопками:Послано боту->'
-#                         f'{msg.from_user.id}:'
-#                         f'{await get_username(msg)}:'
-#                         f'{msg.content_type}:{msg.text}')
-#     logger_admin.debug('Exit')
-
 @admin_router.message(F.text == '/admin')
 async def cmd_admin(
         msg: Message, state: FSMContext, redis_data: Redis,
