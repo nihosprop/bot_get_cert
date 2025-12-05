@@ -23,7 +23,7 @@ from aiogram.types import (CallbackQuery,
                            Update)
 from redis.asyncio import Redis
 
-from config_data.config import Course
+from config_data.config import Course, Config
 
 logger_utils = logging.getLogger(__name__)
 
@@ -201,9 +201,11 @@ class StepikService:
                                    stepik_user_id: str,
                                    course_id: str,
                                    access_token: str,
-                                   tg_username: str) -> bool | str:
+                                   tg_username: str,
+                                   config: Config) -> bool | str:
         """
          Проверяет наличие сертификата у пользователя на Stepik.
+        :param config:
         :param tg_username:
         :param stepik_user_id: ID пользователя на Stepik.
         :param course_id: ID курса, сертификат которого надо проверить на
@@ -233,13 +235,15 @@ class StepikService:
                         # logger_utils.debug(f'{data['certificates']}')
 
                         # Проверяем сертификаты на текущей странице
+                        course_data = config.courses_data.courses.get(
+                            int(course_id))
                         for certificate in data['certificates']:
                             if certificate['course'] == int(course_id):
                                 logger_utils.info(
                                     f'У STEPIK_ID:{stepik_user_id},'
                                     f'TG_USERNAME:{tg_username} '
-                                    f'cертификат курса {course_id} имеется'
-                                    f' на Stepik')
+                                    f'cертификат курса {course_data.name}'
+                                    f':{course_id} имеется на Stepik')
                                 return True  # Сертификат за курс найден
 
                         # Если есть следующая страница, переходим к ней
