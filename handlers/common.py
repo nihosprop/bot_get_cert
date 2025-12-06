@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 async def clbk_exit(clbk: CallbackQuery,
                    state: FSMContext,
                    msg_processor: MessageProcessor):
-    logger.debug(f'Entry')
+    logger.debug('Entry')
 
     try:
         await msg_processor.deletes_messages(msgs_remove_kb=True,
@@ -38,4 +38,4 @@ async def clbk_exit(clbk: CallbackQuery,
     await state.set_state(state=None)
     await clbk.answer()
 
-    logger.debug(f'Exit')
+    logger.debug('Exit')
