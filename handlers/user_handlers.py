@@ -33,6 +33,7 @@ user_router = Router()
 user_router.message.filter(IsPrivateChat())
 logger_user_hand = logging.getLogger(__name__)
 
+
 @user_router.message(F.text.lower().find('спасибо') == 0)
 async def msg_thanks(msg: Message, msg_processor: MessageProcessor):
     logger_user_hand.debug('Entry')
@@ -184,9 +185,8 @@ async def clbk_back_end(
 
 
 @user_router.message(
-    StateFilter(default_state),
-    ~IsAdmins(),
-    ~F.text.in_({'/start'},),
+    StateFilter(default_state), ~IsAdmins(),
+    ~F.text.in_({'/start'}, ),
     F.content_type.in_(
         {"text", "sticker", "photo", "video", "document"}))
 async def msg_other(msg: Message, msg_processor: MessageProcessor):
@@ -242,8 +242,9 @@ async def clbk_get_cert(
     logger_user_hand.info(
         f'Запрос сертификата:{clbk.from_user.id}'
         f':{await get_username(clbk)}')
-    if not await check_user_in_group(clbk,
-                                     tg_target_channel=config.tg_target_channel):
+    if not await check_user_in_group(
+            clbk,
+            tg_target_channel=config.tg_target_channel):
         logger_user_hand.info(
             f'Юзер {clbk.from_user.id}:{await get_username(clbk)} отсутствует '
             f'в паблике {config.tg_target_channel}')
@@ -276,9 +277,9 @@ async def clbk_gender(clbk: CallbackQuery, state: FSMContext):
     await clbk.answer()
 
 
-
-@user_router.callback_query(IsBestPythonCoursesFilter(),
-                            StateFilter(FSMQuiz.fill_course))
+@user_router.callback_query(
+    IsBestPythonCoursesFilter(),
+    StateFilter(FSMQuiz.fill_course))
 async def clbk_select_course(
         clbk: CallbackQuery,
         state: FSMContext,
@@ -437,8 +438,9 @@ async def clbk_done(
     tg_username = await get_username(clbk)
 
     # Проверяем, есть ли у пользователя уже сохраненный Stepik ID
-    existing_stepik_id = await redis_data.hget(name=str(clbk.from_user.id),
-                                               key='stepik_user_id')
+    existing_stepik_id = await redis_data.hget(
+        name=str(clbk.from_user.id),
+        key='stepik_user_id')
     if existing_stepik_id:
         if existing_stepik_id != stepik_user_id:
             await clbk.message.edit_text(
@@ -457,8 +459,9 @@ async def clbk_done(
         all_user_hashes = await redis_data.keys('*')
         for user_key in all_user_hashes:
             if user_key.isdigit() and user_key != str(clbk.from_user.id):
-                other_user_stepik_id = await redis_data.hget(user_key,
-                                                             'stepik_user_id')
+                other_user_stepik_id = await redis_data.hget(
+                    user_key,
+                    'stepik_user_id')
                 if other_user_stepik_id == stepik_user_id:
                     await clbk.message.edit_text(
                         'Этот Stepik-аккаунт уже используется другим пользователем. '
@@ -470,7 +473,7 @@ async def clbk_done(
                     await state.clear()
                     await clbk.answer()
                     return
-        
+
         # Если все проверки пройдены, сохраняем Stepik ID
         await redis_data.hset(
             name=str(clbk.from_user.id),
