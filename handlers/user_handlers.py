@@ -534,7 +534,7 @@ async def clbk_done(
             # генерация сертификата
             logger_user_hand.info(
                 f'Генерация сертификата для'
-                f' :{clbk.from_user.id}:{tg_username}')
+                f':{clbk.from_user.id}:{tg_username}')
             path = await stepik_service.generate_certificate(
                 state,
                 type_update=clbk,
