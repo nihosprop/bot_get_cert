@@ -4,8 +4,8 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from filters.filters import IsPrivateChat, IsAdmins
-from keyboards.keyboards import get_kb_courses, kb_butt_quiz
+from filters.filters import IsPrivateChat
+from keyboards.keyboards import kb_butt_quiz
 from lexicon import LexiconRu
 from utils import MessageProcessor
 
