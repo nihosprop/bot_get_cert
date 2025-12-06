@@ -60,6 +60,7 @@ async def cmd_start(
 
     logger_user_hand.info(
         f'cmd_start:{msg.from_user.id}:{await get_username(msg)}')
+
     # logger_user_hand.debug(
     #     msg.model_dump_json(
     #         indent=4,
