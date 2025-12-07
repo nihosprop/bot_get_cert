@@ -125,8 +125,8 @@ async def clbk_newsletter(
         msg_processor: MessageProcessor):
     # await clbk.answer(f'Кнопка в разработке', show_alert=True)
     value = await clbk.message.edit_text(
-        f'1. Отправить боту сообщение для рассылки.\n\n'
-        f'2. Подтвердить на следующем шаге!',
+        '1. Отправить боту сообщение для рассылки.\n\n'
+        '2. Подтвердить на следующем шаге!',
         reply_markup=kb_back_cancel)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
     await state.set_state(FSMAdminPanel.fill_newsletter)
