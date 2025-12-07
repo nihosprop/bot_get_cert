@@ -167,7 +167,7 @@ async def clbk_done_newsletter(
 
     await msg_processor.delete_message()
 
-    msg_letter = await state.get_value('msg_letter')
+    msg_letter: str = await state.get_value('msg_letter')
     user_ids = set(
         map(int, filter(lambda _id: _id.isdigit(), await redis_data.keys())))
     end_cert = str(await redis_data.get('end_number')).zfill(6)
