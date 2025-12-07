@@ -1,29 +1,32 @@
 import asyncio
+import io
 import logging
 import os
 import re
+
 from dataclasses import dataclass
-import io
 from datetime import datetime, timedelta
 
-from PyPDF2 import PdfReader, PdfWriter
 from aiogram.client.session import aiohttp
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.colors import Color
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (CallbackQuery,
-                           ChatFullInfo,
-                           FSInputFile,
-                           LinkPreviewOptions,
-                           Message,
-                           Update)
+from aiogram.types import (
+    CallbackQuery,
+    ChatFullInfo,
+    FSInputFile,
+    LinkPreviewOptions,
+    Message,
+    Update,
+)
+from PyPDF2 import PdfReader, PdfWriter
 from redis.asyncio import Redis
+from reportlab.lib.colors import Color
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 
-from config_data.config import Course, Config
+from config_data.config import Config, Course
 
 logger_utils = logging.getLogger(__name__)
 
@@ -397,7 +400,7 @@ class StepikService:
     def sync_exists_certificate(self,
                                 data: dict[str, str],
                                 w_text: bool = False):
-        logger_utils.debug(f'Entry')
+        logger_utils.debug('Entry')
         logger_utils.debug(f'{data=}')
 
         try:
@@ -500,7 +503,7 @@ class StepikService:
         :param w_text: Флаг для добавления водяного знака.
         :return: Путь к сгенерированному файлу сертификата.
         """
-        logger_utils.debug(f'Entry')
+        logger_utils.debug('Entry')
 
         data = await state_data.get_data()
         user_tg_id = str(type_update.from_user.id)
@@ -519,12 +522,12 @@ class StepikService:
                              'course': course_id})
 
             except Exception:
-                logger_utils.error(f'Не удалось получить данные пользователя '
-                                   f'из Redis хранилища', exc_info=True)
+                logger_utils.error('Не удалось получить данные пользователя '
+                                   'из Redis хранилища', exc_info=True)
                 raise
             output_file = await asyncio.to_thread(
                 self.sync_exists_certificate, data, w_text)
-            logger_utils.debug(f'Exit')
+            logger_utils.debug('Exit')
             return output_file
 
         course_id = data.get('course')
@@ -545,12 +548,12 @@ class StepikService:
                 f'user_tg_id={user_tg_id},'
                 f' course_id={course_id}')
 
-            logger_utils.debug(f'Exit')
+            logger_utils.debug('Exit')
             return output_file
 
         except Exception as err:
             logger_utils.error(f'{err=}', exc_info=True)
-            logger_utils.debug(f'Exit')
+            logger_utils.debug('Exit')
             raise
 
     async def send_certificate(self,
@@ -570,7 +573,7 @@ class StepikService:
         msg_processor = MessageProcessor(clbk, state)
         try:
             if not output_file:
-                logger_utils.error(f"Получен пустой путь к файлу сертификата.")
+                logger_utils.error("Получен пустой путь к файлу сертификата.")
                 await clbk.message.answer('Проблем при отправке сертификата.\n'
                                           'Обратитесь к администратору.')
                 return
@@ -635,7 +638,7 @@ class MessageProcessor:
         :param msgs_remove_kb:
         :return: None
         """
-        logger_utils.debug(f'Entry')
+        logger_utils.debug('Entry')
         chat_id = None
         if isinstance(self._type_update, Message):
             chat_id = self._type_update.chat.id
@@ -672,7 +675,7 @@ class MessageProcessor:
         if keys:
             for key in keys:
                 msgs_ids: list = dict(await self._state.get_data()).get(key, [])
-                logger_utils.debug(f'Starting to delete messages…')
+                logger_utils.debug('Starting to delete messages…')
 
                 for msg_id in set(msgs_ids):
                     try:
@@ -712,7 +715,7 @@ class MessageProcessor:
                 data: list = dict(await self._state.get_data()).get(key, [])
                 if value.message_id not in data:
                     data.append(str(value.message_id))
-                    logger_utils.debug(f'Msg ID to recorded')
+                    logger_utils.debug('Msg ID to recorded')
                 logger_utils.debug('No msg ID to record')
                 await self._state.update_data({key: data})
         logger_utils.debug('Exit')
@@ -834,7 +837,7 @@ class MessageProcessor:
         :param preview_link: Link for a preview.
         :return Message: Message: The sent message object.
         """
-        logger_utils.debug(f'Entry')
+        logger_utils.debug('Entry')
         await asyncio.sleep(delay)
 
         preview_link_option = LinkPreviewOptions(url=preview_link)
@@ -845,7 +848,7 @@ class MessageProcessor:
             link_preview_options=preview_link_option if preview_link else None,
             disable_web_page_preview=disable_web_page_preview)
 
-        logger_utils.debug(f'Exit')
+        logger_utils.debug('Exit')
         return message
 
 async def shifts_the_date_forward(days: int = 10):
