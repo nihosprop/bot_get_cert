@@ -863,7 +863,7 @@ async def get_data_users(clbk: CallbackQuery, redis_data: Redis):
     cursor = '0'
     user_ids = []
     while cursor:
-        cursor, keys = redis_data.scan(cursor, match='*')
+        cursor, keys = await redis_data.scan(cursor, match='*')
         user_ids.extend([key for key in keys if re.match(r'^\d{9,10}$', key)])
     logger_utils.debug(f'{user_ids=}')
 
