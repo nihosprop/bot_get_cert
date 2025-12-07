@@ -4,10 +4,12 @@ from aiogram.fsm.state import State, StatesGroup
 
 logger_states = logging.getLogger(__name__)
 
+
 class FSMAdminPanel(StatesGroup):
     admin_menu = State()
     fill_newsletter = State()
     fill_confirm_newsletter = State()
+
 
 class FSMQuiz(StatesGroup):
     fill_full_name = State()
@@ -17,14 +19,17 @@ class FSMQuiz(StatesGroup):
     fill_link_to_stepik_profile = State()
     data_confirm = State()
 
+
 # Dzeranov states
 class FSMDzeranovPromo(StatesGroup):
     choice_promocodes = State()
     want_promocode_dzeranov = State()
 
+
 # Pragmatic states
 class FSMPragmaticPromo(StatesGroup):
     choice_promocodes = State()
+
 
 class FSMPragmaticGetCert(StatesGroup):
     fill_date_of_revocation = State()
