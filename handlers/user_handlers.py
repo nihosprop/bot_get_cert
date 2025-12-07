@@ -548,7 +548,9 @@ async def clbk_done(
                 'Произошла ошибка😯\nПопробуйте '
                 'позже или обратитесь к администратору🤖')
             await msg_processor.deletes_msg_a_delay(value=value1, delay=2)
-            await msg_processor.deletes_msg_a_delay(value, 20, indication=True)
+            await msg_processor.deletes_msg_a_delay(value=value,
+                                                    delay=20,
+                                                    indication=True)
             await state.clear()
             return
 
