@@ -15,44 +15,47 @@ router = Router()
 router.callback_query.filter(
     or_f(
         StateFilter(FSMPragmaticPromo),
-        CallBackFilter(
-            clbk_data='courses_pragmatic_programmer')))
+        CallBackFilter(clbk_data='courses_pragmatic_programmer'),
+    )
+)
 logger = logging.getLogger(__name__)
 
 
 @router.callback_query(F.data == 'courses_pragmatic_programmer')
 async def clbk_courses_pragmatic_programmer(
-        clbk: CallbackQuery,
-        state: FSMContext):
+    clbk: CallbackQuery, state: FSMContext
+) -> None:
     logger.debug('Entry')
     logger.info(
         f'{await get_username(clbk)}:{clbk.from_user.id} entered'
-        f'in Promo on Courses Pragmatic Proger')
+        f'in Promo on Courses Pragmatic Proger'
+    )
 
     await clbk.message.edit_text(
         LexiconRu.text_promo_pragmatic_proger,
         reply_markup=kb_pragmatic_proger_promocodes,
-        disable_web_page_preview=True)
+        disable_web_page_preview=True,
+    )
 
     await state.set_state(FSMPragmaticPromo.choice_promocodes)
     await clbk.answer()
     logger.debug('Exit')
 
+
 @router.callback_query(
-    F.data == 'back',
-    StateFilter(FSMPragmaticPromo.choice_promocodes))
-async def clbk_back(
-        clbk: CallbackQuery,
-        state: FSMContext):
+    F.data == 'back', StateFilter(FSMPragmaticPromo.choice_promocodes)
+)
+async def clbk_back(clbk: CallbackQuery, state: FSMContext) -> None:
     logger.debug('Entry')
 
     await clbk.message.edit_text(
         LexiconRu.text_survey,
         reply_markup=kb_create_promo,
-        disable_web_page_preview=True)
+        disable_web_page_preview=True,
+    )
     await state.set_state(state=None)
     await clbk.answer()
     logger.info(
-        f'{await get_username(clbk)}:{clbk.from_user.id} back to '
-        f'start screen.')
+        f'{await get_username(clbk)}:{clbk.from_user.id} back to start screen.'
+    )
     logger.debug('Exit')
