@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv pip install --system --no-cache-dir . \
+RUN uv pip install --system --no-cache-dir --without dev . \
   && apk del gcc musl-dev \
   && rm -rf /var/cache/apk/*
 
