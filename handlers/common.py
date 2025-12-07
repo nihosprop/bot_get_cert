@@ -16,9 +16,8 @@ logger = logging.getLogger(__name__)
 
 @router.callback_query(F.data == 'exit')
 async def clbk_exit(
-        clbk: CallbackQuery,
-        state: FSMContext,
-        msg_processor: MessageProcessor) -> None:
+    clbk: CallbackQuery, state: FSMContext, msg_processor: MessageProcessor
+) -> None:
     """Handle exit callback query.
 
     For exit button. Clears the current state, deletes all
@@ -37,18 +36,19 @@ async def clbk_exit(
 
     try:
         await msg_processor.deletes_messages(
-            msgs_remove_kb=True,
-            msgs_for_del=True)
+            msgs_remove_kb=True, msgs_for_del=True
+        )
     except Exception as err:
         logger.error(
-            f'Ошибка при удалении kb {err.__class__.__name__}',
-            exc_info=True)
+            f'Ошибка при удалении kb {err.__class__.__name__}', exc_info=True
+        )
 
     try:
         value = await clbk.message.answer(
             LexiconRu.text_survey,
             reply_markup=kb_butt_quiz,
-            disable_web_page_preview=True)
+            disable_web_page_preview=True,
+        )
     except Exception as err:
         logger.error(f'{err.__class__.__name__}', exc_info=True)
     else:
