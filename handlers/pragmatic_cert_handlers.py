@@ -1,29 +1,38 @@
 import asyncio
 import logging
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, Message
 from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Config
-from filters.filters import (IsPragmaticCoursesFilter,
+from filters.filters import (
     CallBackFilter,
-    IsCorrectData, IsValidProfileLink, IsPrivateChat)
-from keyboards import (kb_back_cancel,
+    IsCorrectData,
+    IsPragmaticCoursesFilter,
+    IsPrivateChat,
+    IsValidProfileLink,
+)
+from keyboards import (
+    BUTT_GENDER,
+    create_inline_kb,
+    kb_back_cancel,
     kb_end_quiz,
-    BUTT_GENDER, create_inline_kb)
-from keyboards.keyboards import get_kb_courses, kb_butt_quiz
+)
 from keyboards.buttons import BUTT_COURSES
+from keyboards.keyboards import get_kb_courses, kb_butt_quiz
 from lexicon import LexiconRu
 from states.states import FSMPragmaticGetCert, FSMQuiz
-from utils import (get_username,
-    StepikService,
+from utils import (
     MessageProcessor,
-    check_user_in_group)
+    StepikService,
+    check_user_in_group,
+    get_username,
+)
 
 router = Router()
 router.callback_query.filter(or_f(IsPragmaticCoursesFilter(),
@@ -39,7 +48,7 @@ async def get_pragmatic_certificates(
         state: FSMContext,
         config: Config,
         redis_data: Redis,
-        msg_processor: MessageProcessor):
+        msg_processor: MessageProcessor) -> None:
     logger.debug('Entry')
 
     tg_username = await get_username(clbk)
@@ -62,7 +71,8 @@ async def get_pragmatic_certificates(
         f'Проверка наличия серт:TG_ID[{tg_id}]'
         f':{tg_username}:CourseID[{clbk.data}]')
 
-    cert: str | bool = await stepik_service.check_cert_in_user(tg_id, course_id)
+    cert: str | bool = await stepik_service.check_cert_in_user(tg_id,
+                                                               course_id)
     logger.debug(f'{cert=}')
 
     if cert:
@@ -111,7 +121,7 @@ async def get_pragmatic_certificates(
                        StateFilter(
                            FSMPragmaticGetCert.fill_date_of_revocation))
 async def clbk_back_on_fill_course(clbk: CallbackQuery,
-                                   state: FSMContext):
+                                   state: FSMContext) -> None:
     logger.debug('Entry')
 
     await clbk.message.edit_text(LexiconRu.text_select_course,
@@ -126,7 +136,7 @@ async def clbk_back_on_fill_course(clbk: CallbackQuery,
 async def msg_fill_date_revocation(msg: Message,
                                    state: FSMContext,
                                    date: str,
-                                   msg_processor: MessageProcessor):
+                                   msg_processor: MessageProcessor) -> None:
     logger.debug('Entry')
 
     await msg.delete()
@@ -150,7 +160,7 @@ async def msg_fill_date_revocation(msg: Message,
                        StateFilter(
                            FSMPragmaticGetCert.fill_link_to_stepik_profile))
 async def clbk_back_to_fill_date_revocation(clbk: CallbackQuery,
-                                            state: FSMContext):
+                                            state: FSMContext) -> None:
     logger.debug('Entry')
 
     await clbk.message.edit_text(LexiconRu.text_course_number_done,
@@ -167,7 +177,7 @@ async def msg_sent_stepik_link(
         msg: Message,
         state: FSMContext,
         stepik_user_id: str,
-        msg_processor: MessageProcessor):
+        msg_processor: MessageProcessor) -> None:
 
     logger.debug('Entry')
     logger.info(f'Записана ссылка {msg.text} от TG_ID:{msg.from_user.id}'
@@ -191,7 +201,7 @@ async def msg_sent_stepik_link(
 @router.callback_query(F.data == 'back',
                        StateFilter(FSMPragmaticGetCert.data_confirm))
 async def clbk_back_to_sent_stepik_link(clbk: CallbackQuery,
-                                        state: FSMContext):
+                                        state: FSMContext) -> None:
     logger.debug('Entry')
 
     await clbk.message.edit_text(LexiconRu.text_data_done,
@@ -204,12 +214,13 @@ async def clbk_back_to_sent_stepik_link(clbk: CallbackQuery,
 
 @router.callback_query(F.data == 'done',
                        StateFilter(FSMPragmaticGetCert.data_confirm))
+# TODO: reduce branches & statements
 async def clbk_done(
         clbk: CallbackQuery,
         state: FSMContext,
         redis_data: Redis,
         config: Config,
-        msg_processor: MessageProcessor):
+        msg_processor: MessageProcessor) -> None:
     logger.debug('Entry')
 
     stepik_service = StepikService(
@@ -235,7 +246,8 @@ async def clbk_done(
         if existing_stepik_id != stepik_user_id:
             await clbk.message.edit_text(
                 'Вы пытаетесь использовать другой Stepik-аккаунт. '
-                'Если вы ошиблись - повторите или обратитесь к администратору.')
+                'Если вы ошиблись - повторите или обратитесь '
+                'к администратору.')
             logger.warning(
                 f'Попытка смены Stepik ID для '
                 f'TG_ID:{clbk.from_user.id}:{tg_username}. '
@@ -254,7 +266,8 @@ async def clbk_done(
                     'stepik_user_id')
                 if other_user_stepik_id == stepik_user_id:
                     await clbk.message.edit_text(
-                        'Этот Stepik-аккаунт уже используется другим пользователем. '
+                        'Этот Stepik-аккаунт уже используется '
+                        'другим пользователем. '
                         'Обратитесь к администратору.')
                     logger.warning(
                         f'Попытка TG_ID:{clbk.from_user.id}:'
@@ -288,7 +301,8 @@ async def clbk_done(
             f' TG_ID:{clbk.from_user.id}:{tg_username},'
             f' STEPIK_USER_ID:{stepik_user_id},'
             f' COURSE_ID:{course_id}, '
-            f'из-за ошибки передачи данных! Сертификат выдан без проверки!, {e}')
+            f'из-за ошибки передачи данных! Сертификат выдан без проверки!,'
+            f' {e}')
         certificates = True
 
     if certificates == 'PRIVATE':
@@ -389,7 +403,8 @@ async def clbk_done(
                         photo=photo_file_id,
                         caption=text,
                         reply_markup=kb_yes)
-                    await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
+                    await msg_processor.save_msg_id(value=msg,
+                                                    msgs_for_del=True)
                     logger.debug('Photo sent by id')
                 except TelegramBadRequest as e:
                     logger.error(f'Error sending message-photo: {e}')
@@ -403,7 +418,8 @@ async def clbk_done(
                     await redis_data.set(
                         name='pragmatic_photo',
                         value=photo_id_for_course_pragmatic)
-                    await msg_processor.save_msg_id(value=msg, msgs_for_del=True)
+                    await msg_processor.save_msg_id(value=msg,
+                                                    msgs_for_del=True)
                     logger.debug('Photo sent by file (ID refreshed).')
             await state.set_state(
                 state=FSMPragmaticGetCert.fill_get_discount_on_git)
@@ -425,7 +441,8 @@ async def clbk_done(
             f'сертификат на платформе и приходите '
             f'снова, за экземпляром от команды '
             f'курса😉')
-        await msg_processor.deletes_msg_a_delay(value, delay=10, indication=True)
+        await msg_processor.deletes_msg_a_delay(value, delay=10,
+                                                indication=True)
         value = await clbk.message.answer(
             LexiconRu.text_survey,
             reply_markup=kb_butt_quiz,
@@ -434,14 +451,14 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await state.clear()
         await clbk.answer()
-    logger.debug(f'Exit')
+    logger.debug('Exit')
 
 @router.callback_query(F.data == 'yes',
                        StateFilter(FSMPragmaticGetCert.fill_get_discount_on_git))
 async def clbk_get_discount_on_git(clbk: CallbackQuery,
                                    state: FSMContext,
                                    config: Config,
-                                   msg_processor: MessageProcessor):
+                                   msg_processor: MessageProcessor) -> None:
     logger.debug('Entry')
 
     is_subscribe = None
