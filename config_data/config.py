@@ -1,11 +1,15 @@
-import yaml
 from dataclasses import dataclass, field
+
+import yaml
+
 from environs import Env
+
 
 @dataclass
 class Course:
     name: str
     templates: dict[str, str]
+
 
 @dataclass
 class CourseData:
@@ -45,19 +49,19 @@ class Config:
 
 
 def load_courses_from_yaml(path: str = 'config.yaml') -> CourseData:
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
     courses_data = data.get('courses', {})
     courses = {}
     for course_id, course_info in courses_data.items():
         courses[int(course_id)] = Course(
-            name=course_info['name'],
-            templates=course_info['templates']
-            )
+            name=course_info['name'], templates=course_info['templates']
+        )
     courses_data = CourseData(
         courses=courses,
-        best_in_python_courses=data.get('best_in_python_courses', []))
+        best_in_python_courses=data.get('best_in_python_courses', []),
+    )
 
     return courses_data
 
@@ -71,7 +75,7 @@ def load_config(path: str | None = None) -> Config:
     """
     env = Env()
     env.read_env(path)
-    redis_host = env.str("REDIS_HOST", "localhost")
+    redis_host = env.str('REDIS_HOST', 'localhost')
     stepik_client_id = env('STEPIK_CLIENT_ID')
     stepik_client_secret = env('STEPIK_CLIENT_SECRET')
     level_log = env.str('LOG_LEVEL', 'INFO')
@@ -94,16 +98,13 @@ def load_config(path: str | None = None) -> Config:
 
     courses_data = load_courses_from_yaml()
 
-
-    tg_bot = TgBot(
-        token=env('BOT_TOKEN'),
-        id_admins=env('ID_ADMIN'))
+    tg_bot = TgBot(token=env('BOT_TOKEN'), id_admins=env('ID_ADMIN'))
 
     return Config(
         tg_bot=tg_bot,
         stepik=Stepik(
-            client_id=stepik_client_id,
-            client_secret=stepik_client_secret),
+            client_id=stepik_client_id, client_secret=stepik_client_secret
+        ),
         redis_host=redis_host,
         level_log=level_log,
         w_text=w_text,
@@ -116,4 +117,5 @@ def load_config(path: str | None = None) -> Config:
         log_error_tg_chat_id=log_error_tg_chat_id,
         log_error_tg_thread_id=log_error_tg_thread_id,
         pragmatic_courses=pragmatic_courses,
-        courses_data=courses_data)
+        courses_data=courses_data,
+    )
