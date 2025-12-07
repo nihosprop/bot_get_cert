@@ -1,31 +1,39 @@
 import asyncio
 import logging
+
 from logging.config import dictConfig
 
 import yaml
-from aiogram.fsm.storage.redis import Redis, RedisStorage
+
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.redis import Redis, RedisStorage
 from arq.connections import RedisSettings
 
 from config_data.config import Config, load_config
-from keyboards.set_menu import set_main_menu
-from keyboards.buttons import get_courses_buttons
-from handlers import (admin_handlers,
-    user_handlers,
-    temp_handlers,
+from handlers import (
+    admin_handlers,
+    common,
     dzeranov_handlers,
-    pragmatic_promo_handlers, pragmatic_cert_handlers, common)
-from middlewares.outer import (MsgProcMiddleware,
+    pragmatic_cert_handlers,
+    pragmatic_promo_handlers,
+    temp_handlers,
+    user_handlers,
+)
+from keyboards.buttons import get_courses_buttons
+from keyboards.set_menu import set_main_menu
+from middlewares.outer import (
+    MsgProcMiddleware,
     RedisMiddleware,
-    ThrottlingMiddleware)
+    ThrottlingMiddleware,
+)
 from queues.que_utils import run_arq_worker
 
 logger_main = logging.getLogger(__name__)
 
 async def setup_logging(config: Config):
-    with open('logging_setting/log_config.yml', 'rt') as file:
+    with open('logging_setting/log_config.yml') as file:
         log_config = yaml.safe_load(file)
     
     # set level log
@@ -94,7 +102,7 @@ async def setup_redis(config: Config) -> tuple[
     return redis_fsm, redis_throttling, redis_data, redis_que
 
 
-async def main():
+async def main() -> None:
     config: Config = load_config()
 
     get_courses_buttons(config)
@@ -117,16 +125,18 @@ async def main():
         # maintenance_middleware = StrictMaintenanceMiddleware(
         #     redis=redis_data, enabled=True,
         # По умолчанию выключено, можно включать через Redis
-        # message="⚙️ Бот временно недоступен из-за технических работ. Приносим извинения за неудобства!")
+        # message="⚙️ Бот временно недоступен из-за технических работ.
+        # Приносим извинения за неудобства!")
         # dp.update.outer_middleware(maintenance_middleware)
         dp.update.middleware(RedisMiddleware(redis=redis_data))
         dp.update.middleware(MsgProcMiddleware())
-        dp.message.outer_middleware(ThrottlingMiddleware(storage=storage_throttling,
-                                                         ttl=700))
-        dp.callback_query.outer_middleware(ThrottlingMiddleware(storage=storage_throttling,
-                                                                ttl=500))
+        dp.message.outer_middleware(ThrottlingMiddleware(
+            storage=storage_throttling, ttl=700))
+        dp.callback_query.outer_middleware(ThrottlingMiddleware(
+            storage=storage_throttling, ttl=500))
         
         # routers
+        # TODO: using include_routers
         dp.include_router(common.router)
         dp.include_router(temp_handlers.temp_router)
         dp.include_router(dzeranov_handlers.router)
