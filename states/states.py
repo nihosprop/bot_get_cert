@@ -1,6 +1,6 @@
 import logging
 
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.state import State, StatesGroup
 
 logger_states = logging.getLogger(__name__)
 
