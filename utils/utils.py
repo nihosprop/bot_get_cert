@@ -788,16 +788,6 @@ class MessageProcessor:
     @staticmethod
     async def deletes_msg_a_delay(value: Message,
                                   delay: int = 1, indication=False) -> None:
-        """
-         Deletes a message after a specified time interval.
-         Arguments: value (types.Message): The message to delete.
-                    delay (int): Time in seconds before the message is deleted.
-                    returns: None
-        :param indication: Bool
-        :param value: Message
-        :param delay: int
-        :return: None
-        """
         if not indication:
             await asyncio.sleep(delay)
             await value.delete()
