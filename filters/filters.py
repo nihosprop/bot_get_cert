@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 
-from aiogram.enums import ContentType, ChatType
+from aiogram.enums import ChatType, ContentType
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
