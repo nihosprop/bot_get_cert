@@ -57,6 +57,9 @@ line-length = 79
 target-version = "py313"
 exclude = ["venv", ".venv", ".mypy_cache"]
 
+[tool.ruff.format]
+quote-style = "single"
+
 [tool.ruff.lint]
 # Enable all major rule families:
 # E,F   — pycodestyle + Pyflakes
