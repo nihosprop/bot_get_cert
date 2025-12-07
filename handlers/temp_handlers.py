@@ -1,8 +1,9 @@
 import logging
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import or_f
 from aiogram.types import Message
+
 from utils import get_username
 
 temp_router = Router()
