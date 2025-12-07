@@ -19,6 +19,20 @@ async def clbk_exit(
         clbk: CallbackQuery,
         state: FSMContext,
         msg_processor: MessageProcessor) -> None:
+    """Handle exit callback query.
+
+    For exit button. Clears the current state, deletes all
+    previously sent messages and sends a message with the survey.
+
+    Args:
+        clbk (CallbackQuery): The callback query object.
+        state (FSMContext): The state object.
+        msg_processor (MessageProcessor): The message processor object.
+
+    Returns:
+        None
+
+    """
     logger.debug('Entry')
 
     try:
