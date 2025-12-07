@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 async def clbk_exit(
         clbk: CallbackQuery,
         state: FSMContext,
-        msg_processor: MessageProcessor):
+        msg_processor: MessageProcessor) -> None:
     logger.debug('Entry')
 
     try:
