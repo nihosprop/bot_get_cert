@@ -25,9 +25,7 @@ BUTT_GENDER: dict[str, str] = {'male': 'Мужской ♂', 'female': 'Женс
 BUTT_COURSES: dict[str, str] = {}
 BUTT_COURSES_PRAGMATIC: dict[str, str] = {}
 
-def get_courses_buttons(config: Config):
-    global BUTT_COURSES, BUTT_COURSES_PRAGMATIC
-
+def get_courses_buttons(config: Config) -> None:
     for course_id, course_data in config.courses_data.courses.items():
         BUTT_COURSES[str(course_id)] = course_data.name
         if 'pragmatic' in course_data.templates.get('male'):
