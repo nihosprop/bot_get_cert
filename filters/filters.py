@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from aiogram.enums import ContentType, ChatType
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
 from config_data.config import Config
 from keyboards.buttons import BUTT_COURSES_PRAGMATIC
