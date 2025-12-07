@@ -9,24 +9,27 @@ from aiohttp import ConnectionTimeoutError
 from redis import Redis
 
 from config_data.config import Config
-from filters.filters import (IsCorrectData,
+from filters.filters import (
+    IsAdmins,
+    IsBestPythonCoursesFilter,
+    IsCorrectData,
     IsFullName,
+    IsPrivateChat,
     IsValidProfileLink,
-    IsPrivateChat, IsBestPythonCoursesFilter, IsAdmins)
-from keyboards import (BUTT_COURSES,
+)
+from keyboards import (
+    BUTT_COURSES,
     BUTT_GENDER,
     kb_back_cancel,
     kb_butt_cancel,
     kb_create_promo,
     kb_end_quiz,
-    kb_select_gender)
-from keyboards.keyboards import get_kb_courses
+    kb_select_gender,
+)
+from keyboards.keyboards import get_kb_courses, kb_butt_quiz
 from lexicon.lexicon_ru import LexiconRu
-from keyboards.keyboards import kb_butt_quiz
 from states.states import FSMQuiz
-from utils import (StepikService,
-    check_user_in_group,
-    get_username)
+from utils import StepikService, check_user_in_group, get_username
 from utils.utils import MessageProcessor
 
 user_router = Router()
@@ -230,7 +233,7 @@ async def clbk_cancel_in_state(
         disable_web_page_preview=True)
     await msg_processor.save_msg_id(value, msgs_for_del=True)
     await clbk.answer()
-    logger_user_hand.debug(f'Exit')
+    logger_user_hand.debug('Exit')
 
 
 @user_router.callback_query(F.data == 'get_cert', StateFilter(default_state))
@@ -322,7 +325,7 @@ async def clbk_select_course(
 
         await msg_processor.deletes_msg_a_delay(value, delay=5)
         await state.clear()
-        logger_user_hand.debug(f'Exit')
+        logger_user_hand.debug('Exit')
         return
     course_name = stepik_service.courses.get(int(clbk.data)).name
     logger_user_hand.info(
@@ -590,7 +593,7 @@ async def clbk_done(
         await msg_processor.save_msg_id(value, msgs_for_del=True)
         await state.clear()
         await clbk.answer()
-    logger_user_hand.debug(f'Exit')
+    logger_user_hand.debug('Exit')
 
 
 @user_router.message(
