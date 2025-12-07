@@ -9,12 +9,12 @@ from redis.asyncio import Redis
 
 from config_data.config import Config
 from filters.filters import IsAdmins
-from keyboards import kb_butt_quiz, kb_back_cancel, kb_done_newsletter
+from keyboards import kb_back_cancel, kb_butt_quiz, kb_done_newsletter
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from queues.que_utils import mass_mailing
 from states.states import FSMAdminPanel
-from utils import MessageProcessor, get_username, get_data_users
+from utils import MessageProcessor, get_data_users, get_username
 
 admin_router = Router()
 admin_router.message.filter(IsAdmins())
