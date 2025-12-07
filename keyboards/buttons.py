@@ -1,10 +1,10 @@
 import logging
+
 from config_data.config import Config
 
 logger_buttons = logging.getLogger(__name__)
 
 ADMIN_PANEL_BUTT: dict[str, str] = {
-    'newsletter': 'Рассылка',
     'certs_data': 'Данные по сертификатам',
     'make_cert': 'Сделать сертификат',
     'add_admin': 'Добавить админа',
