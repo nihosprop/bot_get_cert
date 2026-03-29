@@ -41,7 +41,6 @@ services:
         condition: service_healthy
     networks:
       - my-network
-    # Опционально: монтируйте код для горячих правок (если Dockerfile работает из /app)
     volumes:
       - ./:/app
       - ./logs:/app/logs
