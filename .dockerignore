@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -43,6 +42,8 @@ coverage.xml
 .jupyter/
 .ipynb_checkpoints/
 .pyenv
+LICENSE
+README.md
 
 # Version Control
 .git/
@@ -67,18 +68,14 @@ Thumbs.db
 *.sublime-workspace
 
 # Docker & Kubernetes
-Dockerfile*
+Dockerfile
 docker-compose*.yml
-docker-compose*.yaml
 .dockerignore
 k8s/
-kubernetes/
-*.kubeconfig
 
 # Secrets & Config
 .env.*
 *.key
-*.pem
 *.p12
 *.pfx
 secrets/
@@ -87,5 +84,4 @@ config/database.yml
 
 # CI/CD
 .github/workflows/
-
 .pytest_cache
