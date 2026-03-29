@@ -1,16 +1,18 @@
 import logging
 
-from keyboards.kb_utils import create_inline_kb
-from keyboards.buttons import (ADMIN_PANEL_BUTT,
-    BUTT_GENDER,
+from keyboards.buttons import (
+    ADMIN_PANEL_BUTT,
     BUTT_COURSES,
     BUTT_DONE,
+    BUTT_GENDER,
     BUTT_START,
-    BUTTS_URL_PROMO,
+    BUTT_WANT_PROMOCODE_DZERANOV,
     BUTTS_PROMO_OTHER_AUTHOR,
     BUTTS_URL_DZERANOV_PROMOCODES,
-    BUTT_WANT_PROMOCODE_DZERANOV,
-    BUTTS_URL_PRAGMATIC_PROGER)
+    BUTTS_URL_PRAGMATIC_PROGER,
+    BUTTS_URL_PROMO,
+)
+from keyboards.kb_utils import create_inline_kb
 
 logger_keyboards = logging.getLogger(__name__)
 

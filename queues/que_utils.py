@@ -2,10 +2,12 @@ import asyncio
 import logging
 
 from aiogram import Bot
-from aiogram.exceptions import (TelegramRetryAfter,
-                                TelegramBadRequest,
-                                TelegramUnauthorizedError)
-from arq import create_pool, Worker
+from aiogram.exceptions import (
+    TelegramBadRequest,
+    TelegramRetryAfter,
+    TelegramUnauthorizedError,
+)
+from arq import Worker, create_pool
 from arq.connections import RedisSettings
 
 from keyboards import kb_admin
