@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 import logging
+
+from dataclasses import dataclass
 
 logger_lexicon = logging.getLogger(__name__)
 
@@ -64,7 +65,9 @@ class LexiconRu:
 Поэтому купить можно сейчас!
 А проходить — когда удобно! 🐳
 <b>Вот ссылка с встроенным промокодом:</b>
-<a href="https://stepik.org/course/221885/pay?gift=true&promo=PITOSHA7">Ссылка со скидкой</a>
+<a href=
+"https://stepik.org/course/221885/pay?gift=true&promo=PITOSHA7">
+Ссылка со скидкой</a>
 ____________________
 2) Юрий Туть взял интервью у Вани! 
 Задал самые острые вопросы! 🌶
@@ -123,7 +126,7 @@ ________________
                                       'После получения сертификата можете'
                                       ' вернуть приватность, выставив галочку на место 😉\n\n'
                                       'Повторить анкету: <b>/start</b>')
-    text_promo_dzeranov: str = f"""
+    text_promo_dzeranov: str = """
 Курсы Иосифа Дзеранова
 ____________
 
@@ -136,7 +139,7 @@ ____________
 \nПромокоды на курсы PRO C# 👇
 """
 
-    text_promo_pragmatic_proger: str = f"""
+    text_promo_pragmatic_proger: str = """
 Курсы Pragmatic Programmer
 ____________
 
