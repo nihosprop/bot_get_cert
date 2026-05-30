@@ -189,7 +189,6 @@ class IsFullName(BaseFilter):
             logger_filters.debug(f'Exit {self.__class__.__name__}')
             return {'full_name': ' '.join(capitalized_words)}
 
-        # Если регулярка не прошла
         logger_filters.warning(
             f'Некорректные ФИО от {user_id}: {username}. Введено: {text}'
         )
