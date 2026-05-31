@@ -55,10 +55,13 @@ async def msg_thanks(msg: Message, msg_processor: MessageProcessor) -> None:
 
 
 @user_router.message(F.text == '/start')
-# @user_router.message(CommandStart())
 async def cmd_start(
     msg: Message, state: FSMContext, msg_processor: MessageProcessor
 ) -> None:
+    if not msg.from_user:
+        logger_user_hand.warning('Message without user info received')
+        return
+
     logger_user_hand.info(
         f'cmd_start:{msg.from_user.id}:{await get_username(msg)}'
     )
