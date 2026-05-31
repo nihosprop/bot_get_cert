@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 
 @temp_router.message(F.new_chat_members)
 async def delete_join_message(msg: Message) -> None:
+    if not msg.from_user:
+        logger.warning('Message without user info received')
+        return
+
     logger.info(
         f'{await get_username(msg)}:{msg.from_user.id} joined the chat!'
     )
@@ -25,6 +29,10 @@ async def delete_join_message(msg: Message) -> None:
 
 @temp_router.message(F.left_chat_member)
 async def delete_exit_message(msg: Message) -> None:
+    if not msg.from_user:
+        logger.warning('Message without user info received')
+        return
+
     logger.info(f'{await get_username(msg)}:{msg.from_user.id} exit the chat!')
     try:
         await msg.delete()
