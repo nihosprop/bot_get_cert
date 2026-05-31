@@ -30,7 +30,7 @@ dependencies = [
     "marshmallow==3.25.1",
     "multidict==6.1.0",
     "packaging==24.2",
-    "pillow==11.1.0",
+    "pillow==12.2.0",
     "propcache==0.2.1",
     "pydantic==2.10.5",
     "pydantic-core==2.27.2",
