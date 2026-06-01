@@ -30,9 +30,6 @@ from config_data.config import Config, Course
 
 logger_utils = logging.getLogger(__name__)
 
-# Создаем пул потоков для выполнения синхронных операций
-# executor = ThreadPoolExecutor(max_workers=4)
-
 
 async def check_user_in_group(
     _type_update: Message | CallbackQuery, tg_target_channel: int
