@@ -50,11 +50,6 @@ handlers:
 
 loggers:
 
-  queues.que_utils:
-    level: INFO
-    handlers: [ stdout, file, telegram_error ]
-    propagate: no
-
   handlers.common:
     level: INFO
     handlers: [ stdout, file, telegram_error ]
@@ -81,6 +76,11 @@ loggers:
     propagate: no
 
   handlers.dzeranov_handlers:
+    level: INFO
+    handlers: [ stdout, file, telegram_error ]
+    propagate: no
+
+  handlers.make_cert:
     level: INFO
     handlers: [ stdout, file, telegram_error ]
     propagate: no
