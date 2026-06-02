@@ -7,6 +7,7 @@ from aiogram.types import Message
 
 from filters.filters import (
     CallBackFilter,
+    IsAdmins,
     IsPrivateChat,
 )
 from states.states import MakeCert
@@ -14,11 +15,12 @@ from states.states import MakeCert
 router = Router()
 router.callback_query.filter(
     or_f(
+        IsAdmins(),
         CallBackFilter('back'),
         StateFilter(MakeCert()),
     )
 )
-router.message.filter(IsPrivateChat(), StateFilter(MakeCert()))
+router.message.filter(IsAdmins(), IsPrivateChat(), StateFilter(MakeCert()))
 logger = logging.getLogger(__name__)
 
 

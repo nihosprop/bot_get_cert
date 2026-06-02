@@ -120,3 +120,4 @@ async def clbk_make_cert(clbk: CallbackQuery,
     await state.set_state(MakeCert.fill_link_to_stepik_profile)
 
     logger_admin.debug('Exit')
+
