@@ -15,6 +15,7 @@ from handlers import (
     admin_handlers,
     common,
     dzeranov_handlers,
+    make_cert,
     pragmatic_cert_handlers,
     pragmatic_promo_handlers,
     temp_handlers,
@@ -149,6 +150,7 @@ async def main() -> None:
         # TODO: using include_routers
         dp.include_router(common.router)
         dp.include_router(temp_handlers.temp_router)
+        dp.include_router(make_cert.router)
         dp.include_router(dzeranov_handlers.router)
         dp.include_router(pragmatic_cert_handlers.router)
         dp.include_router(pragmatic_promo_handlers.router)
