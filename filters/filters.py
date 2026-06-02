@@ -281,7 +281,8 @@ class IsCorrectData(BaseFilter):
 
 class IsCorrectEmail(BaseFilter):
     async def __call__(self, msg: Message) -> bool:
-        """Проверяет валидность email по регулярному выражению.
+        """
+        Проверяет валидность email по регулярному выражению.
         Покрывает большинство повседневных случаев, но не проверяет
         существование домена.
         """
