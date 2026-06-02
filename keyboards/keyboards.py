@@ -1,5 +1,7 @@
 import logging
 
+from aiogram.types import InlineKeyboardMarkup
+
 from keyboards.buttons import (
     ADMIN_PANEL_BUTT,
     BUTT_COURSES,
@@ -50,7 +52,7 @@ kb_admin = create_inline_kb(2, **ADMIN_PANEL_BUTT, cancel_butt=False)
 kb_select_gender = create_inline_kb(2, **BUTT_GENDER, back=True)
 
 
-def get_kb_courses():
+def get_kb_courses() -> InlineKeyboardMarkup:
     return create_inline_kb(**BUTT_COURSES, back=True)
 
 
