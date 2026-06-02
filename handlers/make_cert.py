@@ -8,11 +8,14 @@ from aiogram.types import Message
 from filters.filters import (
     CallBackFilter,
     IsAdmins,
+    IsFullName,
     IsPrivateChat,
     IsValidProfileLink,
 )
+from keyboards import kb_select_gender
+from lexicon import LexiconRu
 from states.states import MakeCert
-from utils import get_username
+from utils import MessageProcessor, get_username
 
 router = Router()
 router.callback_query.filter(
@@ -59,3 +62,28 @@ async def msg_fill_link_to_stepik_profile(
 
     logger.debug('Exit')
 
+
+@router.message(StateFilter(MakeCert.fill_full_name), IsFullName())
+async def msg_fill_full_name(
+    msg: Message,
+    full_name: dict | bool,
+    state: FSMContext,
+    msg_processor: MessageProcessor,
+) -> None:
+    logger.debug('Entry')
+
+    if not msg.from_user:
+        logger.warning('Message without user info received')
+        return
+
+    logger.info(
+        f'Корректное ФИО:{msg.from_user.id}'
+        f':{await get_username(msg)}:{full_name}'
+    )
+    await msg.delete()
+    await state.update_data(full_name=full_name)
+    await msg_processor.deletes_messages(msgs_for_del=True)
+    await msg.answer(LexiconRu.text_gender, reply_markup=kb_select_gender)
+    await state.set_state(state=MakeCert.fill_gender)
+
+    logger.debug('Exit')
