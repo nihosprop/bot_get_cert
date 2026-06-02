@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 from redis.asyncio import Redis
 
 from filters.filters import IsAdmins
-from keyboards import kb_butt_quiz
+from keyboards import get_kb_courses, kb_butt_quiz
 from keyboards.keyboards import kb_admin
 from lexicon import LexiconRu
 from states.states import FSMAdminPanel, MakeCert
@@ -105,19 +105,19 @@ async def clbk_add_admin(clbk: CallbackQuery) -> None:
 @admin_router.callback_query(
     F.data == 'make_cert', StateFilter(FSMAdminPanel.admin_menu)
 )
-async def clbk_make_cert(clbk: CallbackQuery,
-                         state: FSMContext) -> None:
+async def clbk_make_cert(clbk: CallbackQuery, state: FSMContext) -> None:
     logger_admin.debug('Entry')
-    
-    text = ('Меню генерации сертификата.\n'
-            'Отправьте боту ссылку на Stepik-профиль ученика.')
-    # await clbk.answer('Копка в разработке', show_alert=True)
+
+    text = (
+        '<b>Меню генерации сертификата.\n</b>'
+        'Выберите курс.'
+    )
     if not clbk.message or not isinstance(clbk.message, Message):
         logger_admin.warning('Callback message is None or inaccessible')
         return
 
-    await clbk.message.edit_text(text)
-    await state.set_state(MakeCert.fill_link_to_stepik_profile)
+    await clbk.message.edit_text(text, reply_markup=get_kb_courses())
+    await state.set_state(MakeCert.fill_course)
+    await clbk.answer()
 
     logger_admin.debug('Exit')
-
