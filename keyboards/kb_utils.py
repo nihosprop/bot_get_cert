@@ -16,7 +16,7 @@ def create_inline_kb(
         exit=False,
         reverse_size_text=False,
         links_first=True,
-        url_buttons: dict = None,
+        url_buttons: dict | None = None,
         **kwargs) -> InlineKeyboardMarkup:
     """
     Генерация инлайн-клавиатур на лету.
