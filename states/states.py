@@ -7,8 +7,6 @@ logger_states = logging.getLogger(__name__)
 
 class FSMAdminPanel(StatesGroup):
     admin_menu = State()
-    fill_newsletter = State()
-    fill_confirm_newsletter = State()
 
 
 class FSMQuiz(StatesGroup):

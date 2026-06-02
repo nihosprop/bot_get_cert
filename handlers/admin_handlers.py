@@ -35,30 +35,6 @@ async def cmd_start(
     await msg_processor.save_msg_id(value, msgs_for_del=True)
 
 
-@admin_router.callback_query(
-    F.data == 'back', StateFilter(FSMAdminPanel.fill_newsletter)
-)
-async def clbk_back_newsletter(
-    clbk: CallbackQuery, state: FSMContext, redis_data: Redis
-) -> None:
-    logger_admin.debug('Entry')
-
-    if not clbk.message or not isinstance(clbk.message, Message):
-        logger_admin.error('Callback message is None or inaccessible')
-        return
-
-    end_cert = str(await redis_data.get('end_number')).zfill(6)
-
-    await clbk.message.edit_text(
-        LexiconRu.text_adm_panel.format(end_cert=end_cert),
-        reply_markup=kb_admin,
-    )
-    await state.set_state(FSMAdminPanel.admin_menu)
-    await clbk.answer()
-
-    logger_admin.debug('Exit')
-
-
 @admin_router.message(F.text == '/admin')
 async def cmd_admin(
     msg: Message,
