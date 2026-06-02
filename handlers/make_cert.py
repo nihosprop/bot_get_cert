@@ -34,6 +34,17 @@ async def msg_fill_link_to_stepik_profile(
     state: FSMContext,
     stepik_user_id: str,
 ) -> None:
+    """
+    Handles the stepik user link.
+
+    Args:
+        msg: The message containing the stepik user link.
+        state: The current state of the FSM.
+        stepik_user_id: The stepik user ID extracted from the link.
+
+    Returns:
+        None
+    """
     logger.debug('Entry')
 
     if not msg.from_user:
@@ -47,3 +58,4 @@ async def msg_fill_link_to_stepik_profile(
     await state.set_state(state=MakeCert.fill_full_name)
 
     logger.debug('Exit')
+
