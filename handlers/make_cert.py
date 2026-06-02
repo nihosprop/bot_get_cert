@@ -9,8 +9,10 @@ from filters.filters import (
     CallBackFilter,
     IsAdmins,
     IsPrivateChat,
+    IsValidProfileLink,
 )
 from states.states import MakeCert
+from utils import get_username
 
 router = Router()
 router.callback_query.filter(
@@ -24,10 +26,24 @@ router.message.filter(IsAdmins(), IsPrivateChat(), StateFilter(MakeCert()))
 logger = logging.getLogger(__name__)
 
 
-@router.message(StateFilter(MakeCert.fill_link_to_stepik_profile))
+@router.message(
+    StateFilter(MakeCert.fill_link_to_stepik_profile), IsValidProfileLink()
+)
 async def msg_fill_link_to_stepik_profile(
-    msg: Message, state: FSMContext
+    msg: Message,
+    state: FSMContext,
+    stepik_user_id: str,
 ) -> None:
     logger.debug('Entry')
+
+    if not msg.from_user:
+        logger.warning('Message without user info received')
+        return
+    await state.update_data(stepik_user_id=stepik_user_id)
+    logger.info(
+        f'Ссылка записана:{msg.from_user.id}'
+        f':{await get_username(msg)}:[{msg.text}]'
+    )
+    await state.set_state(state=MakeCert.fill_full_name)
 
     logger.debug('Exit')
