@@ -10,10 +10,10 @@ class FSMAdminPanel(StatesGroup):
     make_cert = State()
 
 class MakeCert(StatesGroup):
+    fill_course = State()
     fill_link_to_stepik_profile = State()
     fill_full_name = State()
     fill_gender = State()
-    fill_course = State()
 
 
 class FSMQuiz(StatesGroup):
