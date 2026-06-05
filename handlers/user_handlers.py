@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message
 from aiohttp import ConnectionTimeoutError
-from redis import Redis
+from redis.asyncio.client import Redis
 
 from config_data.config import Config
 from filters.filters import (
