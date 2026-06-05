@@ -616,7 +616,7 @@ async def clbk_done(
             return
 
         try:
-            # отправка сертификата
+            # sending certificate
             await stepik_service.send_certificate(
                 clbk=clbk, output_file=path, state=state, course_id=course_id
             )
