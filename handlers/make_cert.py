@@ -86,6 +86,7 @@ async def msg_fill_link_to_stepik_profile(
         None
     """
     logger.debug('Entry')
+    logger.debug(f'{await state.get_data()=}')
 
     await msg_processor.deletes_messages(msgs_for_del=True)
     if not msg.from_user:
@@ -167,10 +168,10 @@ async def msg_fill_full_name(
         f':{await get_username(msg)}:{full_name}'
     )
     await msg_processor.deletes_messages(msgs_for_del=True)
-    # await msg.delete()
     await state.update_data(full_name=full_name)
     await msg.answer(
         'Проверьте данные и подтвердите.', reply_markup=kb_end_quiz
     )
+
 
     logger.debug('Exit')
