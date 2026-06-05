@@ -594,7 +594,7 @@ async def clbk_done(
 
         try:
             await clbk.answer('Идет проверка…')
-            # генерация сертификата
+            # certificate generation
             logger_user_hand.info(
                 f'Генерация сертификата для:{clbk.from_user.id}:{tg_username}'
             )
