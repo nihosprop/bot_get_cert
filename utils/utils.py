@@ -777,7 +777,7 @@ class MessageProcessor:
 
     async def save_msg_id(
         self,
-        value: Message | CallbackQuery,
+        value: Message | CallbackQuery | bool,
         msg_remove: str | None = None,
         msgs_for_del=False,
         msgs_remove_kb=False,
