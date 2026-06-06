@@ -4,7 +4,9 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from redis.asyncio import Redis
 
+from config_data.config import Config
 from filters.filters import (
     CallBackFilter,
     IsAdmins,
@@ -21,7 +23,7 @@ from keyboards import (
 )
 from lexicon import LexiconRu
 from states.states import MakeCert
-from utils import MessageProcessor, get_username
+from utils import MessageProcessor, StepikService, get_username
 
 router = Router()
 router.callback_query.filter(
@@ -71,12 +73,16 @@ async def msg_fill_link_to_stepik_profile(
     msg: Message,
     state: FSMContext,
     stepik_user_id: str,
+    config: Config,
+    redis_data: Redis,
     msg_processor: MessageProcessor,
 ) -> None:
     """
     Handles the stepik user link.
 
     Args:
+        redis_data: Redis instance.
+        config: Config instance.
         msg_processor: MessageProcessor instance.
         msg: The message containing the stepik user link.
         state: The current state of the FSM.
